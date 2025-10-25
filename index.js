@@ -1,192 +1,270 @@
-'use strict';
+/*!
+ * media-typer
+ * Copyright(c) 2014 Douglas Christopher Wilson
+ * MIT Licensed
+ */
 
-var test = require('tape');
-var v = require('es-value-fixtures');
-var forEach = require('for-each');
-var inspect = require('object-inspect');
+/**
+ * RegExp to match *( ";" parameter ) in RFC 2616 sec 3.7
+ *
+ * parameter     = token "=" ( token | quoted-string )
+ * token         = 1*<any CHAR except CTLs or separators>
+ * separators    = "(" | ")" | "<" | ">" | "@"
+ *               | "," | ";" | ":" | "\" | <">
+ *               | "/" | "[" | "]" | "?" | "="
+ *               | "{" | "}" | SP | HT
+ * quoted-string = ( <"> *(qdtext | quoted-pair ) <"> )
+ * qdtext        = <any TEXT except <">>
+ * quoted-pair   = "\" CHAR
+ * CHAR          = <any US-ASCII character (octets 0 - 127)>
+ * TEXT          = <any OCTET except CTLs, but including LWS>
+ * LWS           = [CRLF] 1*( SP | HT )
+ * CRLF          = CR LF
+ * CR            = <US-ASCII CR, carriage return (13)>
+ * LF            = <US-ASCII LF, linefeed (10)>
+ * SP            = <US-ASCII SP, space (32)>
+ * SHT           = <US-ASCII HT, horizontal-tab (9)>
+ * CTL           = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
+ * OCTET         = <any 8-bit sequence of data>
+ */
+var paramRegExp = /; *([!#$%&'\*\+\-\.0-9A-Z\^_`a-z\|~]+) *= *("(?:[ !\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u0020-\u007e])*"|[!#$%&'\*\+\-\.0-9A-Z\^_`a-z\|~]+) */g;
+var textRegExp = /^[\u0020-\u007e\u0080-\u00ff]+$/
+var tokenRegExp = /^[!#$%&'\*\+\-\.0-9A-Z\^_`a-z\|~]+$/
 
-var abs = require('../abs');
-var floor = require('../floor');
-var isFinite = require('../isFinite');
-var isInteger = require('../isInteger');
-var isNaN = require('../isNaN');
-var isNegativeZero = require('../isNegativeZero');
-var max = require('../max');
-var min = require('../min');
-var mod = require('../mod');
-var pow = require('../pow');
-var round = require('../round');
-var sign = require('../sign');
+/**
+ * RegExp to match quoted-pair in RFC 2616
+ *
+ * quoted-pair = "\" CHAR
+ * CHAR        = <any US-ASCII character (octets 0 - 127)>
+ */
+var qescRegExp = /\\([\u0000-\u007f])/g;
 
-var maxArrayLength = require('../constants/maxArrayLength');
-var maxSafeInteger = require('../constants/maxSafeInteger');
-var maxValue = require('../constants/maxValue');
+/**
+ * RegExp to match chars that must be quoted-pair in RFC 2616
+ */
+var quoteRegExp = /([\\"])/g;
 
-test('abs', function (t) {
-	t.equal(abs(-1), 1, 'abs(-1) === 1');
-	t.equal(abs(+1), 1, 'abs(+1) === 1');
-	t.equal(abs(+0), +0, 'abs(+0) === +0');
-	t.equal(abs(-0), +0, 'abs(-0) === +0');
+/**
+ * RegExp to match type in RFC 6838
+ *
+ * type-name = restricted-name
+ * subtype-name = restricted-name
+ * restricted-name = restricted-name-first *126restricted-name-chars
+ * restricted-name-first  = ALPHA / DIGIT
+ * restricted-name-chars  = ALPHA / DIGIT / "!" / "#" /
+ *                          "$" / "&" / "-" / "^" / "_"
+ * restricted-name-chars =/ "." ; Characters before first dot always
+ *                              ; specify a facet name
+ * restricted-name-chars =/ "+" ; Characters after last plus always
+ *                              ; specify a structured syntax suffix
+ * ALPHA =  %x41-5A / %x61-7A   ; A-Z / a-z
+ * DIGIT =  %x30-39             ; 0-9
+ */
+var subtypeNameRegExp = /^[A-Za-z0-9][A-Za-z0-9!#$&^_.-]{0,126}$/
+var typeNameRegExp = /^[A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126}$/
+var typeRegExp = /^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})\/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$/;
 
-	t.end();
-});
+/**
+ * Module exports.
+ */
 
-test('floor', function (t) {
-	t.equal(floor(-1.1), -2, 'floor(-1.1) === -2');
-	t.equal(floor(+1.1), 1, 'floor(+1.1) === 1');
-	t.equal(floor(+0), +0, 'floor(+0) === +0');
-	t.equal(floor(-0), -0, 'floor(-0) === -0');
-	t.equal(floor(-Infinity), -Infinity, 'floor(-Infinity) === -Infinity');
-	t.equal(floor(Number(Infinity)), Number(Infinity), 'floor(+Infinity) === +Infinity');
-	t.equal(floor(NaN), NaN, 'floor(NaN) === NaN');
-	t.equal(floor(0), +0, 'floor(0) === +0');
-	t.equal(floor(-0), -0, 'floor(-0) === -0');
-	t.equal(floor(1), 1, 'floor(1) === 1');
-	t.equal(floor(-1), -1, 'floor(-1) === -1');
-	t.equal(floor(1.1), 1, 'floor(1.1) === 1');
-	t.equal(floor(-1.1), -2, 'floor(-1.1) === -2');
-	t.equal(floor(maxValue), maxValue, 'floor(maxValue) === maxValue');
-	t.equal(floor(maxSafeInteger), maxSafeInteger, 'floor(maxSafeInteger) === maxSafeInteger');
+exports.format = format
+exports.parse = parse
 
-	t.end();
-});
+/**
+ * Format object to media type.
+ *
+ * @param {object} obj
+ * @return {string}
+ * @api public
+ */
 
-test('isFinite', function (t) {
-	t.equal(isFinite(0), true, 'isFinite(+0) === true');
-	t.equal(isFinite(-0), true, 'isFinite(-0) === true');
-	t.equal(isFinite(1), true, 'isFinite(1) === true');
-	t.equal(isFinite(Infinity), false, 'isFinite(Infinity) === false');
-	t.equal(isFinite(-Infinity), false, 'isFinite(-Infinity) === false');
-	t.equal(isFinite(NaN), false, 'isFinite(NaN) === false');
+function format(obj) {
+  if (!obj || typeof obj !== 'object') {
+    throw new TypeError('argument obj is required')
+  }
 
-	forEach(v.nonNumbers, function (nonNumber) {
-		t.equal(isFinite(nonNumber), false, 'isFinite(' + inspect(nonNumber) + ') === false');
-	});
+  var parameters = obj.parameters
+  var subtype = obj.subtype
+  var suffix = obj.suffix
+  var type = obj.type
 
-	t.end();
-});
+  if (!type || !typeNameRegExp.test(type)) {
+    throw new TypeError('invalid type')
+  }
 
-test('isInteger', function (t) {
-	forEach([].concat(
-		// @ts-expect-error TS sucks with concat
-		v.nonNumbers,
-		v.nonIntegerNumbers
-	), function (nonInteger) {
-		t.equal(isInteger(nonInteger), false, 'isInteger(' + inspect(nonInteger) + ') === false');
-	});
+  if (!subtype || !subtypeNameRegExp.test(subtype)) {
+    throw new TypeError('invalid subtype')
+  }
 
-	t.end();
-});
+  // format as type/subtype
+  var string = type + '/' + subtype
 
-test('isNaN', function (t) {
-	forEach([].concat(
-		// @ts-expect-error TS sucks with concat
-		v.nonNumbers,
-		v.infinities,
-		v.zeroes,
-		v.integerNumbers
-	), function (nonNaN) {
-		t.equal(isNaN(nonNaN), false, 'isNaN(' + inspect(nonNaN) + ') === false');
-	});
+  // append +suffix
+  if (suffix) {
+    if (!typeNameRegExp.test(suffix)) {
+      throw new TypeError('invalid suffix')
+    }
 
-	t.equal(isNaN(NaN), true, 'isNaN(NaN) === true');
+    string += '+' + suffix
+  }
 
-	t.end();
-});
+  // append parameters
+  if (parameters && typeof parameters === 'object') {
+    var param
+    var params = Object.keys(parameters).sort()
 
-test('isNegativeZero', function (t) {
-	t.equal(isNegativeZero(-0), true, 'isNegativeZero(-0) === true');
-	t.equal(isNegativeZero(+0), false, 'isNegativeZero(+0) === false');
-	t.equal(isNegativeZero(1), false, 'isNegativeZero(1) === false');
-	t.equal(isNegativeZero(-1), false, 'isNegativeZero(-1) === false');
-	t.equal(isNegativeZero(NaN), false, 'isNegativeZero(NaN) === false');
-	t.equal(isNegativeZero(Infinity), false, 'isNegativeZero(Infinity) === false');
-	t.equal(isNegativeZero(-Infinity), false, 'isNegativeZero(-Infinity) === false');
+    for (var i = 0; i < params.length; i++) {
+      param = params[i]
 
-	forEach(v.nonNumbers, function (nonNumber) {
-		t.equal(isNegativeZero(nonNumber), false, 'isNegativeZero(' + inspect(nonNumber) + ') === false');
-	});
+      if (!tokenRegExp.test(param)) {
+        throw new TypeError('invalid parameter name')
+      }
 
-	t.end();
-});
+      string += '; ' + param + '=' + qstring(parameters[param])
+    }
+  }
 
-test('max', function (t) {
-	t.equal(max(1, 2), 2, 'max(1, 2) === 2');
-	t.equal(max(1, 2, 3), 3, 'max(1, 2, 3) === 3');
-	t.equal(max(1, 2, 3, 4), 4, 'max(1, 2, 3, 4) === 4');
-	t.equal(max(1, 2, 3, 4, 5), 5, 'max(1, 2, 3, 4, 5) === 5');
-	t.equal(max(1, 2, 3, 4, 5, 6), 6, 'max(1, 2, 3, 4, 5, 6) === 6');
-	t.equal(max(1, 2, 3, 4, 5, 6, 7), 7, 'max(1, 2, 3, 4, 5, 6, 7) === 7');
+  return string
+}
 
-	t.end();
-});
+/**
+ * Parse media type to object.
+ *
+ * @param {string|object} string
+ * @return {Object}
+ * @api public
+ */
 
-test('min', function (t) {
-	t.equal(min(1, 2), 1, 'min(1, 2) === 1');
-	t.equal(min(1, 2, 3), 1, 'min(1, 2, 3) === 1');
-	t.equal(min(1, 2, 3, 4), 1, 'min(1, 2, 3, 4) === 1');
-	t.equal(min(1, 2, 3, 4, 5), 1, 'min(1, 2, 3, 4, 5) === 1');
-	t.equal(min(1, 2, 3, 4, 5, 6), 1, 'min(1, 2, 3, 4, 5, 6) === 1');
+function parse(string) {
+  if (!string) {
+    throw new TypeError('argument string is required')
+  }
 
-	t.end();
-});
+  // support req/res-like objects as argument
+  if (typeof string === 'object') {
+    string = getcontenttype(string)
+  }
 
-test('mod', function (t) {
-	t.equal(mod(1, 2), 1, 'mod(1, 2) === 1');
-	t.equal(mod(2, 2), 0, 'mod(2, 2) === 0');
-	t.equal(mod(3, 2), 1, 'mod(3, 2) === 1');
-	t.equal(mod(4, 2), 0, 'mod(4, 2) === 0');
-	t.equal(mod(5, 2), 1, 'mod(5, 2) === 1');
-	t.equal(mod(6, 2), 0, 'mod(6, 2) === 0');
-	t.equal(mod(7, 2), 1, 'mod(7, 2) === 1');
-	t.equal(mod(8, 2), 0, 'mod(8, 2) === 0');
-	t.equal(mod(9, 2), 1, 'mod(9, 2) === 1');
-	t.equal(mod(10, 2), 0, 'mod(10, 2) === 0');
-	t.equal(mod(11, 2), 1, 'mod(11, 2) === 1');
+  if (typeof string !== 'string') {
+    throw new TypeError('argument string is required to be a string')
+  }
 
-	t.end();
-});
+  var index = string.indexOf(';')
+  var type = index !== -1
+    ? string.substr(0, index)
+    : string
 
-test('pow', function (t) {
-	t.equal(pow(2, 2), 4, 'pow(2, 2) === 4');
-	t.equal(pow(2, 3), 8, 'pow(2, 3) === 8');
-	t.equal(pow(2, 4), 16, 'pow(2, 4) === 16');
-	t.equal(pow(2, 5), 32, 'pow(2, 5) === 32');
-	t.equal(pow(2, 6), 64, 'pow(2, 6) === 64');
-	t.equal(pow(2, 7), 128, 'pow(2, 7) === 128');
-	t.equal(pow(2, 8), 256, 'pow(2, 8) === 256');
-	t.equal(pow(2, 9), 512, 'pow(2, 9) === 512');
-	t.equal(pow(2, 10), 1024, 'pow(2, 10) === 1024');
+  var key
+  var match
+  var obj = splitType(type)
+  var params = {}
+  var value
 
-	t.end();
-});
+  paramRegExp.lastIndex = index
 
-test('round', function (t) {
-	t.equal(round(1.1), 1, 'round(1.1) === 1');
-	t.equal(round(1.5), 2, 'round(1.5) === 2');
-	t.equal(round(1.9), 2, 'round(1.9) === 2');
+  while (match = paramRegExp.exec(string)) {
+    if (match.index !== index) {
+      throw new TypeError('invalid parameter format')
+    }
 
-	t.end();
-});
+    index += match[0].length
+    key = match[1].toLowerCase()
+    value = match[2]
 
-test('sign', function (t) {
-	t.equal(sign(-1), -1, 'sign(-1) === -1');
-	t.equal(sign(+1), +1, 'sign(+1) === +1');
-	t.equal(sign(+0), +0, 'sign(+0) === +0');
-	t.equal(sign(-0), -0, 'sign(-0) === -0');
-	t.equal(sign(NaN), NaN, 'sign(NaN) === NaN');
-	t.equal(sign(Infinity), +1, 'sign(Infinity) === +1');
-	t.equal(sign(-Infinity), -1, 'sign(-Infinity) === -1');
-	t.equal(sign(maxValue), +1, 'sign(maxValue) === +1');
-	t.equal(sign(maxSafeInteger), +1, 'sign(maxSafeInteger) === +1');
+    if (value[0] === '"') {
+      // remove quotes and escapes
+      value = value
+        .substr(1, value.length - 2)
+        .replace(qescRegExp, '$1')
+    }
 
-	t.end();
-});
+    params[key] = value
+  }
 
-test('constants', function (t) {
-	t.equal(typeof maxArrayLength, 'number', 'typeof maxArrayLength === "number"');
-	t.equal(typeof maxSafeInteger, 'number', 'typeof maxSafeInteger === "number"');
-	t.equal(typeof maxValue, 'number', 'typeof maxValue === "number"');
+  if (index !== -1 && index !== string.length) {
+    throw new TypeError('invalid parameter format')
+  }
 
-	t.end();
-});
+  obj.parameters = params
+
+  return obj
+}
+
+/**
+ * Get content-type from req/res objects.
+ *
+ * @param {object}
+ * @return {Object}
+ * @api private
+ */
+
+function getcontenttype(obj) {
+  if (typeof obj.getHeader === 'function') {
+    // res-like
+    return obj.getHeader('content-type')
+  }
+
+  if (typeof obj.headers === 'object') {
+    // req-like
+    return obj.headers && obj.headers['content-type']
+  }
+}
+
+/**
+ * Quote a string if necessary.
+ *
+ * @param {string} val
+ * @return {string}
+ * @api private
+ */
+
+function qstring(val) {
+  var str = String(val)
+
+  // no need to quote tokens
+  if (tokenRegExp.test(str)) {
+    return str
+  }
+
+  if (str.length > 0 && !textRegExp.test(str)) {
+    throw new TypeError('invalid parameter value')
+  }
+
+  return '"' + str.replace(quoteRegExp, '\\$1') + '"'
+}
+
+/**
+ * Simply "type/subtype+siffx" into parts.
+ *
+ * @param {string} string
+ * @return {Object}
+ * @api private
+ */
+
+function splitType(string) {
+  var match = typeRegExp.exec(string.toLowerCase())
+
+  if (!match) {
+    throw new TypeError('invalid media type')
+  }
+
+  var type = match[1]
+  var subtype = match[2]
+  var suffix
+
+  // suffix after last +
+  var index = subtype.lastIndexOf('+')
+  if (index !== -1) {
+    suffix = subtype.substr(index + 1)
+    subtype = subtype.substr(0, index)
+  }
+
+  var obj = {
+    type: type,
+    subtype: subtype,
+    suffix: suffix
+  }
+
+  return obj
+}
