@@ -1,243 +1,312 @@
-# cors
+# debug
+[![Build Status](https://travis-ci.org/visionmedia/debug.svg?branch=master)](https://travis-ci.org/visionmedia/debug)  [![Coverage Status](https://coveralls.io/repos/github/visionmedia/debug/badge.svg?branch=master)](https://coveralls.io/github/visionmedia/debug?branch=master)  [![Slack](https://visionmedia-community-slackin.now.sh/badge.svg)](https://visionmedia-community-slackin.now.sh/) [![OpenCollective](https://opencollective.com/debug/backers/badge.svg)](#backers) 
+[![OpenCollective](https://opencollective.com/debug/sponsors/badge.svg)](#sponsors)
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
 
-CORS is a node.js package for providing a [Connect](http://www.senchalabs.org/connect/)/[Express](http://expressjs.com/) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
 
-**[Follow me (@troygoode) on Twitter!](https://twitter.com/intent/user?screen_name=troygoode)**
+A tiny node.js debugging utility modelled after node core's debugging technique.
 
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Simple Usage](#simple-usage-enable-all-cors-requests)
-  * [Enable CORS for a Single Route](#enable-cors-for-a-single-route)
-  * [Configuring CORS](#configuring-cors)
-  * [Configuring CORS Asynchronously](#configuring-cors-asynchronously)
-  * [Enabling CORS Pre-Flight](#enabling-cors-pre-flight)
-* [Configuration Options](#configuration-options)
-* [Demo](#demo)
-* [License](#license)
-* [Author](#author)
+**Discussion around the V3 API is under way [here](https://github.com/visionmedia/debug/issues/370)**
 
 ## Installation
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
-
-```sh
-$ npm install cors
+```bash
+$ npm install debug
 ```
 
 ## Usage
 
-### Simple Usage (Enable *All* CORS Requests)
+`debug` exposes a function; simply pass this function the name of your module, and it will return a decorated version of `console.error` for you to pass debug statements to. This will allow you to toggle the debug output for different parts of your module as well as the module as a whole.
 
-```javascript
-var express = require('express')
-var cors = require('cors')
-var app = express()
+Example _app.js_:
 
-app.use(cors())
+```js
+var debug = require('debug')('http')
+  , http = require('http')
+  , name = 'My App';
 
-app.get('/products/:id', function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for all origins!'})
-})
+// fake app
 
-app.listen(80, function () {
-  console.log('CORS-enabled web server listening on port 80')
-})
+debug('booting %s', name);
+
+http.createServer(function(req, res){
+  debug(req.method + ' ' + req.url);
+  res.end('hello\n');
+}).listen(3000, function(){
+  debug('listening');
+});
+
+// fake worker of some kind
+
+require('./worker');
 ```
 
-### Enable CORS for a Single Route
+Example _worker.js_:
 
-```javascript
-var express = require('express')
-var cors = require('cors')
-var app = express()
+```js
+var debug = require('debug')('worker');
 
-app.get('/products/:id', cors(), function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for a Single Route'})
-})
-
-app.listen(80, function () {
-  console.log('CORS-enabled web server listening on port 80')
-})
+setInterval(function(){
+  debug('doing some work');
+}, 1000);
 ```
 
-### Configuring CORS
+ The __DEBUG__ environment variable is then used to enable these based on space or comma-delimited names. Here are some examples:
 
-```javascript
-var express = require('express')
-var cors = require('cors')
-var app = express()
+  ![debug http and worker](http://f.cl.ly/items/18471z1H402O24072r1J/Screenshot.png)
 
-var corsOptions = {
-  origin: 'http://example.com',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  ![debug worker](http://f.cl.ly/items/1X413v1a3M0d3C2c1E0i/Screenshot.png)
+
+#### Windows note
+
+ On Windows the environment variable is set using the `set` command.
+
+ ```cmd
+ set DEBUG=*,-not_this
+ ```
+
+ Note that PowerShell uses different syntax to set environment variables.
+
+ ```cmd
+ $env:DEBUG = "*,-not_this"
+  ```
+
+Then, run the program to be debugged as usual.
+
+## Millisecond diff
+
+  When actively developing an application it can be useful to see when the time spent between one `debug()` call and the next. Suppose for example you invoke `debug()` before requesting a resource, and after as well, the "+NNNms" will show you how much time was spent between calls.
+
+  ![](http://f.cl.ly/items/2i3h1d3t121M2Z1A3Q0N/Screenshot.png)
+
+  When stdout is not a TTY, `Date#toUTCString()` is used, making it more useful for logging the debug information as shown below:
+
+  ![](http://f.cl.ly/items/112H3i0e0o0P0a2Q2r11/Screenshot.png)
+
+## Conventions
+
+  If you're using this in one or more of your libraries, you _should_ use the name of your library so that developers may toggle debugging as desired without guessing names. If you have more than one debuggers you _should_ prefix them with your library name and use ":" to separate features. For example "bodyParser" from Connect would then be "connect:bodyParser".
+
+## Wildcards
+
+  The `*` character may be used as a wildcard. Suppose for example your library has debuggers named "connect:bodyParser", "connect:compress", "connect:session", instead of listing all three with `DEBUG=connect:bodyParser,connect:compress,connect:session`, you may simply do `DEBUG=connect:*`, or to run everything using this module simply use `DEBUG=*`.
+
+  You can also exclude specific debuggers by prefixing them with a "-" character.  For example, `DEBUG=*,-connect:*` would include all debuggers except those starting with "connect:".
+
+## Environment Variables
+
+  When running through Node.js, you can set a few environment variables that will
+  change the behavior of the debug logging:
+
+| Name      | Purpose                                         |
+|-----------|-------------------------------------------------|
+| `DEBUG`   | Enables/disables specific debugging namespaces. |
+| `DEBUG_COLORS`| Whether or not to use colors in the debug output. |
+| `DEBUG_DEPTH` | Object inspection depth. |
+| `DEBUG_SHOW_HIDDEN` | Shows hidden properties on inspected objects. |
+
+
+  __Note:__ The environment variables beginning with `DEBUG_` end up being
+  converted into an Options object that gets used with `%o`/`%O` formatters.
+  See the Node.js documentation for
+  [`util.inspect()`](https://nodejs.org/api/util.html#util_util_inspect_object_options)
+  for the complete list.
+
+## Formatters
+
+
+  Debug uses [printf-style](https://wikipedia.org/wiki/Printf_format_string) formatting. Below are the officially supported formatters:
+
+| Formatter | Representation |
+|-----------|----------------|
+| `%O`      | Pretty-print an Object on multiple lines. |
+| `%o`      | Pretty-print an Object all on a single line. |
+| `%s`      | String. |
+| `%d`      | Number (both integer and float). |
+| `%j`      | JSON. Replaced with the string '[Circular]' if the argument contains circular references. |
+| `%%`      | Single percent sign ('%'). This does not consume an argument. |
+
+### Custom formatters
+
+  You can add custom formatters by extending the `debug.formatters` object. For example, if you wanted to add support for rendering a Buffer as hex with `%h`, you could do something like:
+
+```js
+const createDebug = require('debug')
+createDebug.formatters.h = (v) => {
+  return v.toString('hex')
 }
 
-app.get('/products/:id', cors(corsOptions), function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for only example.com.'})
-})
-
-app.listen(80, function () {
-  console.log('CORS-enabled web server listening on port 80')
-})
+// …elsewhere
+const debug = createDebug('foo')
+debug('this is hex: %h', new Buffer('hello world'))
+//   foo this is hex: 68656c6c6f20776f726c6421 +0ms
 ```
 
-### Configuring CORS w/ Dynamic Origin
+## Browser support
+  You can build a browser-ready script using [browserify](https://github.com/substack/node-browserify),
+  or just use the [browserify-as-a-service](https://wzrd.in/) [build](https://wzrd.in/standalone/debug@latest),
+  if you don't want to build it yourself.
 
-```javascript
-var express = require('express')
-var cors = require('cors')
-var app = express()
+  Debug's enable state is currently persisted by `localStorage`.
+  Consider the situation shown below where you have `worker:a` and `worker:b`,
+  and wish to debug both. You can enable this using `localStorage.debug`:
 
-var whitelist = ['http://example1.com', 'http://example2.com']
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
-
-app.get('/products/:id', cors(corsOptions), function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for a whitelisted domain.'})
-})
-
-app.listen(80, function () {
-  console.log('CORS-enabled web server listening on port 80')
-})
+```js
+localStorage.debug = 'worker:*'
 ```
 
-If you do not want to block REST tools or server-to-server requests,
-add a `!origin` check in the origin function like so:
+And then refresh the page.
 
-```javascript
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
+```js
+a = debug('worker:a');
+b = debug('worker:b');
+
+setInterval(function(){
+  a('doing some work');
+}, 1000);
+
+setInterval(function(){
+  b('doing some work');
+}, 1200);
 ```
 
-### Enabling CORS Pre-Flight
+#### Web Inspector Colors
 
-Certain CORS requests are considered 'complex' and require an initial
-`OPTIONS` request (called the "pre-flight request"). An example of a
-'complex' CORS request is one that uses an HTTP verb other than
-GET/HEAD/POST (such as DELETE) or that uses custom headers. To enable
-pre-flighting, you must add a new OPTIONS handler for the route you want
-to support:
+  Colors are also enabled on "Web Inspectors" that understand the `%c` formatting
+  option. These are WebKit web inspectors, Firefox ([since version
+  31](https://hacks.mozilla.org/2014/05/editable-box-model-multiple-selection-sublime-text-keys-much-more-firefox-developer-tools-episode-31/))
+  and the Firebug plugin for Firefox (any version).
 
-```javascript
-var express = require('express')
-var cors = require('cors')
-var app = express()
+  Colored output looks something like:
 
-app.options('/products/:id', cors()) // enable pre-flight request for DELETE request
-app.del('/products/:id', cors(), function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for all origins!'})
-})
+  ![](https://cloud.githubusercontent.com/assets/71256/3139768/b98c5fd8-e8ef-11e3-862a-f7253b6f47c6.png)
 
-app.listen(80, function () {
-  console.log('CORS-enabled web server listening on port 80')
-})
+
+## Output streams
+
+  By default `debug` will log to stderr, however this can be configured per-namespace by overriding the `log` method:
+
+Example _stdout.js_:
+
+```js
+var debug = require('debug');
+var error = debug('app:error');
+
+// by default stderr is used
+error('goes to stderr!');
+
+var log = debug('app:log');
+// set this namespace to log via console.log
+log.log = console.log.bind(console); // don't forget to bind to console!
+log('goes to stdout');
+error('still goes to stderr!');
+
+// set all output to go via console.info
+// overrides all per-namespace log settings
+debug.log = console.info.bind(console);
+error('now goes to stdout via console.info');
+log('still goes to stdout, but via console.info now');
 ```
 
-You can also enable pre-flight across-the-board like so:
 
-```javascript
-app.options('*', cors()) // include before other routes
-```
+## Authors
 
-### Configuring CORS Asynchronously
+ - TJ Holowaychuk
+ - Nathan Rajlich
+ - Andrew Rhyne
+ 
+## Backers
 
-```javascript
-var express = require('express')
-var cors = require('cors')
-var app = express()
+Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/debug#backer)]
 
-var whitelist = ['http://example1.com', 'http://example2.com']
-var corsOptionsDelegate = function (req, callback) {
-  var corsOptions;
-  if (whitelist.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
-  } else {
-    corsOptions = { origin: false } // disable CORS for this request
-  }
-  callback(null, corsOptions) // callback expects two parameters: error and options
-}
+<a href="https://opencollective.com/debug/backer/0/website" target="_blank"><img src="https://opencollective.com/debug/backer/0/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/1/website" target="_blank"><img src="https://opencollective.com/debug/backer/1/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/2/website" target="_blank"><img src="https://opencollective.com/debug/backer/2/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/3/website" target="_blank"><img src="https://opencollective.com/debug/backer/3/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/4/website" target="_blank"><img src="https://opencollective.com/debug/backer/4/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/5/website" target="_blank"><img src="https://opencollective.com/debug/backer/5/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/6/website" target="_blank"><img src="https://opencollective.com/debug/backer/6/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/7/website" target="_blank"><img src="https://opencollective.com/debug/backer/7/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/8/website" target="_blank"><img src="https://opencollective.com/debug/backer/8/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/9/website" target="_blank"><img src="https://opencollective.com/debug/backer/9/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/10/website" target="_blank"><img src="https://opencollective.com/debug/backer/10/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/11/website" target="_blank"><img src="https://opencollective.com/debug/backer/11/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/12/website" target="_blank"><img src="https://opencollective.com/debug/backer/12/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/13/website" target="_blank"><img src="https://opencollective.com/debug/backer/13/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/14/website" target="_blank"><img src="https://opencollective.com/debug/backer/14/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/15/website" target="_blank"><img src="https://opencollective.com/debug/backer/15/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/16/website" target="_blank"><img src="https://opencollective.com/debug/backer/16/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/17/website" target="_blank"><img src="https://opencollective.com/debug/backer/17/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/18/website" target="_blank"><img src="https://opencollective.com/debug/backer/18/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/19/website" target="_blank"><img src="https://opencollective.com/debug/backer/19/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/20/website" target="_blank"><img src="https://opencollective.com/debug/backer/20/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/21/website" target="_blank"><img src="https://opencollective.com/debug/backer/21/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/22/website" target="_blank"><img src="https://opencollective.com/debug/backer/22/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/23/website" target="_blank"><img src="https://opencollective.com/debug/backer/23/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/24/website" target="_blank"><img src="https://opencollective.com/debug/backer/24/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/25/website" target="_blank"><img src="https://opencollective.com/debug/backer/25/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/26/website" target="_blank"><img src="https://opencollective.com/debug/backer/26/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/27/website" target="_blank"><img src="https://opencollective.com/debug/backer/27/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/28/website" target="_blank"><img src="https://opencollective.com/debug/backer/28/avatar.svg"></a>
+<a href="https://opencollective.com/debug/backer/29/website" target="_blank"><img src="https://opencollective.com/debug/backer/29/avatar.svg"></a>
 
-app.get('/products/:id', cors(corsOptionsDelegate), function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for a whitelisted domain.'})
-})
 
-app.listen(80, function () {
-  console.log('CORS-enabled web server listening on port 80')
-})
-```
+## Sponsors
 
-## Configuration Options
+Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/debug#sponsor)]
 
-* `origin`: Configures the **Access-Control-Allow-Origin** CORS header. Possible values:
-  - `Boolean` - set `origin` to `true` to reflect the [request origin](http://tools.ietf.org/html/draft-abarth-origin-09), as defined by `req.header('Origin')`, or set it to `false` to disable CORS.
-  - `String` - set `origin` to a specific origin. For example if you set it to `"http://example.com"` only requests from "http://example.com" will be allowed.
-  - `RegExp` - set `origin` to a regular expression pattern which will be used to test the request origin. If it's a match, the request origin will be reflected. For example the pattern `/example\.com$/` will reflect any request that is coming from an origin ending with "example.com".
-  - `Array` - set `origin` to an array of valid origins. Each origin can be a `String` or a `RegExp`. For example `["http://example1.com", /\.example2\.com$/]` will accept any request from "http://example1.com" or from a subdomain of "example2.com".
-  - `Function` - set `origin` to a function implementing some custom logic. The function takes the request origin as the first parameter and a callback (which expects the signature `err [object], allow [bool]`) as the second.
-* `methods`: Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (ex: 'GET,PUT,POST') or an array (ex: `['GET', 'PUT', 'POST']`).
-* `allowedHeaders`: Configures the **Access-Control-Allow-Headers** CORS header. Expects a comma-delimited string (ex: 'Content-Type,Authorization') or an array (ex: `['Content-Type', 'Authorization']`). If not specified, defaults to reflecting the headers specified in the request's **Access-Control-Request-Headers** header.
-* `exposedHeaders`: Configures the **Access-Control-Expose-Headers** CORS header. Expects a comma-delimited string (ex: 'Content-Range,X-Content-Range') or an array (ex: `['Content-Range', 'X-Content-Range']`). If not specified, no custom headers are exposed.
-* `credentials`: Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true` to pass the header, otherwise it is omitted.
-* `maxAge`: Configures the **Access-Control-Max-Age** CORS header. Set to an integer to pass the header, otherwise it is omitted.
-* `preflightContinue`: Pass the CORS preflight response to the next handler.
-* `optionsSuccessStatus`: Provides a status code to use for successful `OPTIONS` requests, since some legacy browsers (IE11, various SmartTVs) choke on `204`.
-
-The default configuration is the equivalent of:
-
-```json
-{
-  "origin": "*",
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "preflightContinue": false,
-  "optionsSuccessStatus": 204
-}
-```
-
-For details on the effect of each CORS header, read [this](http://www.html5rocks.com/en/tutorials/cors/) article on HTML5 Rocks.
-
-## Demo
-
-A demo that illustrates CORS working (and not working) using jQuery is available here: [http://node-cors-client.herokuapp.com/](http://node-cors-client.herokuapp.com/)
-
-Code for that demo can be found here:
-
-* Client: [https://github.com/TroyGoode/node-cors-client](https://github.com/TroyGoode/node-cors-client)
-* Server: [https://github.com/TroyGoode/node-cors-server](https://github.com/TroyGoode/node-cors-server)
+<a href="https://opencollective.com/debug/sponsor/0/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/1/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/2/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/3/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/4/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/5/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/6/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/7/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/8/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/9/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/10/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/10/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/11/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/11/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/12/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/12/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/13/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/13/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/14/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/14/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/15/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/15/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/16/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/16/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/17/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/17/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/18/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/18/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/19/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/19/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/20/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/20/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/21/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/21/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/22/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/22/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/23/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/23/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/24/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/24/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/25/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/25/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/26/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/26/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/27/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/27/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/28/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/28/avatar.svg"></a>
+<a href="https://opencollective.com/debug/sponsor/29/website" target="_blank"><img src="https://opencollective.com/debug/sponsor/29/avatar.svg"></a>
 
 ## License
 
-[MIT License](http://www.opensource.org/licenses/mit-license.php)
+(The MIT License)
 
-## Author
+Copyright (c) 2014-2016 TJ Holowaychuk &lt;tj@vision-media.ca&gt;
 
-[Troy Goode](https://github.com/TroyGoode) ([troygoode@gmail.com](mailto:troygoode@gmail.com))
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-[coveralls-image]: https://img.shields.io/coveralls/expressjs/cors/master.svg
-[coveralls-url]: https://coveralls.io/r/expressjs/cors?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/cors.svg
-[downloads-url]: https://npmjs.org/package/cors
-[npm-image]: https://img.shields.io/npm/v/cors.svg
-[npm-url]: https://npmjs.org/package/cors
-[travis-image]: https://img.shields.io/travis/expressjs/cors/master.svg
-[travis-url]: https://travis-ci.org/expressjs/cors
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
