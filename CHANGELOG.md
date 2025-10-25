@@ -1,151 +1,30 @@
-### Version 4.0.0 (2018-01-28) ###
+# Changelog
 
-- Added: Support for ES2018. The only change needed was recognizing the `s`
-  regex flag.
-- Changed: _All_ tokens returned by the `matchToToken` function now have a
-  `closed` property. It is set to `undefined` for the tokens where “closed”
-  doesn’t make sense. This means that all tokens objects have the same shape,
-  which might improve performance.
+All notable changes to this project will be documented in this file.
 
-These are the breaking changes:
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- `'/a/s'.match(jsTokens)` no longer returns `['/', 'a', '/', 's']`, but
-  `['/a/s']`. (There are of course other variations of this.)
-- Code that rely on some token objects not having the `closed` property could
-  now behave differently.
+## [v1.0.2](https://github.com/ljharb/call-bind-apply-helpers/compare/v1.0.1...v1.0.2) - 2025-02-12
 
+### Commits
 
-### Version 3.0.2 (2017-06-28) ###
+- [types] improve inferred types [`e6f9586`](https://github.com/ljharb/call-bind-apply-helpers/commit/e6f95860a3c72879cb861a858cdfb8138fbedec1)
+- [Dev Deps] update `@arethetypeswrong/cli`, `@ljharb/tsconfig`, `@types/tape`, `es-value-fixtures`, `for-each`, `has-strict-mode`, `object-inspect` [`e43d540`](https://github.com/ljharb/call-bind-apply-helpers/commit/e43d5409f97543bfbb11f345d47d8ce4e066d8c1)
 
-- No code changes. Just updates to the readme.
+## [v1.0.1](https://github.com/ljharb/call-bind-apply-helpers/compare/v1.0.0...v1.0.1) - 2024-12-08
 
+### Commits
 
-### Version 3.0.1 (2017-01-30) ###
+- [types] `reflectApply`: fix types [`4efc396`](https://github.com/ljharb/call-bind-apply-helpers/commit/4efc3965351a4f02cc55e836fa391d3d11ef2ef8)
+- [Fix] `reflectApply`: oops, Reflect is not a function [`83cc739`](https://github.com/ljharb/call-bind-apply-helpers/commit/83cc7395de6b79b7730bdf092f1436f0b1263c75)
+- [Dev Deps] update `@arethetypeswrong/cli` [`80bd5d3`](https://github.com/ljharb/call-bind-apply-helpers/commit/80bd5d3ae58b4f6b6995ce439dd5a1bcb178a940)
 
-- Fixed: ES2015 unicode escapes with more than 6 hex digits are now matched
-  correctly.
+## v1.0.0 - 2024-12-05
 
+### Commits
 
-### Version 3.0.0 (2017-01-11) ###
-
-This release contains one breaking change, that should [improve performance in
-V8][v8-perf]:
-
-> So how can you, as a JavaScript developer, ensure that your RegExps are fast?
-> If you are not interested in hooking into RegExp internals, make sure that
-> neither the RegExp instance, nor its prototype is modified in order to get the
-> best performance:
->
-> ```js
-> var re = /./g;
-> re.exec('');  // Fast path.
-> re.new_property = 'slow';
-> ```
-
-This module used to export a single regex, with `.matchToToken` bolted
-on, just like in the above example. This release changes the exports of
-the module to avoid this issue.
-
-Before:
-
-```js
-import jsTokens from "js-tokens"
-// or:
-var jsTokens = require("js-tokens")
-var matchToToken = jsTokens.matchToToken
-```
-
-After:
-
-```js
-import jsTokens, {matchToToken} from "js-tokens"
-// or:
-var jsTokens = require("js-tokens").default
-var matchToToken = require("js-tokens").matchToToken
-```
-
-[v8-perf]: http://v8project.blogspot.se/2017/01/speeding-up-v8-regular-expressions.html
-
-
-### Version 2.0.0 (2016-06-19) ###
-
-- Added: Support for ES2016. In other words, support for the `**` exponentiation
-  operator.
-
-These are the breaking changes:
-
-- `'**'.match(jsTokens)` no longer returns `['*', '*']`, but `['**']`.
-- `'**='.match(jsTokens)` no longer returns `['*', '*=']`, but `['**=']`.
-
-
-### Version 1.0.3 (2016-03-27) ###
-
-- Improved: Made the regex ever so slightly smaller.
-- Updated: The readme.
-
-
-### Version 1.0.2 (2015-10-18) ###
-
-- Improved: Limited npm package contents for a smaller download. Thanks to
-  @zertosh!
-
-
-### Version 1.0.1 (2015-06-20) ###
-
-- Fixed: Declared an undeclared variable.
-
-
-### Version 1.0.0 (2015-02-26) ###
-
-- Changed: Merged the 'operator' and 'punctuation' types into 'punctuator'. That
-  type is now equivalent to the Punctuator token in the ECMAScript
-  specification. (Backwards-incompatible change.)
-- Fixed: A `-` followed by a number is now correctly matched as a punctuator
-  followed by a number. It used to be matched as just a number, but there is no
-  such thing as negative number literals. (Possibly backwards-incompatible
-  change.)
-
-
-### Version 0.4.1 (2015-02-21) ###
-
-- Added: Support for the regex `u` flag.
-
-
-### Version 0.4.0 (2015-02-21) ###
-
-- Improved: `jsTokens.matchToToken` performance.
-- Added: Support for octal and binary number literals.
-- Added: Support for template strings.
-
-
-### Version 0.3.1 (2015-01-06) ###
-
-- Fixed: Support for unicode spaces. They used to be allowed in names (which is
-  very confusing), and some unicode newlines were wrongly allowed in strings and
-  regexes.
-
-
-### Version 0.3.0 (2014-12-19) ###
-
-- Changed: The `jsTokens.names` array has been replaced with the
-  `jsTokens.matchToToken` function. The capturing groups of `jsTokens` are no
-  longer part of the public API; instead use said function. See this [gist] for
-  an example. (Backwards-incompatible change.)
-- Changed: The empty string is now considered an “invalid” token, instead an
-  “empty” token (its own group). (Backwards-incompatible change.)
-- Removed: component support. (Backwards-incompatible change.)
-
-[gist]: https://gist.github.com/lydell/be49dbf80c382c473004
-
-
-### Version 0.2.0 (2014-06-19) ###
-
-- Changed: Match ES6 function arrows (`=>`) as an operator, instead of its own
-  category (“functionArrow”), for simplicity. (Backwards-incompatible change.)
-- Added: ES6 splats (`...`) are now matched as an operator (instead of three
-  punctuations). (Backwards-incompatible change.)
-
-
-### Version 0.1.0 (2014-03-08) ###
-
-- Initial release.
+- Initial implementation, tests, readme [`7879629`](https://github.com/ljharb/call-bind-apply-helpers/commit/78796290f9b7430c9934d6f33d94ae9bc89fce04)
+- Initial commit [`3f1dc16`](https://github.com/ljharb/call-bind-apply-helpers/commit/3f1dc164afc43285631b114a5f9dd9137b2b952f)
+- npm init [`081df04`](https://github.com/ljharb/call-bind-apply-helpers/commit/081df048c312fcee400922026f6e97281200a603)
+- Only apps should have lockfiles [`5b9ca0f`](https://github.com/ljharb/call-bind-apply-helpers/commit/5b9ca0fe8101ebfaf309c549caac4e0a017ed930)
