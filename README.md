@@ -1,4 +1,4 @@
-# call-bind-apply-helpers <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
+# call-bound <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
 [![github actions][actions-image]][actions-url]
 [![coverage][codecov-image]][codecov-url]
@@ -9,54 +9,45 @@
 
 [![npm badge][npm-badge-png]][package-url]
 
-Helper functions around Function call/apply/bind, for use in `call-bind`.
-
-The only packages that should likely ever use this package directly are `call-bind` and `get-intrinsic`.
-Please use `call-bind` unless you have a very good reason not to.
+Robust call-bound JavaScript intrinsics, using `call-bind` and `get-intrinsic`.
 
 ## Getting started
 
 ```sh
-npm install --save call-bind-apply-helpers
+npm install --save call-bound
 ```
 
 ## Usage/Examples
 
 ```js
 const assert = require('assert');
-const callBindBasic = require('call-bind-apply-helpers');
+const callBound = require('call-bound');
 
-function f(a, b) {
-	assert.equal(this, 1);
-	assert.equal(a, 2);
-	assert.equal(b, 3);
-	assert.equal(arguments.length, 2);
-}
-
-const fBound = callBindBasic([f, 1]);
+const slice = callBound('Array.prototype.slice');
 
 delete Function.prototype.call;
 delete Function.prototype.bind;
+delete Array.prototype.slice;
 
-fBound(2, 3);
+assert.deepEqual(slice([1, 2, 3, 4], 1, -1), [2, 3]);
 ```
 
 ## Tests
 
 Clone the repo, `npm install`, and run `npm test`
 
-[package-url]: https://npmjs.org/package/call-bind-apply-helpers
-[npm-version-svg]: https://versionbadg.es/ljharb/call-bind-apply-helpers.svg
-[deps-svg]: https://david-dm.org/ljharb/call-bind-apply-helpers.svg
-[deps-url]: https://david-dm.org/ljharb/call-bind-apply-helpers
-[dev-deps-svg]: https://david-dm.org/ljharb/call-bind-apply-helpers/dev-status.svg
-[dev-deps-url]: https://david-dm.org/ljharb/call-bind-apply-helpers#info=devDependencies
-[npm-badge-png]: https://nodei.co/npm/call-bind-apply-helpers.png?downloads=true&stars=true
-[license-image]: https://img.shields.io/npm/l/call-bind-apply-helpers.svg
+[package-url]: https://npmjs.org/package/call-bound
+[npm-version-svg]: https://versionbadg.es/ljharb/call-bound.svg
+[deps-svg]: https://david-dm.org/ljharb/call-bound.svg
+[deps-url]: https://david-dm.org/ljharb/call-bound
+[dev-deps-svg]: https://david-dm.org/ljharb/call-bound/dev-status.svg
+[dev-deps-url]: https://david-dm.org/ljharb/call-bound#info=devDependencies
+[npm-badge-png]: https://nodei.co/npm/call-bound.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/call-bound.svg
 [license-url]: LICENSE
-[downloads-image]: https://img.shields.io/npm/dm/call-bind-apply-helpers.svg
-[downloads-url]: https://npm-stat.com/charts.html?package=call-bind-apply-helpers
-[codecov-image]: https://codecov.io/gh/ljharb/call-bind-apply-helpers/branch/main/graphs/badge.svg
-[codecov-url]: https://app.codecov.io/gh/ljharb/call-bind-apply-helpers/
-[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/ljharb/call-bind-apply-helpers
-[actions-url]: https://github.com/ljharb/call-bind-apply-helpers/actions
+[downloads-image]: https://img.shields.io/npm/dm/call-bound.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=call-bound
+[codecov-image]: https://codecov.io/gh/ljharb/call-bound/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/ljharb/call-bound/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/ljharb/call-bound
+[actions-url]: https://github.com/ljharb/call-bound/actions
