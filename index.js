@@ -1,60 +1,78 @@
 /*!
- * encodeurl
- * Copyright(c) 2016 Douglas Christopher Wilson
+ * escape-html
+ * Copyright(c) 2012-2013 TJ Holowaychuk
+ * Copyright(c) 2015 Andreas Lubbe
+ * Copyright(c) 2015 Tiancheng "Timothy" Gu
  * MIT Licensed
  */
 
-'use strict'
+'use strict';
+
+/**
+ * Module variables.
+ * @private
+ */
+
+var matchHtmlRegExp = /["'&<>]/;
 
 /**
  * Module exports.
  * @public
  */
 
-module.exports = encodeUrl
+module.exports = escapeHtml;
 
 /**
- * RegExp to match non-URL code points, *after* encoding (i.e. not including "%")
- * and including invalid escape sequences.
- * @private
- */
-
-var ENCODE_CHARS_REGEXP = /(?:[^\x21\x23-\x3B\x3D\x3F-\x5F\x61-\x7A\x7C\x7E]|%(?:[^0-9A-Fa-f]|[0-9A-Fa-f][^0-9A-Fa-f]|$))+/g
-
-/**
- * RegExp to match unmatched surrogate pair.
- * @private
- */
-
-var UNMATCHED_SURROGATE_PAIR_REGEXP = /(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF]([^\uDC00-\uDFFF]|$)/g
-
-/**
- * String to replace unmatched surrogate pair with.
- * @private
- */
-
-var UNMATCHED_SURROGATE_PAIR_REPLACE = '$1\uFFFD$2'
-
-/**
- * Encode a URL to a percent-encoded form, excluding already-encoded sequences.
+ * Escape special characters in the given string of html.
  *
- * This function will take an already-encoded URL and encode all the non-URL
- * code points. This function will not encode the "%" character unless it is
- * not part of a valid sequence (`%20` will be left as-is, but `%foo` will
- * be encoded as `%25foo`).
- *
- * This encode is meant to be "safe" and does not throw errors. It will try as
- * hard as it can to properly encode the given URL, including replacing any raw,
- * unpaired surrogate pairs with the Unicode replacement character prior to
- * encoding.
- *
- * @param {string} url
+ * @param  {string} string The string to escape for inserting into HTML
  * @return {string}
  * @public
  */
 
-function encodeUrl (url) {
-  return String(url)
-    .replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE)
-    .replace(ENCODE_CHARS_REGEXP, encodeURI)
+function escapeHtml(string) {
+  var str = '' + string;
+  var match = matchHtmlRegExp.exec(str);
+
+  if (!match) {
+    return str;
+  }
+
+  var escape;
+  var html = '';
+  var index = 0;
+  var lastIndex = 0;
+
+  for (index = match.index; index < str.length; index++) {
+    switch (str.charCodeAt(index)) {
+      case 34: // "
+        escape = '&quot;';
+        break;
+      case 38: // &
+        escape = '&amp;';
+        break;
+      case 39: // '
+        escape = '&#39;';
+        break;
+      case 60: // <
+        escape = '&lt;';
+        break;
+      case 62: // >
+        escape = '&gt;';
+        break;
+      default:
+        continue;
+    }
+
+    if (lastIndex !== index) {
+      html += str.substring(lastIndex, index);
+    }
+
+    lastIndex = index + 1;
+    html += escape;
+  }
+
+  return lastIndex !== index
+    ? html + str.substring(lastIndex, index)
+    : html;
 }
