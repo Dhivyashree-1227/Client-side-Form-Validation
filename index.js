@@ -1,225 +1,334 @@
 /*!
- * content-type
+ * cookie
+ * Copyright(c) 2012-2014 Roman Shtylman
  * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
 
-'use strict'
-
-/**
- * RegExp to match *( ";" parameter ) in RFC 7231 sec 3.1.1.1
- *
- * parameter     = token "=" ( token / quoted-string )
- * token         = 1*tchar
- * tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
- *               / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
- *               / DIGIT / ALPHA
- *               ; any VCHAR, except delimiters
- * quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE
- * qdtext        = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
- * obs-text      = %x80-FF
- * quoted-pair   = "\" ( HTAB / SP / VCHAR / obs-text )
- */
-var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g // eslint-disable-line no-control-regex
-var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/ // eslint-disable-line no-control-regex
-var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
-
-/**
- * RegExp to match quoted-pair in RFC 7230 sec 3.2.6
- *
- * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
- * obs-text    = %x80-FF
- */
-var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g // eslint-disable-line no-control-regex
-
-/**
- * RegExp to match chars that must be quoted-pair in RFC 7230 sec 3.2.6
- */
-var QUOTE_REGEXP = /([\\"])/g
-
-/**
- * RegExp to match type in RFC 7231 sec 3.1.1.1
- *
- * media-type = type "/" subtype
- * type       = token
- * subtype    = token
- */
-var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
+'use strict';
 
 /**
  * Module exports.
  * @public
  */
 
-exports.format = format
-exports.parse = parse
+exports.parse = parse;
+exports.serialize = serialize;
 
 /**
- * Format object to media type.
- *
- * @param {object} obj
- * @return {string}
- * @public
- */
-
-function format (obj) {
-  if (!obj || typeof obj !== 'object') {
-    throw new TypeError('argument obj is required')
-  }
-
-  var parameters = obj.parameters
-  var type = obj.type
-
-  if (!type || !TYPE_REGEXP.test(type)) {
-    throw new TypeError('invalid type')
-  }
-
-  var string = type
-
-  // append parameters
-  if (parameters && typeof parameters === 'object') {
-    var param
-    var params = Object.keys(parameters).sort()
-
-    for (var i = 0; i < params.length; i++) {
-      param = params[i]
-
-      if (!TOKEN_REGEXP.test(param)) {
-        throw new TypeError('invalid parameter name')
-      }
-
-      string += '; ' + param + '=' + qstring(parameters[param])
-    }
-  }
-
-  return string
-}
-
-/**
- * Parse media type to object.
- *
- * @param {string|object} string
- * @return {Object}
- * @public
- */
-
-function parse (string) {
-  if (!string) {
-    throw new TypeError('argument string is required')
-  }
-
-  // support req/res-like objects as argument
-  var header = typeof string === 'object'
-    ? getcontenttype(string)
-    : string
-
-  if (typeof header !== 'string') {
-    throw new TypeError('argument string is required to be a string')
-  }
-
-  var index = header.indexOf(';')
-  var type = index !== -1
-    ? header.slice(0, index).trim()
-    : header.trim()
-
-  if (!TYPE_REGEXP.test(type)) {
-    throw new TypeError('invalid media type')
-  }
-
-  var obj = new ContentType(type.toLowerCase())
-
-  // parse parameters
-  if (index !== -1) {
-    var key
-    var match
-    var value
-
-    PARAM_REGEXP.lastIndex = index
-
-    while ((match = PARAM_REGEXP.exec(header))) {
-      if (match.index !== index) {
-        throw new TypeError('invalid parameter format')
-      }
-
-      index += match[0].length
-      key = match[1].toLowerCase()
-      value = match[2]
-
-      if (value.charCodeAt(0) === 0x22 /* " */) {
-        // remove quotes
-        value = value.slice(1, -1)
-
-        // remove escapes
-        if (value.indexOf('\\') !== -1) {
-          value = value.replace(QESC_REGEXP, '$1')
-        }
-      }
-
-      obj.parameters[key] = value
-    }
-
-    if (index !== header.length) {
-      throw new TypeError('invalid parameter format')
-    }
-  }
-
-  return obj
-}
-
-/**
- * Get content-type from req/res objects.
- *
- * @param {object}
- * @return {Object}
+ * Module variables.
  * @private
  */
 
-function getcontenttype (obj) {
-  var header
+var __toString = Object.prototype.toString
 
-  if (typeof obj.getHeader === 'function') {
-    // res-like
-    header = obj.getHeader('content-type')
-  } else if (typeof obj.headers === 'object') {
-    // req-like
-    header = obj.headers && obj.headers['content-type']
+/**
+ * RegExp to match cookie-name in RFC 6265 sec 4.1.1
+ * This refers out to the obsoleted definition of token in RFC 2616 sec 2.2
+ * which has been replaced by the token definition in RFC 7230 appendix B.
+ *
+ * cookie-name       = token
+ * token             = 1*tchar
+ * tchar             = "!" / "#" / "$" / "%" / "&" / "'" /
+ *                     "*" / "+" / "-" / "." / "^" / "_" /
+ *                     "`" / "|" / "~" / DIGIT / ALPHA
+ */
+
+var cookieNameRegExp = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+
+/**
+ * RegExp to match cookie-value in RFC 6265 sec 4.1.1
+ *
+ * cookie-value      = *cookie-octet / ( DQUOTE *cookie-octet DQUOTE )
+ * cookie-octet      = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
+ *                     ; US-ASCII characters excluding CTLs,
+ *                     ; whitespace DQUOTE, comma, semicolon,
+ *                     ; and backslash
+ */
+
+var cookieValueRegExp = /^("?)[\u0021\u0023-\u002B\u002D-\u003A\u003C-\u005B\u005D-\u007E]*\1$/;
+
+/**
+ * RegExp to match domain-value in RFC 6265 sec 4.1.1
+ *
+ * domain-value      = <subdomain>
+ *                     ; defined in [RFC1034], Section 3.5, as
+ *                     ; enhanced by [RFC1123], Section 2.1
+ * <subdomain>       = <label> | <subdomain> "." <label>
+ * <label>           = <let-dig> [ [ <ldh-str> ] <let-dig> ]
+ *                     Labels must be 63 characters or less.
+ *                     'let-dig' not 'letter' in the first char, per RFC1123
+ * <ldh-str>         = <let-dig-hyp> | <let-dig-hyp> <ldh-str>
+ * <let-dig-hyp>     = <let-dig> | "-"
+ * <let-dig>         = <letter> | <digit>
+ * <letter>          = any one of the 52 alphabetic characters A through Z in
+ *                     upper case and a through z in lower case
+ * <digit>           = any one of the ten digits 0 through 9
+ *
+ * Keep support for leading dot: https://github.com/jshttp/cookie/issues/173
+ *
+ * > (Note that a leading %x2E ("."), if present, is ignored even though that
+ * character is not permitted, but a trailing %x2E ("."), if present, will
+ * cause the user agent to ignore the attribute.)
+ */
+
+var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+
+/**
+ * RegExp to match path-value in RFC 6265 sec 4.1.1
+ *
+ * path-value        = <any CHAR except CTLs or ";">
+ * CHAR              = %x01-7F
+ *                     ; defined in RFC 5234 appendix B.1
+ */
+
+var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
+
+/**
+ * Parse a cookie header.
+ *
+ * Parse the given cookie header string into an object
+ * The object has the various cookies as keys(names) => values
+ *
+ * @param {string} str
+ * @param {object} [opt]
+ * @return {object}
+ * @public
+ */
+
+function parse(str, opt) {
+  if (typeof str !== 'string') {
+    throw new TypeError('argument str must be a string');
   }
 
-  if (typeof header !== 'string') {
-    throw new TypeError('content-type header is missing from object')
-  }
+  var obj = {};
+  var len = str.length;
+  // RFC 6265 sec 4.1.1, RFC 2616 2.2 defines a cookie name consists of one char minimum, plus '='.
+  if (len < 2) return obj;
 
-  return header
+  var dec = (opt && opt.decode) || decode;
+  var index = 0;
+  var eqIdx = 0;
+  var endIdx = 0;
+
+  do {
+    eqIdx = str.indexOf('=', index);
+    if (eqIdx === -1) break; // No more cookie pairs.
+
+    endIdx = str.indexOf(';', index);
+
+    if (endIdx === -1) {
+      endIdx = len;
+    } else if (eqIdx > endIdx) {
+      // backtrack on prior semicolon
+      index = str.lastIndexOf(';', eqIdx - 1) + 1;
+      continue;
+    }
+
+    var keyStartIdx = startIndex(str, index, eqIdx);
+    var keyEndIdx = endIndex(str, eqIdx, keyStartIdx);
+    var key = str.slice(keyStartIdx, keyEndIdx);
+
+    // only assign once
+    if (!obj.hasOwnProperty(key)) {
+      var valStartIdx = startIndex(str, eqIdx + 1, endIdx);
+      var valEndIdx = endIndex(str, endIdx, valStartIdx);
+
+      if (str.charCodeAt(valStartIdx) === 0x22 /* " */ && str.charCodeAt(valEndIdx - 1) === 0x22 /* " */) {
+        valStartIdx++;
+        valEndIdx--;
+      }
+
+      var val = str.slice(valStartIdx, valEndIdx);
+      obj[key] = tryDecode(val, dec);
+    }
+
+    index = endIdx + 1
+  } while (index < len);
+
+  return obj;
+}
+
+function startIndex(str, index, max) {
+  do {
+    var code = str.charCodeAt(index);
+    if (code !== 0x20 /*   */ && code !== 0x09 /* \t */) return index;
+  } while (++index < max);
+  return max;
+}
+
+function endIndex(str, index, min) {
+  while (index > min) {
+    var code = str.charCodeAt(--index);
+    if (code !== 0x20 /*   */ && code !== 0x09 /* \t */) return index + 1;
+  }
+  return min;
 }
 
 /**
- * Quote a string if necessary.
+ * Serialize data into a cookie header.
  *
+ * Serialize a name value pair into a cookie string suitable for
+ * http headers. An optional options object specifies cookie parameters.
+ *
+ * serialize('foo', 'bar', { httpOnly: true })
+ *   => "foo=bar; httpOnly"
+ *
+ * @param {string} name
  * @param {string} val
+ * @param {object} [opt]
  * @return {string}
- * @private
+ * @public
  */
 
-function qstring (val) {
-  var str = String(val)
+function serialize(name, val, opt) {
+  var enc = (opt && opt.encode) || encodeURIComponent;
 
-  // no need to quote tokens
-  if (TOKEN_REGEXP.test(str)) {
-    return str
+  if (typeof enc !== 'function') {
+    throw new TypeError('option encode is invalid');
   }
 
-  if (str.length > 0 && !TEXT_REGEXP.test(str)) {
-    throw new TypeError('invalid parameter value')
+  if (!cookieNameRegExp.test(name)) {
+    throw new TypeError('argument name is invalid');
   }
 
-  return '"' + str.replace(QUOTE_REGEXP, '\\$1') + '"'
+  var value = enc(val);
+
+  if (!cookieValueRegExp.test(value)) {
+    throw new TypeError('argument val is invalid');
+  }
+
+  var str = name + '=' + value;
+  if (!opt) return str;
+
+  if (null != opt.maxAge) {
+    var maxAge = Math.floor(opt.maxAge);
+
+    if (!isFinite(maxAge)) {
+      throw new TypeError('option maxAge is invalid')
+    }
+
+    str += '; Max-Age=' + maxAge;
+  }
+
+  if (opt.domain) {
+    if (!domainValueRegExp.test(opt.domain)) {
+      throw new TypeError('option domain is invalid');
+    }
+
+    str += '; Domain=' + opt.domain;
+  }
+
+  if (opt.path) {
+    if (!pathValueRegExp.test(opt.path)) {
+      throw new TypeError('option path is invalid');
+    }
+
+    str += '; Path=' + opt.path;
+  }
+
+  if (opt.expires) {
+    var expires = opt.expires
+
+    if (!isDate(expires) || isNaN(expires.valueOf())) {
+      throw new TypeError('option expires is invalid');
+    }
+
+    str += '; Expires=' + expires.toUTCString()
+  }
+
+  if (opt.httpOnly) {
+    str += '; HttpOnly';
+  }
+
+  if (opt.secure) {
+    str += '; Secure';
+  }
+
+  if (opt.partitioned) {
+    str += '; Partitioned'
+  }
+
+  if (opt.priority) {
+    var priority = typeof opt.priority === 'string'
+      ? opt.priority.toLowerCase() : opt.priority;
+
+    switch (priority) {
+      case 'low':
+        str += '; Priority=Low'
+        break
+      case 'medium':
+        str += '; Priority=Medium'
+        break
+      case 'high':
+        str += '; Priority=High'
+        break
+      default:
+        throw new TypeError('option priority is invalid')
+    }
+  }
+
+  if (opt.sameSite) {
+    var sameSite = typeof opt.sameSite === 'string'
+      ? opt.sameSite.toLowerCase() : opt.sameSite;
+
+    switch (sameSite) {
+      case true:
+        str += '; SameSite=Strict';
+        break;
+      case 'lax':
+        str += '; SameSite=Lax';
+        break;
+      case 'strict':
+        str += '; SameSite=Strict';
+        break;
+      case 'none':
+        str += '; SameSite=None';
+        break;
+      default:
+        throw new TypeError('option sameSite is invalid');
+    }
+  }
+
+  return str;
 }
 
 /**
- * Class to represent a content type.
+ * URL-decode string value. Optimized to skip native call when no %.
+ *
+ * @param {string} str
+ * @returns {string}
+ */
+
+function decode (str) {
+  return str.indexOf('%') !== -1
+    ? decodeURIComponent(str)
+    : str
+}
+
+/**
+ * Determine if value is a Date.
+ *
+ * @param {*} val
  * @private
  */
-function ContentType (type) {
-  this.parameters = Object.create(null)
-  this.type = type
+
+function isDate (val) {
+  return __toString.call(val) === '[object Date]';
+}
+
+/**
+ * Try decoding a string using a decoding function.
+ *
+ * @param {string} str
+ * @param {function} decode
+ * @private
+ */
+
+function tryDecode(str, decode) {
+  try {
+    return decode(str);
+  } catch (e) {
+    return str;
+  }
 }
