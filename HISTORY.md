@@ -1,507 +1,397 @@
-1.52.0 / 2022-02-21
+2.1.35 / 2022-03-12
 ===================
 
-  * Add extensions from IANA for more `image/*` types
-  * Add extension `.asc` to `application/pgp-keys`
-  * Add extensions to various XML types
-  * Add new upstream MIME types
+  * deps: mime-db@1.52.0
+    - Add extensions from IANA for more `image/*` types
+    - Add extension `.asc` to `application/pgp-keys`
+    - Add extensions to various XML types
+    - Add new upstream MIME types
 
-1.51.0 / 2021-11-08
+2.1.34 / 2021-11-08
 ===================
 
-  * Add new upstream MIME types
-  * Mark `image/vnd.microsoft.icon` as compressible
-  * Mark `image/vnd.ms-dds` as compressible
+  * deps: mime-db@1.51.0
+    - Add new upstream MIME types
 
-1.50.0 / 2021-09-15
+2.1.33 / 2021-10-01
 ===================
 
-  * Add deprecated iWorks mime types and extensions
-  * Add new upstream MIME types
+  * deps: mime-db@1.50.0
+    - Add deprecated iWorks mime types and extensions
+    - Add new upstream MIME types
 
-1.49.0 / 2021-07-26
+2.1.32 / 2021-07-27
 ===================
 
-  * Add extension `.trig` to `application/trig`
-  * Add new upstream MIME types
+  * deps: mime-db@1.49.0
+    - Add extension `.trig` to `application/trig`
+    - Add new upstream MIME types
 
-1.48.0 / 2021-05-30
+2.1.31 / 2021-06-01
 ===================
 
-  * Add extension `.mvt` to `application/vnd.mapbox-vector-tile`
-  * Add new upstream MIME types
-  * Mark `text/yaml` as compressible
+  * deps: mime-db@1.48.0
+    - Add extension `.mvt` to `application/vnd.mapbox-vector-tile`
+    - Add new upstream MIME types
 
-1.47.0 / 2021-04-01
+2.1.30 / 2021-04-02
 ===================
 
-  * Add new upstream MIME types
-  * Remove ambigious extensions from IANA for `application/*+xml` types
-  * Update primary extension to `.es` for `application/ecmascript`
+  * deps: mime-db@1.47.0
+    - Add extension `.amr` to `audio/amr`
+    - Remove ambigious extensions from IANA for `application/*+xml` types
+    - Update primary extension to `.es` for `application/ecmascript`
 
-1.46.0 / 2021-02-13
+2.1.29 / 2021-02-17
 ===================
 
-  * Add extension `.amr` to `audio/amr`
-  * Add extension `.m4s` to `video/iso.segment`
-  * Add extension `.opus` to `audio/ogg`
-  * Add new upstream MIME types
+  * deps: mime-db@1.46.0
+    - Add extension `.amr` to `audio/amr`
+    - Add extension `.m4s` to `video/iso.segment`
+    - Add extension `.opus` to `audio/ogg`
+    - Add new upstream MIME types
 
-1.45.0 / 2020-09-22
+2.1.28 / 2021-01-01
 ===================
 
-  * Add `application/ubjson` with extension `.ubj`
-  * Add `image/avif` with extension `.avif`
-  * Add `image/ktx2` with extension `.ktx2`
-  * Add extension `.dbf` to `application/vnd.dbf`
-  * Add extension `.rar` to `application/vnd.rar`
-  * Add extension `.td` to `application/urc-targetdesc+xml`
-  * Add new upstream MIME types
-  * Fix extension of `application/vnd.apple.keynote` to be `.key`
+  * deps: mime-db@1.45.0
+    - Add `application/ubjson` with extension `.ubj`
+    - Add `image/avif` with extension `.avif`
+    - Add `image/ktx2` with extension `.ktx2`
+    - Add extension `.dbf` to `application/vnd.dbf`
+    - Add extension `.rar` to `application/vnd.rar`
+    - Add extension `.td` to `application/urc-targetdesc+xml`
+    - Add new upstream MIME types
+    - Fix extension of `application/vnd.apple.keynote` to be `.key`
 
-1.44.0 / 2020-04-22
+2.1.27 / 2020-04-23
 ===================
 
-  * Add charsets from IANA
-  * Add extension `.cjs` to `application/node`
-  * Add new upstream MIME types
+  * deps: mime-db@1.44.0
+    - Add charsets from IANA
+    - Add extension `.cjs` to `application/node`
+    - Add new upstream MIME types
 
-1.43.0 / 2020-01-05
+2.1.26 / 2020-01-05
 ===================
 
-  * Add `application/x-keepass2` with extension `.kdbx`
-  * Add extension `.mxmf` to `audio/mobile-xmf`
-  * Add extensions from IANA for `application/*+xml` types
-  * Add new upstream MIME types
+  * deps: mime-db@1.43.0
+    - Add `application/x-keepass2` with extension `.kdbx`
+    - Add extension `.mxmf` to `audio/mobile-xmf`
+    - Add extensions from IANA for `application/*+xml` types
+    - Add new upstream MIME types
 
-1.42.0 / 2019-09-25
+2.1.25 / 2019-11-12
 ===================
 
-  * Add `image/vnd.ms-dds` with extension `.dds`
-  * Add new upstream MIME types
-  * Remove compressible from `multipart/mixed`
+  * deps: mime-db@1.42.0
+    - Add new upstream MIME types
+    - Add `application/toml` with extension `.toml`
+    - Add `image/vnd.ms-dds` with extension `.dds`
 
-1.41.0 / 2019-08-30
+2.1.24 / 2019-04-20
 ===================
 
-  * Add new upstream MIME types
-  * Add `application/toml` with extension `.toml`
-  * Mark `font/ttf` as compressible
+  * deps: mime-db@1.40.0
+    - Add extensions from IANA for `model/*` types
+    - Add `text/mdx` with extension `.mdx`
 
-1.40.0 / 2019-04-20
+2.1.23 / 2019-04-17
 ===================
 
-  * Add extensions from IANA for `model/*` types
-  * Add `text/mdx` with extension `.mdx`
+  * deps: mime-db@~1.39.0
+    - Add extensions `.siv` and `.sieve` to `application/sieve`
+    - Add new upstream MIME types
 
-1.39.0 / 2019-04-04
+2.1.22 / 2019-02-14
 ===================
 
-  * Add extensions `.siv` and `.sieve` to `application/sieve`
-  * Add new upstream MIME types
+  * deps: mime-db@~1.38.0
+    - Add extension `.nq` to `application/n-quads`
+    - Add extension `.nt` to `application/n-triples`
+    - Add new upstream MIME types
 
-1.38.0 / 2019-02-04
+2.1.21 / 2018-10-19
 ===================
 
-  * Add extension `.nq` to `application/n-quads`
-  * Add extension `.nt` to `application/n-triples`
-  * Add new upstream MIME types
-  * Mark `text/less` as compressible
+  * deps: mime-db@~1.37.0
+    - Add extensions to HEIC image types
+    - Add new upstream MIME types
 
-1.37.0 / 2018-10-19
+2.1.20 / 2018-08-26
 ===================
 
-  * Add extensions to HEIC image types
-  * Add new upstream MIME types
+  * deps: mime-db@~1.36.0
+    - Add Apple file extensions from IANA
+    - Add extensions from IANA for `image/*` types
+    - Add new upstream MIME types
 
-1.36.0 / 2018-08-20
+2.1.19 / 2018-07-17
 ===================
 
-  * Add Apple file extensions from IANA
-  * Add extensions from IANA for `image/*` types
-  * Add new upstream MIME types
+  * deps: mime-db@~1.35.0
+    - Add extension `.csl` to `application/vnd.citationstyles.style+xml`
+    - Add extension `.es` to `application/ecmascript`
+    - Add extension `.owl` to `application/rdf+xml`
+    - Add new upstream MIME types
+    - Add UTF-8 as default charset for `text/turtle`
 
-1.35.0 / 2018-07-15
+2.1.18 / 2018-02-16
 ===================
 
-  * Add extension `.owl` to `application/rdf+xml`
-  * Add new upstream MIME types
-    - Removes extension `.woff` from `application/font-woff`
+  * deps: mime-db@~1.33.0
+    - Add `application/raml+yaml` with extension `.raml`
+    - Add `application/wasm` with extension `.wasm`
+    - Add `text/shex` with extension `.shex`
+    - Add extensions for JPEG-2000 images
+    - Add extensions from IANA for `message/*` types
+    - Add new upstream MIME types
+    - Update font MIME types
+    - Update `text/hjson` to registered `application/hjson`
 
-1.34.0 / 2018-06-03
+2.1.17 / 2017-09-01
 ===================
 
-  * Add extension `.csl` to `application/vnd.citationstyles.style+xml`
-  * Add extension `.es` to `application/ecmascript`
-  * Add new upstream MIME types
-  * Add `UTF-8` as default charset for `text/turtle`
-  * Mark all XML-derived types as compressible
+  * deps: mime-db@~1.30.0
+    - Add `application/vnd.ms-outlook`
+    - Add `application/x-arj`
+    - Add extension `.mjs` to `application/javascript`
+    - Add glTF types and extensions
+    - Add new upstream MIME types
+    - Add `text/x-org`
+    - Add VirtualBox MIME types
+    - Fix `source` records for `video/*` types that are IANA
+    - Update `font/opentype` to registered `font/otf`
 
-1.33.0 / 2018-02-15
+2.1.16 / 2017-07-24
 ===================
 
-  * Add extensions from IANA for `message/*` types
-  * Add new upstream MIME types
-  * Fix some incorrect OOXML types
-  * Remove `application/font-woff2`
+  * deps: mime-db@~1.29.0
+    - Add `application/fido.trusted-apps+json`
+    - Add extension `.wadl` to `application/vnd.sun.wadl+xml`
+    - Add extension `.gz` to `application/gzip`
+    - Add new upstream MIME types
+    - Update extensions `.md` and `.markdown` to be `text/markdown`
 
-1.32.0 / 2017-11-29
+2.1.15 / 2017-03-23
 ===================
 
-  * Add new upstream MIME types
-  * Update `text/hjson` to registered `application/hjson`
-  * Add `text/shex` with extension `.shex`
+  * deps: mime-db@~1.27.0
+    - Add new mime types
+    - Add `image/apng`
 
-1.31.0 / 2017-10-25
+2.1.14 / 2017-01-14
 ===================
 
-  * Add `application/raml+yaml` with extension `.raml`
-  * Add `application/wasm` with extension `.wasm`
-  * Add new `font` type from IANA
-  * Add new upstream font extensions
-  * Add new upstream MIME types
-  * Add extensions for JPEG-2000 images
+  * deps: mime-db@~1.26.0
+    - Add new mime types
 
-1.30.0 / 2017-08-27
+2.1.13 / 2016-11-18
 ===================
 
-  * Add `application/vnd.ms-outlook`
-  * Add `application/x-arj`
-  * Add extension `.mjs` to `application/javascript`
-  * Add glTF types and extensions
-  * Add new upstream MIME types
-  * Add `text/x-org`
-  * Add VirtualBox MIME types
-  * Fix `source` records for `video/*` types that are IANA
-  * Update `font/opentype` to registered `font/otf`
+  * deps: mime-db@~1.25.0
+    - Add new mime types
 
-1.29.0 / 2017-07-10
+2.1.12 / 2016-09-18
 ===================
 
-  * Add `application/fido.trusted-apps+json`
-  * Add extension `.wadl` to `application/vnd.sun.wadl+xml`
-  * Add new upstream MIME types
-  * Add `UTF-8` as default charset for `text/css`
+  * deps: mime-db@~1.24.0
+    - Add new mime types
+    - Add `audio/mp3`
 
-1.28.0 / 2017-05-14
+2.1.11 / 2016-05-01
 ===================
 
-  * Add new upstream MIME types
-  * Add extension `.gz` to `application/gzip`
-  * Update extensions `.md` and `.markdown` to be `text/markdown`
+  * deps: mime-db@~1.23.0
+    - Add new mime types
 
-1.27.0 / 2017-03-16
+2.1.10 / 2016-02-15
 ===================
 
-  * Add new upstream MIME types
-  * Add `image/apng` with extension `.apng`
+  * deps: mime-db@~1.22.0
+    - Add new mime types
+    - Fix extension of `application/dash+xml`
+    - Update primary extension for `audio/mp4`
 
-1.26.0 / 2017-01-14
-===================
-
-  * Add new upstream MIME types
-  * Add extension `.geojson` to `application/geo+json`
-
-1.25.0 / 2016-11-11
-===================
-
-  * Add new upstream MIME types
-
-1.24.0 / 2016-09-18
-===================
-
-  * Add `audio/mp3`
-  * Add new upstream MIME types
-
-1.23.0 / 2016-05-01
-===================
-
-  * Add new upstream MIME types
-  * Add extension `.3gpp` to `audio/3gpp`
-
-1.22.0 / 2016-02-15
-===================
-
-  * Add `text/slim`
-  * Add extension `.rng` to `application/xml`
-  * Add new upstream MIME types
-  * Fix extension of `application/dash+xml` to be `.mpd`
-  * Update primary extension to `.m4a` for `audio/mp4`
-
-1.21.0 / 2016-01-06
-===================
-
-  * Add Google document types
-  * Add new upstream MIME types
-
-1.20.0 / 2015-11-10
-===================
-
-  * Add `text/x-suse-ymp`
-  * Add new upstream MIME types
-
-1.19.0 / 2015-09-17
-===================
-
-  * Add `application/vnd.apple.pkpass`
-  * Add new upstream MIME types
-
-1.18.0 / 2015-09-03
-===================
-
-  * Add new upstream MIME types
-
-1.17.0 / 2015-08-13
-===================
-
-  * Add `application/x-msdos-program`
-  * Add `audio/g711-0`
-  * Add `image/vnd.mozilla.apng`
-  * Add extension `.exe` to `application/x-msdos-program`
-
-1.16.0 / 2015-07-29
-===================
-
-  * Add `application/vnd.uri-map`
-
-1.15.0 / 2015-07-13
-===================
-
-  * Add `application/x-httpd-php`
-
-1.14.0 / 2015-06-25
-===================
-
-  * Add `application/scim+json`
-  * Add `application/vnd.3gpp.ussd+xml`
-  * Add `application/vnd.biopax.rdf+xml`
-  * Add `text/x-processing`
-
-1.13.0 / 2015-06-07
-===================
-
-  * Add nginx as a source
-  * Add `application/x-cocoa`
-  * Add `application/x-java-archive-diff`
-  * Add `application/x-makeself`
-  * Add `application/x-perl`
-  * Add `application/x-pilot`
-  * Add `application/x-redhat-package-manager`
-  * Add `application/x-sea`
-  * Add `audio/x-m4a`
-  * Add `audio/x-realaudio`
-  * Add `image/x-jng`
-  * Add `text/mathml`
-
-1.12.0 / 2015-06-05
-===================
-
-  * Add `application/bdoc`
-  * Add `application/vnd.hyperdrive+json`
-  * Add `application/x-bdoc`
-  * Add extension `.rtf` to `text/rtf`
-
-1.11.0 / 2015-05-31
-===================
-
-  * Add `audio/wav`
-  * Add `audio/wave`
-  * Add extension `.litcoffee` to `text/coffeescript`
-  * Add extension `.sfd-hdstx` to `application/vnd.hydrostatix.sof-data`
-  * Add extension `.n-gage` to `application/vnd.nokia.n-gage.symbian.install`
-
-1.10.0 / 2015-05-19
-===================
-
-  * Add `application/vnd.balsamiq.bmpr`
-  * Add `application/vnd.microsoft.portable-executable`
-  * Add `application/x-ns-proxy-autoconfig`
-
-1.9.1 / 2015-04-19
+2.1.9 / 2016-01-06
 ==================
 
-  * Remove `.json` extension from `application/manifest+json`
-    - This is causing bugs downstream
+  * deps: mime-db@~1.21.0
+    - Add new mime types
 
-1.9.0 / 2015-04-19
+2.1.8 / 2015-11-30
 ==================
 
-  * Add `application/manifest+json`
-  * Add `application/vnd.micro+json`
-  * Add `image/vnd.zbrush.pcx`
-  * Add `image/x-ms-bmp`
+  * deps: mime-db@~1.20.0
+    - Add new mime types
 
-1.8.0 / 2015-03-13
+2.1.7 / 2015-09-20
 ==================
 
-  * Add `application/vnd.citationstyles.style+xml`
-  * Add `application/vnd.fastcopy-disk-image`
-  * Add `application/vnd.gov.sk.xmldatacontainer+xml`
-  * Add extension `.jsonld` to `application/ld+json`
+  * deps: mime-db@~1.19.0
+    - Add new mime types
 
-1.7.0 / 2015-02-08
+2.1.6 / 2015-09-03
 ==================
 
-  * Add `application/vnd.gerber`
-  * Add `application/vnd.msa-disk-image`
+  * deps: mime-db@~1.18.0
+    - Add new mime types
 
-1.6.1 / 2015-02-05
+2.1.5 / 2015-08-20
 ==================
 
-  * Community extensions ownership transferred from `node-mime`
+  * deps: mime-db@~1.17.0
+    - Add new mime types
 
-1.6.0 / 2015-01-29
+2.1.4 / 2015-07-30
 ==================
 
-  * Add `application/jose`
-  * Add `application/jose+json`
-  * Add `application/json-seq`
-  * Add `application/jwk+json`
-  * Add `application/jwk-set+json`
-  * Add `application/jwt`
-  * Add `application/rdap+json`
-  * Add `application/vnd.gov.sk.e-form+xml`
-  * Add `application/vnd.ims.imsccv1p3`
+  * deps: mime-db@~1.16.0
+    - Add new mime types
 
-1.5.0 / 2014-12-30
+2.1.3 / 2015-07-13
 ==================
 
-  * Add `application/vnd.oracle.resource+json`
-  * Fix various invalid MIME type entries
-    - `application/mbox+xml`
-    - `application/oscp-response`
-    - `application/vwg-multiplexed`
-    - `audio/g721`
+  * deps: mime-db@~1.15.0
+    - Add new mime types
 
-1.4.0 / 2014-12-21
+2.1.2 / 2015-06-25
 ==================
 
-  * Add `application/vnd.ims.imsccv1p2`
-  * Fix various invalid MIME type entries
-    - `application/vnd-acucobol`
-    - `application/vnd-curl`
-    - `application/vnd-dart`
-    - `application/vnd-dxr`
-    - `application/vnd-fdf`
-    - `application/vnd-mif`
-    - `application/vnd-sema`
-    - `application/vnd-wap-wmlc`
-    - `application/vnd.adobe.flash-movie`
-    - `application/vnd.dece-zip`
-    - `application/vnd.dvb_service`
-    - `application/vnd.micrografx-igx`
-    - `application/vnd.sealed-doc`
-    - `application/vnd.sealed-eml`
-    - `application/vnd.sealed-mht`
-    - `application/vnd.sealed-ppt`
-    - `application/vnd.sealed-tiff`
-    - `application/vnd.sealed-xls`
-    - `application/vnd.sealedmedia.softseal-html`
-    - `application/vnd.sealedmedia.softseal-pdf`
-    - `application/vnd.wap-slc`
-    - `application/vnd.wap-wbxml`
-    - `audio/vnd.sealedmedia.softseal-mpeg`
-    - `image/vnd-djvu`
-    - `image/vnd-svf`
-    - `image/vnd-wap-wbmp`
-    - `image/vnd.sealed-png`
-    - `image/vnd.sealedmedia.softseal-gif`
-    - `image/vnd.sealedmedia.softseal-jpg`
-    - `model/vnd-dwf`
-    - `model/vnd.parasolid.transmit-binary`
-    - `model/vnd.parasolid.transmit-text`
-    - `text/vnd-a`
-    - `text/vnd-curl`
-    - `text/vnd.wap-wml`
-  * Remove example template MIME types
-    - `application/example`
-    - `audio/example`
-    - `image/example`
-    - `message/example`
-    - `model/example`
-    - `multipart/example`
-    - `text/example`
-    - `video/example`
+  * deps: mime-db@~1.14.0
+    - Add new mime types
 
-1.3.1 / 2014-12-16
+2.1.1 / 2015-06-08
 ==================
 
-  * Fix missing extensions
-    - `application/json5`
-    - `text/hjson`
+  * perf: fix deopt during mapping
 
-1.3.0 / 2014-12-07
+2.1.0 / 2015-06-07
 ==================
 
-  * Add `application/a2l`
-  * Add `application/aml`
-  * Add `application/atfx`
-  * Add `application/atxml`
-  * Add `application/cdfx+xml`
-  * Add `application/dii`
-  * Add `application/json5`
-  * Add `application/lxf`
-  * Add `application/mf4`
-  * Add `application/vnd.apache.thrift.compact`
-  * Add `application/vnd.apache.thrift.json`
-  * Add `application/vnd.coffeescript`
-  * Add `application/vnd.enphase.envoy`
-  * Add `application/vnd.ims.imsccv1p1`
-  * Add `text/csv-schema`
-  * Add `text/hjson`
-  * Add `text/markdown`
-  * Add `text/yaml`
+  * Fix incorrectly treating extension-less file name as extension
+    - i.e. `'path/to/json'` will no longer return `application/json`
+  * Fix `.charset(type)` to accept parameters
+  * Fix `.charset(type)` to match case-insensitive
+  * Improve generation of extension to MIME mapping
+  * Refactor internals for readability and no argument reassignment
+  * Prefer `application/*` MIME types from the same source
+  * Prefer any type over `application/octet-stream`
+  * deps: mime-db@~1.13.0
+    - Add nginx as a source
+    - Add new mime types
 
-1.2.0 / 2014-11-09
+2.0.14 / 2015-06-06
+===================
+
+  * deps: mime-db@~1.12.0
+    - Add new mime types
+
+2.0.13 / 2015-05-31
+===================
+
+  * deps: mime-db@~1.11.0
+    - Add new mime types
+
+2.0.12 / 2015-05-19
+===================
+
+  * deps: mime-db@~1.10.0
+    - Add new mime types
+
+2.0.11 / 2015-05-05
+===================
+
+  * deps: mime-db@~1.9.1
+    - Add new mime types
+
+2.0.10 / 2015-03-13
+===================
+
+  * deps: mime-db@~1.8.0
+    - Add new mime types
+
+2.0.9 / 2015-02-09
 ==================
 
-  * Add `application/cea`
-  * Add `application/dit`
-  * Add `application/vnd.gov.sk.e-form+zip`
-  * Add `application/vnd.tmd.mediaflex.api+xml`
-  * Type `application/epub+zip` is now IANA-registered
+  * deps: mime-db@~1.7.0
+    - Add new mime types
+    - Community extensions ownership transferred from `node-mime`
 
-1.1.2 / 2014-10-23
+2.0.8 / 2015-01-29
 ==================
 
-  * Rebuild database for `application/x-www-form-urlencoded` change
+  * deps: mime-db@~1.6.0
+    - Add new mime types
 
-1.1.1 / 2014-10-20
+2.0.7 / 2014-12-30
 ==================
 
-  * Mark `application/x-www-form-urlencoded` as compressible.
+  * deps: mime-db@~1.5.0
+    - Add new mime types
+    - Fix various invalid MIME type entries
 
-1.1.0 / 2014-09-28
+2.0.6 / 2014-12-30
 ==================
 
-  * Add `application/font-woff2`
+  * deps: mime-db@~1.4.0
+    - Add new mime types
+    - Fix various invalid MIME type entries
+    - Remove example template MIME types
 
-1.0.3 / 2014-09-25
+2.0.5 / 2014-12-29
 ==================
 
-  * Fix engine requirement in package
+  * deps: mime-db@~1.3.1
+    - Fix missing extensions
 
-1.0.2 / 2014-09-25
+2.0.4 / 2014-12-10
 ==================
 
-  * Add `application/coap-group+json`
-  * Add `application/dcd`
-  * Add `application/vnd.apache.thrift.binary`
-  * Add `image/vnd.tencent.tap`
-  * Mark all JSON-derived types as compressible
-  * Update `text/vtt` data
+  * deps: mime-db@~1.3.0
+    - Add new mime types
 
-1.0.1 / 2014-08-30
+2.0.3 / 2014-11-09
 ==================
 
-  * Fix extension ordering
+  * deps: mime-db@~1.2.0
+    - Add new mime types
 
-1.0.0 / 2014-08-30
+2.0.2 / 2014-09-28
 ==================
 
-  * Add `application/atf`
-  * Add `application/merge-patch+json`
-  * Add `multipart/x-mixed-replace`
-  * Add `source: 'apache'` metadata
-  * Add `source: 'iana'` metadata
-  * Remove badly-assumed charset data
+  * deps: mime-db@~1.1.0
+    - Add new mime types
+    - Update charsets
+
+2.0.1 / 2014-09-07
+==================
+
+  * Support Node.js 0.6
+
+2.0.0 / 2014-09-02
+==================
+
+  * Use `mime-db`
+  * Remove `.define()`
+
+1.0.2 / 2014-08-04
+==================
+
+  * Set charset=utf-8 for `text/javascript`
+
+1.0.1 / 2014-06-24
+==================
+
+  * Add `text/jsx` type
+
+1.0.0 / 2014-05-12
+==================
+
+  * Return `false` for unknown types
+  * Set charset=utf-8 for `application/json`
+
+0.1.0 / 2014-05-02
+==================
+
+  * Initial release

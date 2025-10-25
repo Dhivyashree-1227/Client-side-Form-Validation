@@ -1,100 +1,113 @@
-# mime-db
+# mime-types
 
 [![NPM Version][npm-version-image]][npm-url]
 [![NPM Downloads][npm-downloads-image]][npm-url]
-[![Node.js Version][node-image]][node-url]
+[![Node.js Version][node-version-image]][node-version-url]
 [![Build Status][ci-image]][ci-url]
-[![Coverage Status][coveralls-image]][coveralls-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
-This is a large database of mime types and information about them.
-It consists of a single, public JSON file and does not include any logic,
-allowing it to remain as un-opinionated as possible with an API.
-It aggregates data from the following sources:
+The ultimate javascript content-type utility.
 
-- http://www.iana.org/assignments/media-types/media-types.xhtml
-- http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
-- http://hg.nginx.org/nginx/raw-file/default/conf/mime.types
+Similar to [the `mime@1.x` module](https://www.npmjs.com/package/mime), except:
 
-## Installation
+- __No fallbacks.__ Instead of naively returning the first available type,
+  `mime-types` simply returns `false`, so do
+  `var type = mime.lookup('unrecognized') || 'application/octet-stream'`.
+- No `new Mime()` business, so you could do `var lookup = require('mime-types').lookup`.
+- No `.define()` functionality
+- Bug fixes for `.lookup(path)`
 
-```bash
-npm install mime-db
+Otherwise, the API is compatible with `mime` 1.x.
+
+## Install
+
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/). Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+
+```sh
+$ npm install mime-types
 ```
 
-### Database Download
+## Adding Types
 
-If you're crazy enough to use this in the browser, you can just grab the
-JSON file using [jsDelivr](https://www.jsdelivr.com/). It is recommended to
-replace `master` with [a release tag](https://github.com/jshttp/mime-db/tags)
-as the JSON format may change in the future.
+All mime types are based on [mime-db](https://www.npmjs.com/package/mime-db),
+so open a PR there if you'd like to add mime types.
 
-```
-https://cdn.jsdelivr.net/gh/jshttp/mime-db@master/db.json
-```
-
-## Usage
+## API
 
 ```js
-var db = require('mime-db')
-
-// grab data on .js files
-var data = db['application/javascript']
+var mime = require('mime-types')
 ```
 
-## Data Structure
+All functions return `false` if input is invalid or not found.
 
-The JSON file is a map lookup for lowercased mime types.
-Each mime type has the following properties:
+### mime.lookup(path)
 
-- `.source` - where the mime type is defined.
-    If not set, it's probably a custom media type.
-    - `apache` - [Apache common media types](http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
-    - `iana` - [IANA-defined media types](http://www.iana.org/assignments/media-types/media-types.xhtml)
-    - `nginx` - [nginx media types](http://hg.nginx.org/nginx/raw-file/default/conf/mime.types)
-- `.extensions[]` - known extensions associated with this mime type.
-- `.compressible` - whether a file of this type can be gzipped.
-- `.charset` - the default charset associated with this type, if any.
+Lookup the content-type associated with a file.
 
-If unknown, every property could be `undefined`.
+```js
+mime.lookup('json') // 'application/json'
+mime.lookup('.md') // 'text/markdown'
+mime.lookup('file.html') // 'text/html'
+mime.lookup('folder/file.js') // 'application/javascript'
+mime.lookup('folder/.htaccess') // false
 
-## Contributing
+mime.lookup('cats') // false
+```
 
-To edit the database, only make PRs against `src/custom-types.json` or
-`src/custom-suffix.json`.
+### mime.contentType(type)
 
-The `src/custom-types.json` file is a JSON object with the MIME type as the
-keys and the values being an object with the following keys:
+Create a full content-type header given a content-type or extension.
+When given an extension, `mime.lookup` is used to get the matching
+content-type, otherwise the given content-type is used. Then if the
+content-type does not already have a `charset` parameter, `mime.charset`
+is used to get the default charset and add to the returned content-type.
 
-- `compressible` - leave out if you don't know, otherwise `true`/`false` to
-  indicate whether the data represented by the type is typically compressible.
-- `extensions` - include an array of file extensions that are associated with
-  the type.
-- `notes` - human-readable notes about the type, typically what the type is.
-- `sources` - include an array of URLs of where the MIME type and the associated
-  extensions are sourced from. This needs to be a [primary source](https://en.wikipedia.org/wiki/Primary_source);
-  links to type aggregating sites and Wikipedia are _not acceptable_.
+```js
+mime.contentType('markdown') // 'text/x-markdown; charset=utf-8'
+mime.contentType('file.json') // 'application/json; charset=utf-8'
+mime.contentType('text/html') // 'text/html; charset=utf-8'
+mime.contentType('text/html; charset=iso-8859-1') // 'text/html; charset=iso-8859-1'
 
-To update the build, run `npm run build`.
+// from a full path
+mime.contentType(path.extname('/path/to/file.json')) // 'application/json; charset=utf-8'
+```
 
-### Adding Custom Media Types
+### mime.extension(type)
 
-The best way to get new media types included in this library is to register
-them with the IANA. The community registration procedure is outlined in
-[RFC 6838 section 5](http://tools.ietf.org/html/rfc6838#section-5). Types
-registered with the IANA are automatically pulled into this library.
+Get the default extension for a content-type.
 
-If that is not possible / feasible, they can be added directly here as a
-"custom" type. To do this, it is required to have a primary source that
-definitively lists the media type. If an extension is going to be listed as
-associateed with this media type, the source must definitively link the
-media type and extension as well.
+```js
+mime.extension('application/octet-stream') // 'bin'
+```
 
-[ci-image]: https://badgen.net/github/checks/jshttp/mime-db/master?label=ci
-[ci-url]: https://github.com/jshttp/mime-db/actions?query=workflow%3Aci
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/mime-db/master
-[coveralls-url]: https://coveralls.io/r/jshttp/mime-db?branch=master
-[node-image]: https://badgen.net/npm/node/mime-db
-[node-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/mime-db
-[npm-url]: https://npmjs.org/package/mime-db
-[npm-version-image]: https://badgen.net/npm/v/mime-db
+### mime.charset(type)
+
+Lookup the implied default charset of a content-type.
+
+```js
+mime.charset('text/markdown') // 'UTF-8'
+```
+
+### var type = mime.types[extension]
+
+A map of content-types by extension.
+
+### [extensions...] = mime.extensions[type]
+
+A map of extensions by content-type.
+
+## License
+
+[MIT](LICENSE)
+
+[ci-image]: https://badgen.net/github/checks/jshttp/mime-types/master?label=ci
+[ci-url]: https://github.com/jshttp/mime-types/actions/workflows/ci.yml
+[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/mime-types/master
+[coveralls-url]: https://coveralls.io/r/jshttp/mime-types?branch=master
+[node-version-image]: https://badgen.net/npm/node/mime-types
+[node-version-url]: https://nodejs.org/en/download
+[npm-downloads-image]: https://badgen.net/npm/dm/mime-types
+[npm-url]: https://npmjs.org/package/mime-types
+[npm-version-image]: https://badgen.net/npm/v/mime-types
