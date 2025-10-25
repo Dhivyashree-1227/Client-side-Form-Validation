@@ -1,169 +1,156 @@
-# http-errors
+## Pure JS character encoding conversion [![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][node-url]
-[![Node.js Version][node-image]][node-url]
-[![Build Status][ci-image]][ci-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+ * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
+ * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
+   [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
+ * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
+ * Intuitive encode/decode API
+ * Streaming support for Node v0.10+
+ * [Deprecated] Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings.
+ * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
+ * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
+ * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
+ * License: MIT.
 
-Create HTTP errors for Express, Koa, Connect, etc. with ease.
+[![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true&downloadRank=true)](https://npmjs.org/packages/iconv-lite/)
 
-## Install
+## Usage
+### Basic API
+```javascript
+var iconv = require('iconv-lite');
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+// Convert from an encoded buffer to js string.
+str = iconv.decode(Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f]), 'win1251');
 
-```console
-$ npm install http-errors
+// Convert from js string to an encoded buffer.
+buf = iconv.encode("Sample input string", 'win1251');
+
+// Check if encoding is supported
+iconv.encodingExists("us-ascii")
 ```
 
-## Example
+### Streaming API (Node v0.10+)
+```javascript
 
-```js
-var createError = require('http-errors')
-var express = require('express')
-var app = express()
+// Decode stream (from binary stream to js strings)
+http.createServer(function(req, res) {
+    var converterStream = iconv.decodeStream('win1251');
+    req.pipe(converterStream);
 
-app.use(function (req, res, next) {
-  if (!req.user) return next(createError(401, 'Please login to view this page.'))
-  next()
-})
+    converterStream.on('data', function(str) {
+        console.log(str); // Do something with decoded strings, chunk-by-chunk.
+    });
+});
+
+// Convert encoding streaming example
+fs.createReadStream('file-in-win1251.txt')
+    .pipe(iconv.decodeStream('win1251'))
+    .pipe(iconv.encodeStream('ucs2'))
+    .pipe(fs.createWriteStream('file-in-ucs2.txt'));
+
+// Sugar: all encode/decode streams have .collect(cb) method to accumulate data.
+http.createServer(function(req, res) {
+    req.pipe(iconv.decodeStream('win1251')).collect(function(err, body) {
+        assert(typeof body == 'string');
+        console.log(body); // full request body string
+    });
+});
 ```
 
-## API
+### [Deprecated] Extend Node.js own encodings
+> NOTE: This doesn't work on latest Node versions. See [details](https://github.com/ashtuchkin/iconv-lite/wiki/Node-v4-compatibility).
 
-This is the current API, currently extracted from Koa and subject to change.
+```javascript
+// After this call all Node basic primitives will understand iconv-lite encodings.
+iconv.extendNodeEncodings();
 
-### Error Properties
+// Examples:
+buf = new Buffer(str, 'win1251');
+buf.write(str, 'gbk');
+str = buf.toString('latin1');
+assert(Buffer.isEncoding('iso-8859-15'));
+Buffer.byteLength(str, 'us-ascii');
 
-- `expose` - can be used to signal if `message` should be sent to the client,
-  defaulting to `false` when `status` >= 500
-- `headers` - can be an object of header names to values to be sent to the
-  client, defaulting to `undefined`. When defined, the key names should all
-  be lower-cased
-- `message` - the traditional error message, which should be kept short and all
-  single line
-- `status` - the status code of the error, mirroring `statusCode` for general
-  compatibility
-- `statusCode` - the status code of the error, defaulting to `500`
+http.createServer(function(req, res) {
+    req.setEncoding('big5');
+    req.collect(function(err, body) {
+        console.log(body);
+    });
+});
 
-### createError([status], [message], [properties])
+fs.createReadStream("file.txt", "shift_jis");
 
-Create a new error object with the given message `msg`.
-The error object inherits from `createError.HttpError`.
+// External modules are also supported (if they use Node primitives, which they probably do).
+request = require('request');
+request({
+    url: "http://github.com/", 
+    encoding: "cp932"
+});
 
-```js
-var err = createError(404, 'This video does not exist!')
+// To remove extensions
+iconv.undoExtendNodeEncodings();
 ```
 
-- `status: 500` - the status code as a number
-- `message` - the message of the error, defaulting to node's text for that status code.
-- `properties` - custom properties to attach to the object
+## Supported encodings
 
-### createError([status], [error], [properties])
+ *  All node.js native encodings: utf8, ucs2 / utf16-le, ascii, binary, base64, hex.
+ *  Additional unicode encodings: utf16, utf16-be, utf-7, utf-7-imap.
+ *  All widespread singlebyte encodings: Windows 125x family, ISO-8859 family, 
+    IBM/DOS codepages, Macintosh family, KOI8 family, all others supported by iconv library. 
+    Aliases like 'latin1', 'us-ascii' also supported.
+ *  All widespread multibyte encodings: CP932, CP936, CP949, CP950, GB2312, GBK, GB18030, Big5, Shift_JIS, EUC-JP.
 
-Extend the given `error` object with `createError.HttpError`
-properties. This will not alter the inheritance of the given
-`error` object, and the modified `error` object is the
-return value.
+See [all supported encodings on wiki](https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings).
 
-<!-- eslint-disable no-redeclare -->
+Most singlebyte encodings are generated automatically from [node-iconv](https://github.com/bnoordhuis/node-iconv). Thank you Ben Noordhuis and libiconv authors!
 
-```js
-fs.readFile('foo.txt', function (err, buf) {
-  if (err) {
-    if (err.code === 'ENOENT') {
-      var httpError = createError(404, err, { expose: false })
-    } else {
-      var httpError = createError(500, err)
-    }
-  }
-})
+Multibyte encodings are generated from [Unicode.org mappings](http://www.unicode.org/Public/MAPPINGS/) and [WHATWG Encoding Standard mappings](http://encoding.spec.whatwg.org/). Thank you, respective authors!
+
+
+## Encoding/decoding speed
+
+Comparison with node-iconv module (1000x256kb, on MacBook Pro, Core i5/2.6 GHz, Node v0.12.0). 
+Note: your results may vary, so please always check on your hardware.
+
+    operation             iconv@2.1.4   iconv-lite@0.4.7
+    ----------------------------------------------------------
+    encode('win1251')     ~96 Mb/s      ~320 Mb/s
+    decode('win1251')     ~95 Mb/s      ~246 Mb/s
+
+## BOM handling
+
+ * Decoding: BOM is stripped by default, unless overridden by passing `stripBOM: false` in options
+   (f.ex. `iconv.decode(buf, enc, {stripBOM: false})`).
+   A callback might also be given as a `stripBOM` parameter - it'll be called if BOM character was actually found.
+ * If you want to detect UTF-8 BOM when decoding other encodings, use [node-autodetect-decoder-stream](https://github.com/danielgindi/node-autodetect-decoder-stream) module.
+ * Encoding: No BOM added, unless overridden by `addBOM: true` option.
+
+## UTF-16 Encodings
+
+This library supports UTF-16LE, UTF-16BE and UTF-16 encodings. First two are straightforward, but UTF-16 is trying to be
+smart about endianness in the following ways:
+ * Decoding: uses BOM and 'spaces heuristic' to determine input endianness. Default is UTF-16LE, but can be 
+   overridden with `defaultEncoding: 'utf-16be'` option. Strips BOM unless `stripBOM: false`.
+ * Encoding: uses UTF-16LE and writes BOM by default. Use `addBOM: false` to override.
+
+## Other notes
+
+When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
+Untranslatable characters are set to � or ?. No transliteration is currently supported.  
+Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).  
+
+## Testing
+
+```bash
+$ git clone git@github.com:ashtuchkin/iconv-lite.git
+$ cd iconv-lite
+$ npm install
+$ npm test
+    
+$ # To view performance:
+$ node test/performance.js
+
+$ # To view test coverage:
+$ npm run coverage
+$ open coverage/lcov-report/index.html
 ```
-
-- `status` - the status code as a number
-- `error` - the error object to extend
-- `properties` - custom properties to attach to the object
-
-### createError.isHttpError(val)
-
-Determine if the provided `val` is an `HttpError`. This will return `true`
-if the error inherits from the `HttpError` constructor of this module or
-matches the "duck type" for an error this module creates. All outputs from
-the `createError` factory will return `true` for this function, including
-if an non-`HttpError` was passed into the factory.
-
-### new createError\[code || name\](\[msg]\))
-
-Create a new error object with the given message `msg`.
-The error object inherits from `createError.HttpError`.
-
-```js
-var err = new createError.NotFound()
-```
-
-- `code` - the status code as a number
-- `name` - the name of the error as a "bumpy case", i.e. `NotFound` or `InternalServerError`.
-
-#### List of all constructors
-
-|Status Code|Constructor Name             |
-|-----------|-----------------------------|
-|400        |BadRequest                   |
-|401        |Unauthorized                 |
-|402        |PaymentRequired              |
-|403        |Forbidden                    |
-|404        |NotFound                     |
-|405        |MethodNotAllowed             |
-|406        |NotAcceptable                |
-|407        |ProxyAuthenticationRequired  |
-|408        |RequestTimeout               |
-|409        |Conflict                     |
-|410        |Gone                         |
-|411        |LengthRequired               |
-|412        |PreconditionFailed           |
-|413        |PayloadTooLarge              |
-|414        |URITooLong                   |
-|415        |UnsupportedMediaType         |
-|416        |RangeNotSatisfiable          |
-|417        |ExpectationFailed            |
-|418        |ImATeapot                    |
-|421        |MisdirectedRequest           |
-|422        |UnprocessableEntity          |
-|423        |Locked                       |
-|424        |FailedDependency             |
-|425        |TooEarly                     |
-|426        |UpgradeRequired              |
-|428        |PreconditionRequired         |
-|429        |TooManyRequests              |
-|431        |RequestHeaderFieldsTooLarge  |
-|451        |UnavailableForLegalReasons   |
-|500        |InternalServerError          |
-|501        |NotImplemented               |
-|502        |BadGateway                   |
-|503        |ServiceUnavailable           |
-|504        |GatewayTimeout               |
-|505        |HTTPVersionNotSupported      |
-|506        |VariantAlsoNegotiates        |
-|507        |InsufficientStorage          |
-|508        |LoopDetected                 |
-|509        |BandwidthLimitExceeded       |
-|510        |NotExtended                  |
-|511        |NetworkAuthenticationRequired|
-
-## License
-
-[MIT](LICENSE)
-
-[ci-image]: https://badgen.net/github/checks/jshttp/http-errors/master?label=ci
-[ci-url]: https://github.com/jshttp/http-errors/actions?query=workflow%3Aci
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/http-errors/master
-[coveralls-url]: https://coveralls.io/r/jshttp/http-errors?branch=master
-[node-image]: https://badgen.net/npm/node/http-errors
-[node-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/http-errors
-[npm-url]: https://npmjs.org/package/http-errors
-[npm-version-image]: https://badgen.net/npm/v/http-errors
-[travis-image]: https://badgen.net/travis/jshttp/http-errors/master
-[travis-url]: https://travis-ci.org/jshttp/http-errors
