@@ -1,3 +1,3 @@
-declare const defineProperty: false | typeof Object.defineProperty;
+declare const Error: ErrorConstructor;
 
-export = defineProperty;
+export = Error;
