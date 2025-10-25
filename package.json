@@ -1,39 +1,36 @@
 {
-  "name": "merge-descriptors",
-  "description": "Merge objects using descriptors",
-  "version": "1.0.3",
-  "author": {
-    "name": "Jonathan Ong",
-    "email": "me@jongleberry.com",
-    "url": "http://jongleberry.com",
-    "twitter": "https://twitter.com/jongleberry"
-  },
+  "name": "methods",
+  "description": "HTTP methods that node supports",
+  "version": "1.1.2",
   "contributors": [
     "Douglas Christopher Wilson <doug@somethingdoug.com>",
-    "Mike Grabowski <grabbou@gmail.com>"
+    "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)",
+    "TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)"
   ],
   "license": "MIT",
-  "repository": "sindresorhus/merge-descriptors",
-  "funding": "https://github.com/sponsors/sindresorhus",
+  "repository": "jshttp/methods",
   "devDependencies": {
-    "eslint": "5.9.0",
-    "eslint-config-standard": "12.0.0",
-    "eslint-plugin-import": "2.14.0",
-    "eslint-plugin-node": "7.0.1",
-    "eslint-plugin-promise": "4.0.1",
-    "eslint-plugin-standard": "4.0.0",
-    "mocha": "5.2.0",
-    "nyc": "13.1.0"
+    "istanbul": "0.4.1",
+    "mocha": "1.21.5"
   },
   "files": [
+    "index.js",
     "HISTORY.md",
-    "LICENSE",
-    "README.md",
-    "index.js"
+    "LICENSE"
   ],
+  "engines": {
+    "node": ">= 0.6"
+  },
   "scripts": {
-    "lint": "eslint .",
-    "test": "mocha test/",
-    "test-cov": "nyc --reporter=html --reporter=text npm test"
-  }
+    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/"
+  },
+  "browser": {
+    "http": false
+  },
+  "keywords": [
+    "http",
+    "methods"
+  ]
 }

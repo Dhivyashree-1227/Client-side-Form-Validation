@@ -1,49 +1,51 @@
-# merge-descriptors
+# Methods
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
+[![Node.js Version][node-version-image]][node-version-url]
 [![Build Status][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-Merge objects using descriptors.
+HTTP verbs that Node.js core's HTTP parser supports.
 
-```js
-var thing = {
-  get name() {
-    return 'jon'
-  }
-}
+This module provides an export that is just like `http.METHODS` from Node.js core,
+with the following differences:
 
-var animal = {
+  * All method names are lower-cased.
+  * Contains a fallback list of methods for Node.js versions that do not have a
+    `http.METHODS` export (0.10 and lower).
+  * Provides the fallback list when using tools like `browserify` without pulling
+    in the `http` shim module.
 
-}
+## Install
 
-merge(animal, thing)
-
-animal.name === 'jon'
+```bash
+$ npm install methods
 ```
 
 ## API
 
-### merge(destination, source)
+```js
+var methods = require('methods')
+```
 
-Redefines `destination`'s descriptors with `source`'s. The return value is the
-`destination` object.
+### methods
 
-### merge(destination, source, false)
-
-Defines `source`'s descriptors on `destination` if `destination` does not have
-a descriptor by the same name. The return value is the `destination` object.
+This is an array of lower-cased method names that Node.js supports. If Node.js
+provides the `http.METHODS` export, then this is the same array lower-cased,
+otherwise it is a snapshot of the verbs from Node.js 0.10.
 
 ## License
 
 [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/merge-descriptors.svg
-[npm-url]: https://npmjs.org/package/merge-descriptors
-[travis-image]: https://img.shields.io/travis/component/merge-descriptors/master.svg
-[travis-url]: https://travis-ci.org/component/merge-descriptors
-[coveralls-image]: https://img.shields.io/coveralls/component/merge-descriptors/master.svg
-[coveralls-url]: https://coveralls.io/r/component/merge-descriptors?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/merge-descriptors.svg
-[downloads-url]: https://npmjs.org/package/merge-descriptors
+[npm-image]: https://img.shields.io/npm/v/methods.svg?style=flat
+[npm-url]: https://npmjs.org/package/methods
+[node-version-image]: https://img.shields.io/node/v/methods.svg?style=flat
+[node-version-url]: https://nodejs.org/en/download/
+[travis-image]: https://img.shields.io/travis/jshttp/methods.svg?style=flat
+[travis-url]: https://travis-ci.org/jshttp/methods
+[coveralls-image]: https://img.shields.io/coveralls/jshttp/methods.svg?style=flat
+[coveralls-url]: https://coveralls.io/r/jshttp/methods?branch=master
+[downloads-image]: https://img.shields.io/npm/dm/methods.svg?style=flat
+[downloads-url]: https://npmjs.org/package/methods

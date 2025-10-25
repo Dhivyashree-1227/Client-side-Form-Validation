@@ -1,60 +1,69 @@
 /*!
- * merge-descriptors
- * Copyright(c) 2014 Jonathan Ong
- * Copyright(c) 2015 Douglas Christopher Wilson
+ * methods
+ * Copyright(c) 2013-2014 TJ Holowaychuk
+ * Copyright(c) 2015-2016 Douglas Christopher Wilson
  * MIT Licensed
  */
 
-'use strict'
+'use strict';
+
+/**
+ * Module dependencies.
+ * @private
+ */
+
+var http = require('http');
 
 /**
  * Module exports.
  * @public
  */
 
-module.exports = merge
+module.exports = getCurrentNodeMethods() || getBasicNodeMethods();
 
 /**
- * Module variables.
+ * Get the current Node.js methods.
  * @private
  */
 
-var hasOwnProperty = Object.prototype.hasOwnProperty
+function getCurrentNodeMethods() {
+  return http.METHODS && http.METHODS.map(function lowerCaseMethod(method) {
+    return method.toLowerCase();
+  });
+}
 
 /**
- * Merge the property descriptors of `src` into `dest`
- *
- * @param {object} dest Object to add descriptors to
- * @param {object} src Object to clone descriptors from
- * @param {boolean} [redefine=true] Redefine `dest` properties with `src` properties
- * @returns {object} Reference to dest
- * @public
+ * Get the "basic" Node.js methods, a snapshot from Node.js 0.10.
+ * @private
  */
 
-function merge (dest, src, redefine) {
-  if (!dest) {
-    throw new TypeError('argument dest is required')
-  }
-
-  if (!src) {
-    throw new TypeError('argument src is required')
-  }
-
-  if (redefine === undefined) {
-    // Default to true
-    redefine = true
-  }
-
-  Object.getOwnPropertyNames(src).forEach(function forEachOwnPropertyName (name) {
-    if (!redefine && hasOwnProperty.call(dest, name)) {
-      // Skip descriptor
-      return
-    }
-
-    // Copy descriptor
-    var descriptor = Object.getOwnPropertyDescriptor(src, name)
-    Object.defineProperty(dest, name, descriptor)
-  })
-
-  return dest
+function getBasicNodeMethods() {
+  return [
+    'get',
+    'post',
+    'put',
+    'head',
+    'delete',
+    'options',
+    'trace',
+    'copy',
+    'lock',
+    'mkcol',
+    'move',
+    'purge',
+    'propfind',
+    'proppatch',
+    'unlock',
+    'report',
+    'mkactivity',
+    'checkout',
+    'merge',
+    'm-search',
+    'notify',
+    'subscribe',
+    'unsubscribe',
+    'patch',
+    'search',
+    'connect'
+  ];
 }
