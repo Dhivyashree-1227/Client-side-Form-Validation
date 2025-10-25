@@ -1,36 +1,44 @@
 {
-  "name": "methods",
-  "description": "HTTP methods that node supports",
-  "version": "1.1.2",
-  "contributors": [
-    "Douglas Christopher Wilson <doug@somethingdoug.com>",
-    "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)",
-    "TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)"
-  ],
-  "license": "MIT",
-  "repository": "jshttp/methods",
-  "devDependencies": {
-    "istanbul": "0.4.1",
-    "mocha": "1.21.5"
+  "author": {
+    "name": "Robert Kieffer",
+    "url": "http://github.com/broofa",
+    "email": "robert@broofa.com"
   },
-  "files": [
-    "index.js",
-    "HISTORY.md",
-    "LICENSE"
-  ],
+  "bin": {
+    "mime": "cli.js"
+  },
   "engines": {
-    "node": ">= 0.6"
+    "node": ">=4"
+  },
+  "contributors": [
+    {
+      "name": "Benjamin Thomas",
+      "url": "http://github.com/bentomas",
+      "email": "benjamin@benjaminthomas.org"
+    }
+  ],
+  "description": "A comprehensive library for mime-type mapping",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "github-release-notes": "0.13.1",
+    "mime-db": "1.31.0",
+    "mime-score": "1.1.0"
   },
   "scripts": {
-    "test": "mocha --reporter spec --bail --check-leaks test/",
-    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --check-leaks test/",
-    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --check-leaks test/"
-  },
-  "browser": {
-    "http": false
+    "prepare": "node src/build.js",
+    "changelog": "gren changelog --tags=all --generate --override",
+    "test": "node src/test.js"
   },
   "keywords": [
-    "http",
-    "methods"
-  ]
+    "util",
+    "mime"
+  ],
+  "main": "mime.js",
+  "name": "mime",
+  "repository": {
+    "url": "https://github.com/broofa/node-mime",
+    "type": "git"
+  },
+  "version": "1.6.0"
 }

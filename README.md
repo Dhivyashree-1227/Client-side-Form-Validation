@@ -1,51 +1,90 @@
-# Methods
+# mime
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
-
-HTTP verbs that Node.js core's HTTP parser supports.
-
-This module provides an export that is just like `http.METHODS` from Node.js core,
-with the following differences:
-
-  * All method names are lower-cased.
-  * Contains a fallback list of methods for Node.js versions that do not have a
-    `http.METHODS` export (0.10 and lower).
-  * Provides the fallback list when using tools like `browserify` without pulling
-    in the `http` shim module.
+Comprehensive MIME type mapping API based on mime-db module.
 
 ## Install
 
-```bash
-$ npm install methods
-```
+Install with [npm](http://github.com/isaacs/npm):
 
-## API
+    npm install mime
+
+## Contributing / Testing
+
+    npm run test
+
+## Command Line
+
+    mime [path_string]
+
+E.g.
+
+    > mime scripts/jquery.js
+    application/javascript
+
+## API - Queries
+
+### mime.lookup(path)
+Get the mime type associated with a file, if no mime type is found `application/octet-stream` is returned. Performs a case-insensitive lookup using the extension in `path` (the substring after the last '/' or '.').  E.g.
 
 ```js
-var methods = require('methods')
+var mime = require('mime');
+
+mime.lookup('/path/to/file.txt');         // => 'text/plain'
+mime.lookup('file.txt');                  // => 'text/plain'
+mime.lookup('.TXT');                      // => 'text/plain'
+mime.lookup('htm');                       // => 'text/html'
 ```
 
-### methods
+### mime.default_type
+Sets the mime type returned when `mime.lookup` fails to find the extension searched for. (Default is `application/octet-stream`.)
 
-This is an array of lower-cased method names that Node.js supports. If Node.js
-provides the `http.METHODS` export, then this is the same array lower-cased,
-otherwise it is a snapshot of the verbs from Node.js 0.10.
+### mime.extension(type)
+Get the default extension for `type`
 
-## License
+```js
+mime.extension('text/html');                 // => 'html'
+mime.extension('application/octet-stream');  // => 'bin'
+```
 
-[MIT](LICENSE)
+### mime.charsets.lookup()
 
-[npm-image]: https://img.shields.io/npm/v/methods.svg?style=flat
-[npm-url]: https://npmjs.org/package/methods
-[node-version-image]: https://img.shields.io/node/v/methods.svg?style=flat
-[node-version-url]: https://nodejs.org/en/download/
-[travis-image]: https://img.shields.io/travis/jshttp/methods.svg?style=flat
-[travis-url]: https://travis-ci.org/jshttp/methods
-[coveralls-image]: https://img.shields.io/coveralls/jshttp/methods.svg?style=flat
-[coveralls-url]: https://coveralls.io/r/jshttp/methods?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/methods.svg?style=flat
-[downloads-url]: https://npmjs.org/package/methods
+Map mime-type to charset
+
+```js
+mime.charsets.lookup('text/plain');        // => 'UTF-8'
+```
+
+(The logic for charset lookups is pretty rudimentary.  Feel free to suggest improvements.)
+
+## API - Defining Custom Types
+
+Custom type mappings can be added on a per-project basis via the following APIs.
+
+### mime.define()
+
+Add custom mime/extension mappings
+
+```js
+mime.define({
+    'text/x-some-format': ['x-sf', 'x-sft', 'x-sfml'],
+    'application/x-my-type': ['x-mt', 'x-mtt'],
+    // etc ...
+});
+
+mime.lookup('x-sft');                 // => 'text/x-some-format'
+```
+
+The first entry in the extensions array is returned by `mime.extension()`. E.g.
+
+```js
+mime.extension('text/x-some-format'); // => 'x-sf'
+```
+
+### mime.load(filepath)
+
+Load mappings from an Apache ".types" format file
+
+```js
+mime.load('./my_project.types');
+```
+The .types file format is simple -  See the `types` dir for examples.
