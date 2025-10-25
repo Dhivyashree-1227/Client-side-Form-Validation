@@ -1,239 +1,80 @@
 /*!
- * content-disposition
- * Copyright(c) 2014-2017 Douglas Christopher Wilson
+ * content-type
+ * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
 
 'use strict'
 
 /**
+ * RegExp to match *( ";" parameter ) in RFC 7231 sec 3.1.1.1
+ *
+ * parameter     = token "=" ( token / quoted-string )
+ * token         = 1*tchar
+ * tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+ *               / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+ *               / DIGIT / ALPHA
+ *               ; any VCHAR, except delimiters
+ * quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+ * qdtext        = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
+ * obs-text      = %x80-FF
+ * quoted-pair   = "\" ( HTAB / SP / VCHAR / obs-text )
+ */
+var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g // eslint-disable-line no-control-regex
+var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/ // eslint-disable-line no-control-regex
+var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
+
+/**
+ * RegExp to match quoted-pair in RFC 7230 sec 3.2.6
+ *
+ * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
+ * obs-text    = %x80-FF
+ */
+var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g // eslint-disable-line no-control-regex
+
+/**
+ * RegExp to match chars that must be quoted-pair in RFC 7230 sec 3.2.6
+ */
+var QUOTE_REGEXP = /([\\"])/g
+
+/**
+ * RegExp to match type in RFC 7231 sec 3.1.1.1
+ *
+ * media-type = type "/" subtype
+ * type       = token
+ * subtype    = token
+ */
+var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
+
+/**
  * Module exports.
  * @public
  */
 
-module.exports = contentDisposition
-module.exports.parse = parse
+exports.format = format
+exports.parse = parse
 
 /**
- * Module dependencies.
- * @private
- */
-
-var basename = require('path').basename
-var Buffer = require('safe-buffer').Buffer
-
-/**
- * RegExp to match non attr-char, *after* encodeURIComponent (i.e. not including "%")
- * @private
- */
-
-var ENCODE_URL_ATTR_CHAR_REGEXP = /[\x00-\x20"'()*,/:;<=>?@[\\\]{}\x7f]/g // eslint-disable-line no-control-regex
-
-/**
- * RegExp to match percent encoding escape.
- * @private
- */
-
-var HEX_ESCAPE_REGEXP = /%[0-9A-Fa-f]{2}/
-var HEX_ESCAPE_REPLACE_REGEXP = /%([0-9A-Fa-f]{2})/g
-
-/**
- * RegExp to match non-latin1 characters.
- * @private
- */
-
-var NON_LATIN1_REGEXP = /[^\x20-\x7e\xa0-\xff]/g
-
-/**
- * RegExp to match quoted-pair in RFC 2616
+ * Format object to media type.
  *
- * quoted-pair = "\" CHAR
- * CHAR        = <any US-ASCII character (octets 0 - 127)>
- * @private
- */
-
-var QESC_REGEXP = /\\([\u0000-\u007f])/g // eslint-disable-line no-control-regex
-
-/**
- * RegExp to match chars that must be quoted-pair in RFC 2616
- * @private
- */
-
-var QUOTE_REGEXP = /([\\"])/g
-
-/**
- * RegExp for various RFC 2616 grammar
- *
- * parameter     = token "=" ( token | quoted-string )
- * token         = 1*<any CHAR except CTLs or separators>
- * separators    = "(" | ")" | "<" | ">" | "@"
- *               | "," | ";" | ":" | "\" | <">
- *               | "/" | "[" | "]" | "?" | "="
- *               | "{" | "}" | SP | HT
- * quoted-string = ( <"> *(qdtext | quoted-pair ) <"> )
- * qdtext        = <any TEXT except <">>
- * quoted-pair   = "\" CHAR
- * CHAR          = <any US-ASCII character (octets 0 - 127)>
- * TEXT          = <any OCTET except CTLs, but including LWS>
- * LWS           = [CRLF] 1*( SP | HT )
- * CRLF          = CR LF
- * CR            = <US-ASCII CR, carriage return (13)>
- * LF            = <US-ASCII LF, linefeed (10)>
- * SP            = <US-ASCII SP, space (32)>
- * HT            = <US-ASCII HT, horizontal-tab (9)>
- * CTL           = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
- * OCTET         = <any 8-bit sequence of data>
- * @private
- */
-
-var PARAM_REGEXP = /;[\x09\x20]*([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*=[\x09\x20]*("(?:[\x20!\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\x20-\x7e])*"|[!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*/g // eslint-disable-line no-control-regex
-var TEXT_REGEXP = /^[\x20-\x7e\x80-\xff]+$/
-var TOKEN_REGEXP = /^[!#$%&'*+.0-9A-Z^_`a-z|~-]+$/
-
-/**
- * RegExp for various RFC 5987 grammar
- *
- * ext-value     = charset  "'" [ language ] "'" value-chars
- * charset       = "UTF-8" / "ISO-8859-1" / mime-charset
- * mime-charset  = 1*mime-charsetc
- * mime-charsetc = ALPHA / DIGIT
- *               / "!" / "#" / "$" / "%" / "&"
- *               / "+" / "-" / "^" / "_" / "`"
- *               / "{" / "}" / "~"
- * language      = ( 2*3ALPHA [ extlang ] )
- *               / 4ALPHA
- *               / 5*8ALPHA
- * extlang       = *3( "-" 3ALPHA )
- * value-chars   = *( pct-encoded / attr-char )
- * pct-encoded   = "%" HEXDIG HEXDIG
- * attr-char     = ALPHA / DIGIT
- *               / "!" / "#" / "$" / "&" / "+" / "-" / "."
- *               / "^" / "_" / "`" / "|" / "~"
- * @private
- */
-
-var EXT_VALUE_REGEXP = /^([A-Za-z0-9!#$%&+\-^_`{}~]+)'(?:[A-Za-z]{2,3}(?:-[A-Za-z]{3}){0,3}|[A-Za-z]{4,8}|)'((?:%[0-9A-Fa-f]{2}|[A-Za-z0-9!#$&+.^_`|~-])+)$/
-
-/**
- * RegExp for various RFC 6266 grammar
- *
- * disposition-type = "inline" | "attachment" | disp-ext-type
- * disp-ext-type    = token
- * disposition-parm = filename-parm | disp-ext-parm
- * filename-parm    = "filename" "=" value
- *                  | "filename*" "=" ext-value
- * disp-ext-parm    = token "=" value
- *                  | ext-token "=" ext-value
- * ext-token        = <the characters in token, followed by "*">
- * @private
- */
-
-var DISPOSITION_TYPE_REGEXP = /^([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*(?:$|;)/ // eslint-disable-line no-control-regex
-
-/**
- * Create an attachment Content-Disposition header.
- *
- * @param {string} [filename]
- * @param {object} [options]
- * @param {string} [options.type=attachment]
- * @param {string|boolean} [options.fallback=true]
+ * @param {object} obj
  * @return {string}
  * @public
  */
 
-function contentDisposition (filename, options) {
-  var opts = options || {}
-
-  // get type
-  var type = opts.type || 'attachment'
-
-  // get parameters
-  var params = createparams(filename, opts.fallback)
-
-  // format into string
-  return format(new ContentDisposition(type, params))
-}
-
-/**
- * Create parameters object from filename and fallback.
- *
- * @param {string} [filename]
- * @param {string|boolean} [fallback=true]
- * @return {object}
- * @private
- */
-
-function createparams (filename, fallback) {
-  if (filename === undefined) {
-    return
-  }
-
-  var params = {}
-
-  if (typeof filename !== 'string') {
-    throw new TypeError('filename must be a string')
-  }
-
-  // fallback defaults to true
-  if (fallback === undefined) {
-    fallback = true
-  }
-
-  if (typeof fallback !== 'string' && typeof fallback !== 'boolean') {
-    throw new TypeError('fallback must be a string or boolean')
-  }
-
-  if (typeof fallback === 'string' && NON_LATIN1_REGEXP.test(fallback)) {
-    throw new TypeError('fallback must be ISO-8859-1 string')
-  }
-
-  // restrict to file base name
-  var name = basename(filename)
-
-  // determine if name is suitable for quoted string
-  var isQuotedString = TEXT_REGEXP.test(name)
-
-  // generate fallback name
-  var fallbackName = typeof fallback !== 'string'
-    ? fallback && getlatin1(name)
-    : basename(fallback)
-  var hasFallback = typeof fallbackName === 'string' && fallbackName !== name
-
-  // set extended filename parameter
-  if (hasFallback || !isQuotedString || HEX_ESCAPE_REGEXP.test(name)) {
-    params['filename*'] = name
-  }
-
-  // set filename parameter
-  if (isQuotedString || hasFallback) {
-    params.filename = hasFallback
-      ? fallbackName
-      : name
-  }
-
-  return params
-}
-
-/**
- * Format object to Content-Disposition header.
- *
- * @param {object} obj
- * @param {string} obj.type
- * @param {object} [obj.parameters]
- * @return {string}
- * @private
- */
-
 function format (obj) {
+  if (!obj || typeof obj !== 'object') {
+    throw new TypeError('argument obj is required')
+  }
+
   var parameters = obj.parameters
   var type = obj.type
 
-  if (!type || typeof type !== 'string' || !TOKEN_REGEXP.test(type)) {
+  if (!type || !TYPE_REGEXP.test(type)) {
     throw new TypeError('invalid type')
   }
 
-  // start with normalized type
-  var string = String(type).toLowerCase()
+  var string = type
 
   // append parameters
   if (parameters && typeof parameters === 'object') {
@@ -243,11 +84,11 @@ function format (obj) {
     for (var i = 0; i < params.length; i++) {
       param = params[i]
 
-      var val = param.substr(-1) === '*'
-        ? ustring(parameters[param])
-        : qstring(parameters[param])
+      if (!TOKEN_REGEXP.test(param)) {
+        throw new TypeError('invalid parameter name')
+      }
 
-      string += '; ' + param + '=' + val
+      string += '; ' + param + '=' + qstring(parameters[param])
     }
   }
 
@@ -255,164 +96,104 @@ function format (obj) {
 }
 
 /**
- * Decode a RFC 5987 field value (gracefully).
+ * Parse media type to object.
  *
- * @param {string} str
- * @return {string}
- * @private
- */
-
-function decodefield (str) {
-  var match = EXT_VALUE_REGEXP.exec(str)
-
-  if (!match) {
-    throw new TypeError('invalid extended field value')
-  }
-
-  var charset = match[1].toLowerCase()
-  var encoded = match[2]
-  var value
-
-  // to binary string
-  var binary = encoded.replace(HEX_ESCAPE_REPLACE_REGEXP, pdecode)
-
-  switch (charset) {
-    case 'iso-8859-1':
-      value = getlatin1(binary)
-      break
-    case 'utf-8':
-      value = Buffer.from(binary, 'binary').toString('utf8')
-      break
-    default:
-      throw new TypeError('unsupported charset in extended field')
-  }
-
-  return value
-}
-
-/**
- * Get ISO-8859-1 version of string.
- *
- * @param {string} val
- * @return {string}
- * @private
- */
-
-function getlatin1 (val) {
-  // simple Unicode -> ISO-8859-1 transformation
-  return String(val).replace(NON_LATIN1_REGEXP, '?')
-}
-
-/**
- * Parse Content-Disposition header string.
- *
- * @param {string} string
- * @return {object}
+ * @param {string|object} string
+ * @return {Object}
  * @public
  */
 
 function parse (string) {
-  if (!string || typeof string !== 'string') {
+  if (!string) {
     throw new TypeError('argument string is required')
   }
 
-  var match = DISPOSITION_TYPE_REGEXP.exec(string)
+  // support req/res-like objects as argument
+  var header = typeof string === 'object'
+    ? getcontenttype(string)
+    : string
 
-  if (!match) {
-    throw new TypeError('invalid type format')
+  if (typeof header !== 'string') {
+    throw new TypeError('argument string is required to be a string')
   }
 
-  // normalize type
-  var index = match[0].length
-  var type = match[1].toLowerCase()
+  var index = header.indexOf(';')
+  var type = index !== -1
+    ? header.slice(0, index).trim()
+    : header.trim()
 
-  var key
-  var names = []
-  var params = {}
-  var value
+  if (!TYPE_REGEXP.test(type)) {
+    throw new TypeError('invalid media type')
+  }
 
-  // calculate index to start at
-  index = PARAM_REGEXP.lastIndex = match[0].substr(-1) === ';'
-    ? index - 1
-    : index
+  var obj = new ContentType(type.toLowerCase())
 
-  // match parameters
-  while ((match = PARAM_REGEXP.exec(string))) {
-    if (match.index !== index) {
+  // parse parameters
+  if (index !== -1) {
+    var key
+    var match
+    var value
+
+    PARAM_REGEXP.lastIndex = index
+
+    while ((match = PARAM_REGEXP.exec(header))) {
+      if (match.index !== index) {
+        throw new TypeError('invalid parameter format')
+      }
+
+      index += match[0].length
+      key = match[1].toLowerCase()
+      value = match[2]
+
+      if (value.charCodeAt(0) === 0x22 /* " */) {
+        // remove quotes
+        value = value.slice(1, -1)
+
+        // remove escapes
+        if (value.indexOf('\\') !== -1) {
+          value = value.replace(QESC_REGEXP, '$1')
+        }
+      }
+
+      obj.parameters[key] = value
+    }
+
+    if (index !== header.length) {
       throw new TypeError('invalid parameter format')
     }
-
-    index += match[0].length
-    key = match[1].toLowerCase()
-    value = match[2]
-
-    if (names.indexOf(key) !== -1) {
-      throw new TypeError('invalid duplicate parameter')
-    }
-
-    names.push(key)
-
-    if (key.indexOf('*') + 1 === key.length) {
-      // decode extended value
-      key = key.slice(0, -1)
-      value = decodefield(value)
-
-      // overwrite existing value
-      params[key] = value
-      continue
-    }
-
-    if (typeof params[key] === 'string') {
-      continue
-    }
-
-    if (value[0] === '"') {
-      // remove quotes and escapes
-      value = value
-        .substr(1, value.length - 2)
-        .replace(QESC_REGEXP, '$1')
-    }
-
-    params[key] = value
   }
 
-  if (index !== -1 && index !== string.length) {
-    throw new TypeError('invalid parameter format')
-  }
-
-  return new ContentDisposition(type, params)
+  return obj
 }
 
 /**
- * Percent decode a single character.
+ * Get content-type from req/res objects.
  *
- * @param {string} str
- * @param {string} hex
- * @return {string}
+ * @param {object}
+ * @return {Object}
  * @private
  */
 
-function pdecode (str, hex) {
-  return String.fromCharCode(parseInt(hex, 16))
+function getcontenttype (obj) {
+  var header
+
+  if (typeof obj.getHeader === 'function') {
+    // res-like
+    header = obj.getHeader('content-type')
+  } else if (typeof obj.headers === 'object') {
+    // req-like
+    header = obj.headers && obj.headers['content-type']
+  }
+
+  if (typeof header !== 'string') {
+    throw new TypeError('content-type header is missing from object')
+  }
+
+  return header
 }
 
 /**
- * Percent encode a single character.
- *
- * @param {string} char
- * @return {string}
- * @private
- */
-
-function pencode (char) {
-  return '%' + String(char)
-    .charCodeAt(0)
-    .toString(16)
-    .toUpperCase()
-}
-
-/**
- * Quote a string for HTTP.
+ * Quote a string if necessary.
  *
  * @param {string} val
  * @return {string}
@@ -422,37 +203,23 @@ function pencode (char) {
 function qstring (val) {
   var str = String(val)
 
+  // no need to quote tokens
+  if (TOKEN_REGEXP.test(str)) {
+    return str
+  }
+
+  if (str.length > 0 && !TEXT_REGEXP.test(str)) {
+    throw new TypeError('invalid parameter value')
+  }
+
   return '"' + str.replace(QUOTE_REGEXP, '\\$1') + '"'
 }
 
 /**
- * Encode a Unicode string for HTTP (RFC 5987).
- *
- * @param {string} val
- * @return {string}
+ * Class to represent a content type.
  * @private
  */
-
-function ustring (val) {
-  var str = String(val)
-
-  // percent encode as UTF-8
-  var encoded = encodeURIComponent(str)
-    .replace(ENCODE_URL_ATTR_CHAR_REGEXP, pencode)
-
-  return 'UTF-8\'\'' + encoded
-}
-
-/**
- * Class for parsed Content-Disposition header for v8 optimization
- *
- * @public
- * @param {string} type
- * @param {object} parameters
- * @constructor
- */
-
-function ContentDisposition (type, parameters) {
+function ContentType (type) {
+  this.parameters = Object.create(null)
   this.type = type
-  this.parameters = parameters
 }
