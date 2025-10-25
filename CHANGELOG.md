@@ -1,600 +1,110 @@
-## **6.13.0**
-- [New] `parse`: add `strictDepth` option (#511)
-- [Tests] use `npm audit` instead of `aud`
+# Changelog
 
-## **6.12.3**
-- [Fix] `parse`: properly account for `strictNullHandling` when `allowEmptyArrays`
-- [meta] fix changelog indentation
+All notable changes to this project will be documented in this file.
 
-## **6.12.2**
-- [Fix] `parse`: parse encoded square brackets (#506)
-- [readme] add CII best practices badge
-
-## **6.12.1**
-- [Fix] `parse`: Disable `decodeDotInKeys` by default to restore previous behavior (#501)
-- [Performance] `utils`: Optimize performance under large data volumes, reduce memory usage, and speed up processing (#502)
-- [Refactor] `utils`: use `+=`
-- [Tests] increase coverage
-
-## **6.12.0**
-
-- [New] `parse`/`stringify`: add `decodeDotInKeys`/`encodeDotKeys` options (#488)
-- [New] `parse`: add `duplicates` option
-- [New] `parse`/`stringify`: add `allowEmptyArrays` option to allow [] in object values (#487)
-- [Refactor] `parse`/`stringify`: move allowDots config logic to its own variable
-- [Refactor] `stringify`: move option-handling code into `normalizeStringifyOptions`
-- [readme] update readme, add logos (#484)
-- [readme] `stringify`: clarify default `arrayFormat` behavior
-- [readme] fix line wrapping
-- [readme] remove dead badges
-- [Deps] update `side-channel`
-- [meta] make the dist build 50% smaller
-- [meta] add `sideEffects` flag
-- [meta] run build in prepack, not prepublish
-- [Tests] `parse`: remove useless tests; add coverage
-- [Tests] `stringify`: increase coverage
-- [Tests] use `mock-property`
-- [Tests] `stringify`: improve coverage
-- [Dev Deps] update `@ljharb/eslint-config `, `aud`, `has-override-mistake`, `has-property-descriptors`, `mock-property`, `npmignore`, `object-inspect`, `tape`
-- [Dev Deps] pin `glob`, since v10.3.8+ requires a broken `jackspeak`
-- [Dev Deps] pin `jackspeak` since 2.1.2+ depends on npm aliases, which kill the install process in npm < 6
-
-## **6.11.2**
-- [Fix] `parse`: Fix parsing when the global Object prototype is frozen (#473)
-- [Tests] add passing test cases with empty keys (#473)
-
-## **6.11.1**
-- [Fix] `stringify`: encode comma values more consistently (#463)
-- [readme] add usage of `filter` option for injecting custom serialization, i.e. of custom types (#447)
-- [meta] remove extraneous code backticks (#457)
-- [meta] fix changelog markdown
-- [actions] update checkout action
-- [actions] restrict action permissions
-- [Dev Deps] update `@ljharb/eslint-config`, `aud`, `object-inspect`, `tape`
-
-## **6.11.0**
-- [New] [Fix] `stringify`: revert 0e903c0; add `commaRoundTrip` option (#442)
-- [readme] fix version badge
-
-## **6.10.5**
-- [Fix] `stringify`: with `arrayFormat: comma`, properly include an explicit `[]` on a single-item array (#434)
-
-## **6.10.4**
-- [Fix] `stringify`: with `arrayFormat: comma`, include an explicit `[]` on a single-item array (#441)
-- [meta] use `npmignore` to autogenerate an npmignore file
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `has-symbol`, `object-inspect`, `tape`
-
-## **6.10.3**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [actions] reuse common workflows
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `object-inspect`, `tape`
-
-## **6.10.2**
-- [Fix] `stringify`: actually fix cyclic references (#426)
-- [Fix] `stringify`: avoid encoding arrayformat comma when `encodeValuesOnly = true` (#424)
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Docs] add note and links for coercing primitive values (#408)
-- [actions] update codecov uploader
-- [actions] update workflows
-- [Tests] clean up stringify tests slightly
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `object-inspect`, `safe-publish-latest`, `tape`
-
-## **6.10.1**
-- [Fix] `stringify`: avoid exception on repeated object values (#402)
-
-## **6.10.0**
-- [New] `stringify`: throw on cycles, instead of an infinite loop (#395, #394, #393)
-- [New] `parse`: add `allowSparse` option for collapsing arrays with missing indices (#312)
-- [meta] fix README.md (#399)
-- [meta] only run `npm run dist` in publish, not install
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `has-symbols`, `tape`
-- [Tests] fix tests on node v0.6
-- [Tests] use `ljharb/actions/node/install` instead of `ljharb/actions/node/run`
-- [Tests] Revert "[meta] ignore eclint transitive audit warning"
-
-## **6.9.7**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] `stringify`: avoid encoding arrayformat comma when `encodeValuesOnly = true` (#424)
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Docs] add note and links for coercing primitive values (#408)
-- [Tests] clean up stringify tests slightly
-- [meta] fix README.md (#399)
-- Revert "[meta] ignore eclint transitive audit warning"
-- [actions] backport actions from main
-- [Dev Deps] backport updates from main
-
-## **6.9.6**
-- [Fix] restore `dist` dir; mistakenly removed in d4f6c32
-
-## **6.9.5**
-- [Fix] `stringify`: do not encode parens for RFC1738
-- [Fix] `stringify`: fix arrayFormat comma with empty array/objects (#350)
-- [Refactor] `format`: remove `util.assign` call
-- [meta] add "Allow Edits" workflow; update rebase workflow
-- [actions] switch Automatic Rebase workflow to `pull_request_target` event
-- [Tests] `stringify`: add tests for #378
-- [Tests] migrate tests to Github Actions
-- [Tests] run `nyc` on all tests; use `tape` runner
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `browserify`, `mkdirp`, `object-inspect`, `tape`; add `aud`
-
-## **6.9.4**
-- [Fix] `stringify`: when `arrayFormat` is `comma`, respect `serializeDate` (#364)
-- [Refactor] `stringify`: reduce branching (part of #350)
-- [Refactor] move `maybeMap` to `utils`
-- [Dev Deps] update `browserify`, `tape`
-
-## **6.9.3**
-- [Fix] proper comma parsing of URL-encoded commas (#361)
-- [Fix] parses comma delimited array while having percent-encoded comma treated as normal text (#336)
-
-## **6.9.2**
-- [Fix] `parse`: Fix parsing array from object with `comma` true (#359)
-- [Fix] `parse`: throw a TypeError instead of an Error for bad charset (#349)
-- [meta] ignore eclint transitive audit warning
-- [meta] fix indentation in package.json
-- [meta] add tidelift marketing copy
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `object-inspect`, `has-symbols`, `tape`, `mkdirp`, `iconv-lite`
-- [actions] add automatic rebasing / merge commit blocking
-
-## **6.9.1**
-- [Fix] `parse`: with comma true, handle field that holds an array of arrays (#335)
-- [Fix] `parse`: with comma true, do not split non-string values (#334)
-- [meta] add `funding` field
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`
-- [Tests] use shared travis-ci config
-
-## **6.9.0**
-- [New] `parse`/`stringify`: Pass extra key/value argument to `decoder` (#333)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `evalmd`
-- [Tests] `parse`: add passing `arrayFormat` tests
-- [Tests] add `posttest` using `npx aud` to run `npm audit` without a lockfile
-- [Tests] up to `node` `v12.10`, `v11.15`, `v10.16`, `v8.16`
-- [Tests] `Buffer.from` in node v5.0-v5.9 and v4.0-v4.4 requires a TypedArray
-
-## **6.8.3**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [Fix] `stringify`: avoid encoding arrayformat comma when `encodeValuesOnly = true` (#424)
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Tests] clean up stringify tests slightly
-- [Docs] add note and links for coercing primitive values (#408)
-- [meta] fix README.md (#399)
-- [actions] backport actions from main
-- [Dev Deps] backport updates from main
-- [Refactor] `stringify`: reduce branching
-- [meta] do not publish workflow files
-
-## **6.8.2**
-- [Fix] proper comma parsing of URL-encoded commas (#361)
-- [Fix] parses comma delimited array while having percent-encoded comma treated as normal text (#336)
-
-## **6.8.1**
-- [Fix] `parse`: Fix parsing array from object with `comma` true (#359)
-- [Fix] `parse`: throw a TypeError instead of an Error for bad charset (#349)
-- [Fix] `parse`: with comma true, handle field that holds an array of arrays (#335)
-- [fix] `parse`: with comma true, do not split non-string values (#334)
-- [meta] add tidelift marketing copy
-- [meta] add `funding` field
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `tape`, `safe-publish-latest`, `evalmd`, `has-symbols`, `iconv-lite`, `mkdirp`, `object-inspect`
-- [Tests] `parse`: add passing `arrayFormat` tests
-- [Tests] use shared travis-ci configs
-- [Tests] `Buffer.from` in node v5.0-v5.9 and v4.0-v4.4 requires a TypedArray
-- [actions] add automatic rebasing / merge commit blocking
-
-## **6.8.0**
-- [New] add `depth=false` to preserve the original key; [Fix] `depth=0` should preserve the original key (#326)
-- [New] [Fix] stringify symbols and bigints
-- [Fix] ensure node 0.12 can stringify Symbols
-- [Fix] fix for an impossible situation: when the formatter is called with a non-string value
-- [Refactor] `formats`: tiny bit of cleanup.
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `browserify`, `safe-publish-latest`, `iconv-lite`, `tape`
-- [Tests] add tests for `depth=0` and `depth=false` behavior, both current and intuitive/intended (#326)
-- [Tests] use `eclint` instead of `editorconfig-tools`
-- [docs] readme: add security note
-- [meta] add github sponsorship
-- [meta] add FUNDING.yml
-- [meta] Clean up license text so it’s properly detected as BSD-3-Clause
-
-## **6.7.3**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] `stringify`: avoid encoding arrayformat comma when `encodeValuesOnly = true` (#424)
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Docs] add note and links for coercing primitive values (#408)
-- [meta] fix README.md (#399)
-- [meta] do not publish workflow files
-- [actions] backport actions from main
-- [Dev Deps] backport updates from main
-- [Tests] use `nyc` for coverage
-- [Tests] clean up stringify tests slightly
-
-## **6.7.2**
-- [Fix] proper comma parsing of URL-encoded commas (#361)
-- [Fix] parses comma delimited array while having percent-encoded comma treated as normal text (#336)
-
-## **6.7.1**
-- [Fix] `parse`: Fix parsing array from object with `comma` true (#359)
-- [Fix] `parse`: with comma true, handle field that holds an array of arrays (#335)
-- [fix] `parse`: with comma true, do not split non-string values (#334)
-- [Fix] `parse`: throw a TypeError instead of an Error for bad charset (#349)
-- [Fix] fix for an impossible situation: when the formatter is called with a non-string value
-- [Refactor] `formats`: tiny bit of cleanup.
-- readme: add security note
-- [meta] add tidelift marketing copy
-- [meta] add `funding` field
-- [meta] add FUNDING.yml
-- [meta] Clean up license text so it’s properly detected as BSD-3-Clause
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `tape`, `safe-publish-latest`, `evalmd`, `iconv-lite`, `mkdirp`, `object-inspect`, `browserify`
-- [Tests] `parse`: add passing `arrayFormat` tests
-- [Tests] use shared travis-ci configs
-- [Tests] `Buffer.from` in node v5.0-v5.9 and v4.0-v4.4 requires a TypedArray
-- [Tests] add tests for `depth=0` and `depth=false` behavior, both current and intuitive/intended
-- [Tests] use `eclint` instead of `editorconfig-tools`
-- [actions] add automatic rebasing / merge commit blocking
-
-## **6.7.0**
-- [New] `stringify`/`parse`: add `comma` as an `arrayFormat` option (#276, #219)
-- [Fix] correctly parse nested arrays (#212)
-- [Fix] `utils.merge`: avoid a crash with a null target and a truthy non-array source, also with an array source
-- [Robustness] `stringify`: cache `Object.prototype.hasOwnProperty`
-- [Refactor] `utils`: `isBuffer`: small tweak; add tests
-- [Refactor] use cached `Array.isArray`
-- [Refactor] `parse`/`stringify`: make a function to normalize the options
-- [Refactor] `utils`: reduce observable [[Get]]s
-- [Refactor] `stringify`/`utils`: cache `Array.isArray`
-- [Tests] always use `String(x)` over `x.toString()`
-- [Tests] fix Buffer tests to work in node < 4.5 and node < 5.10
-- [Tests] temporarily allow coverage to fail
-
-## **6.6.1**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] fix for an impossible situation: when the formatter is called with a non-string value
-- [Fix] `utils.merge`: avoid a crash with a null target and an array source
-- [Fix] `utils.merge`: avoid a crash with a null target and a truthy non-array source
-- [Fix] correctly parse nested arrays
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [Robustness] `stringify`: cache `Object.prototype.hasOwnProperty`
-- [Refactor] `formats`: tiny bit of cleanup.
-- [Refactor] `utils`: `isBuffer`: small tweak; add tests
-- [Refactor]: `stringify`/`utils`: cache `Array.isArray`
-- [Refactor] `utils`: reduce observable [[Get]]s
-- [Refactor] use cached `Array.isArray`
-- [Refactor] `parse`/`stringify`: make a function to normalize the options
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Docs] Clarify the need for "arrayLimit" option
-- [meta] fix README.md (#399)
-- [meta] do not publish workflow files
-- [meta] Clean up license text so it’s properly detected as BSD-3-Clause
-- [meta] add FUNDING.yml
-- [meta] Fixes typo in CHANGELOG.md
-- [actions] backport actions from main
-- [Tests] fix Buffer tests to work in node < 4.5 and node < 5.10
-- [Tests] always use `String(x)` over `x.toString()`
-- [Dev Deps] backport from main
-
-## **6.6.0**
-- [New] Add support for iso-8859-1, utf8 "sentinel" and numeric entities (#268)
-- [New] move two-value combine to a `utils` function (#189)
-- [Fix] `stringify`: fix a crash with `strictNullHandling` and a custom `filter`/`serializeDate` (#279)
-- [Fix] when `parseArrays` is false, properly handle keys ending in `[]` (#260)
-- [Fix] `stringify`: do not crash in an obscure combo of `interpretNumericEntities`, a bad custom `decoder`, & `iso-8859-1`
-- [Fix] `utils`: `merge`: fix crash when `source` is a truthy primitive & no options are provided
-- [refactor] `stringify`: Avoid arr = arr.concat(...), push to the existing instance (#269)
-- [Refactor] `parse`: only need to reassign the var once
-- [Refactor] `parse`/`stringify`: clean up `charset` options checking; fix defaults
-- [Refactor] add missing defaults
-- [Refactor] `parse`: one less `concat` call
-- [Refactor] `utils`: `compactQueue`: make it explicitly side-effecting
-- [Dev Deps] update `browserify`, `eslint`, `@ljharb/eslint-config`, `iconv-lite`, `safe-publish-latest`, `tape`
-- [Tests] up to `node` `v10.10`, `v9.11`, `v8.12`, `v6.14`, `v4.9`; pin included builds to LTS
-
-## **6.5.3**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] `utils.merge`: avoid a crash with a null target and a truthy non-array source
-- [Fix] correctly parse nested arrays
-- [Fix] `stringify`: fix a crash with `strictNullHandling` and a custom `filter`/`serializeDate` (#279)
-- [Fix] `utils`: `merge`: fix crash when `source` is a truthy primitive & no options are provided
-- [Fix] when `parseArrays` is false, properly handle keys ending in `[]`
-- [Fix] fix for an impossible situation: when the formatter is called with a non-string value
-- [Fix] `utils.merge`: avoid a crash with a null target and an array source
-- [Refactor] `utils`: reduce observable [[Get]]s
-- [Refactor] use cached `Array.isArray`
-- [Refactor] `stringify`: Avoid arr = arr.concat(...), push to the existing instance (#269)
-- [Refactor] `parse`: only need to reassign the var once
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Docs] Clean up license text so it’s properly detected as BSD-3-Clause
-- [Docs] Clarify the need for "arrayLimit" option
-- [meta] fix README.md (#399)
-- [meta] add FUNDING.yml
-- [actions] backport actions from main
-- [Tests] always use `String(x)` over `x.toString()`
-- [Tests] remove nonexistent tape option
-- [Dev Deps] backport from main
-
-## **6.5.2**
-- [Fix] use `safer-buffer` instead of `Buffer` constructor
-- [Refactor] utils: `module.exports` one thing, instead of mutating `exports` (#230)
-- [Dev Deps] update `browserify`, `eslint`, `iconv-lite`, `safer-buffer`, `tape`, `browserify`
-
-## **6.5.1**
-- [Fix] Fix parsing & compacting very deep objects (#224)
-- [Refactor] name utils functions
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `tape`
-- [Tests] up to `node` `v8.4`; use `nvm install-latest-npm` so newer npm doesn’t break older node
-- [Tests] Use precise dist for Node.js 0.6 runtime (#225)
-- [Tests] make 0.6 required, now that it’s passing
-- [Tests] on `node` `v8.2`; fix npm on node 0.6
-
-## **6.5.0**
-- [New] add `utils.assign`
-- [New] pass default encoder/decoder to custom encoder/decoder functions (#206)
-- [New] `parse`/`stringify`: add `ignoreQueryPrefix`/`addQueryPrefix` options, respectively (#213)
-- [Fix] Handle stringifying empty objects with addQueryPrefix (#217)
-- [Fix] do not mutate `options` argument (#207)
-- [Refactor] `parse`: cache index to reuse in else statement (#182)
-- [Docs] add various badges to readme (#208)
-- [Dev Deps] update `eslint`, `browserify`, `iconv-lite`, `tape`
-- [Tests] up to `node` `v8.1`, `v7.10`, `v6.11`; npm v4.6 breaks on node < v1; npm v5+ breaks on node < v4
-- [Tests] add `editorconfig-tools`
-
-## **6.4.1**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] fix for an impossible situation: when the formatter is called with a non-string value
-- [Fix] use `safer-buffer` instead of `Buffer` constructor
-- [Fix] `utils.merge`: avoid a crash with a null target and an array source
-- [Fix] `utils.merge`: avoid a crash with a null target and a truthy non-array source
-- [Fix] `stringify`: fix a crash with `strictNullHandling` and a custom `filter`/`serializeDate` (#279)
-- [Fix] `utils`: `merge`: fix crash when `source` is a truthy primitive & no options are provided
-- [Fix] when `parseArrays` is false, properly handle keys ending in `[]`
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [Refactor] use cached `Array.isArray`
-- [Refactor] `stringify`: Avoid arr = arr.concat(...), push to the existing instance (#269)
-- [readme] remove travis badge; add github actions/codecov badges; update URLs
-- [Docs] Clarify the need for "arrayLimit" option
-- [meta] fix README.md (#399)
-- [meta] Clean up license text so it’s properly detected as BSD-3-Clause
-- [meta] add FUNDING.yml
-- [actions] backport actions from main
-- [Tests] remove nonexistent tape option
-- [Dev Deps] backport from main
-
-## **6.4.0**
-- [New] `qs.stringify`: add `encodeValuesOnly` option
-- [Fix] follow `allowPrototypes` option during merge (#201, #201)
-- [Fix] support keys starting with brackets (#202, #200)
-- [Fix] chmod a-x
-- [Dev Deps] update `eslint`
-- [Tests] up to `node` `v7.7`, `v6.10`,` v4.8`; disable osx builds since they block linux builds
-- [eslint] reduce warnings
-
-## **6.3.3**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] fix for an impossible situation: when the formatter is called with a non-string value
-- [Fix] `utils.merge`: avoid a crash with a null target and an array source
-- [Fix] `utils.merge`: avoid a crash with a null target and a truthy non-array source
-- [Fix] `stringify`: fix a crash with `strictNullHandling` and a custom `filter`/`serializeDate` (#279)
-- [Fix] `utils`: `merge`: fix crash when `source` is a truthy primitive & no options are provided
-- [Fix] when `parseArrays` is false, properly handle keys ending in `[]`
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [Refactor] use cached `Array.isArray`
-- [Refactor] `stringify`: Avoid arr = arr.concat(...), push to the existing instance (#269)
-- [Docs] Clarify the need for "arrayLimit" option
-- [meta] fix README.md (#399)
-- [meta] Clean up license text so it’s properly detected as BSD-3-Clause
-- [meta] add FUNDING.yml
-- [actions] backport actions from main
-- [Tests] use `safer-buffer` instead of `Buffer` constructor
-- [Tests] remove nonexistent tape option
-- [Dev Deps] backport from main
-
-## **6.3.2**
-- [Fix] follow `allowPrototypes` option during merge (#201, #200)
-- [Dev Deps] update `eslint`
-- [Fix] chmod a-x
-- [Fix] support keys starting with brackets (#202, #200)
-- [Tests] up to `node` `v7.7`, `v6.10`,` v4.8`; disable osx builds since they block linux builds
-
-## **6.3.1**
-- [Fix] ensure that `allowPrototypes: false` does not ever shadow Object.prototype properties (thanks, @snyk!)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `browserify`, `iconv-lite`, `qs-iconv`, `tape`
-- [Tests] on all node minors; improve test matrix
-- [Docs] document stringify option `allowDots` (#195)
-- [Docs] add empty object and array values example (#195)
-- [Docs] Fix minor inconsistency/typo (#192)
-- [Docs] document stringify option `sort` (#191)
-- [Refactor] `stringify`: throw faster with an invalid encoder
-- [Refactor] remove unnecessary escapes (#184)
-- Remove contributing.md, since `qs` is no longer part of `hapi` (#183)
-
-## **6.3.0**
-- [New] Add support for RFC 1738 (#174, #173)
-- [New] `stringify`: Add `serializeDate` option to customize Date serialization (#159)
-- [Fix] ensure `utils.merge` handles merging two arrays
-- [Refactor] only constructors should be capitalized
-- [Refactor] capitalized var names are for constructors only
-- [Refactor] avoid using a sparse array
-- [Robustness] `formats`: cache `String#replace`
-- [Dev Deps] update `browserify`, `eslint`, `@ljharb/eslint-config`; add `safe-publish-latest`
-- [Tests] up to `node` `v6.8`, `v4.6`; improve test matrix
-- [Tests] flesh out arrayLimit/arrayFormat tests (#107)
-- [Tests] skip Object.create tests when null objects are not available
-- [Tests] Turn on eslint for test files (#175)
-
-## **6.2.4**
-- [Fix] `parse`: ignore `__proto__` keys (#428)
-- [Fix] `utils.merge`: avoid a crash with a null target and an array source
-- [Fix] `utils.merge`: avoid a crash with a null target and a truthy non-array source
-- [Fix] `utils`: `merge`: fix crash when `source` is a truthy primitive & no options are provided
-- [Fix] when `parseArrays` is false, properly handle keys ending in `[]`
-- [Robustness] `stringify`: avoid relying on a global `undefined` (#427)
-- [Refactor] use cached `Array.isArray`
-- [Docs] Clarify the need for "arrayLimit" option
-- [meta] fix README.md (#399)
-- [meta] Clean up license text so it’s properly detected as BSD-3-Clause
-- [meta] add FUNDING.yml
-- [actions] backport actions from main
-- [Tests] use `safer-buffer` instead of `Buffer` constructor
-- [Tests] remove nonexistent tape option
-- [Dev Deps] backport from main
-
-## **6.2.3**
-- [Fix] follow `allowPrototypes` option during merge (#201, #200)
-- [Fix] chmod a-x
-- [Fix] support keys starting with brackets (#202, #200)
-- [Tests] up to `node` `v7.7`, `v6.10`,` v4.8`; disable osx builds since they block linux builds
-
-## **6.2.2**
-- [Fix] ensure that `allowPrototypes: false` does not ever shadow Object.prototype properties
-
-## **6.2.1**
-- [Fix] ensure `key[]=x&key[]&key[]=y` results in 3, not 2, values
-- [Refactor] Be explicit and use `Object.prototype.hasOwnProperty.call`
-- [Tests] remove `parallelshell` since it does not reliably report failures
-- [Tests] up to `node` `v6.3`, `v5.12`
-- [Dev Deps] update `tape`, `eslint`, `@ljharb/eslint-config`, `qs-iconv`
-
-## [**6.2.0**](https://github.com/ljharb/qs/issues?milestone=36&state=closed)
-- [New] pass Buffers to the encoder/decoder directly (#161)
-- [New] add "encoder" and "decoder" options, for custom param encoding/decoding (#160)
-- [Fix] fix compacting of nested sparse arrays (#150)
-
-## **6.1.2**
-- [Fix] follow `allowPrototypes` option during merge (#201, #200)
-- [Fix] chmod a-x
-- [Fix] support keys starting with brackets (#202, #200)
-- [Tests] up to `node` `v7.7`, `v6.10`,` v4.8`; disable osx builds since they block linux builds
-
-## **6.1.1**
-- [Fix] ensure that `allowPrototypes: false` does not ever shadow Object.prototype properties
-
-## [**6.1.0**](https://github.com/ljharb/qs/issues?milestone=35&state=closed)
-- [New] allowDots option for `stringify` (#151)
-- [Fix] "sort" option should work at a depth of 3 or more (#151)
-- [Fix] Restore `dist` directory; will be removed in v7 (#148)
-
-## **6.0.4**
-- [Fix] follow `allowPrototypes` option during merge (#201, #200)
-- [Fix] chmod a-x
-- [Fix] support keys starting with brackets (#202, #200)
-- [Tests] up to `node` `v7.7`, `v6.10`,` v4.8`; disable osx builds since they block linux builds
-
-## **6.0.3**
-- [Fix] ensure that `allowPrototypes: false` does not ever shadow Object.prototype properties
-- [Fix] Restore `dist` directory; will be removed in v7 (#148)
-
-## [**6.0.2**](https://github.com/ljharb/qs/issues?milestone=33&state=closed)
-- Revert ES6 requirement and restore support for node down to v0.8.
-
-## [**6.0.1**](https://github.com/ljharb/qs/issues?milestone=32&state=closed)
-- [**#127**](https://github.com/ljharb/qs/pull/127) Fix engines definition in package.json
-
-## [**6.0.0**](https://github.com/ljharb/qs/issues?milestone=31&state=closed)
-- [**#124**](https://github.com/ljharb/qs/issues/124) Use ES6 and drop support for node < v4
-
-## **5.2.1**
-- [Fix] ensure `key[]=x&key[]&key[]=y` results in 3, not 2, values
-
-## [**5.2.0**](https://github.com/ljharb/qs/issues?milestone=30&state=closed)
-- [**#64**](https://github.com/ljharb/qs/issues/64) Add option to sort object keys in the query string
-
-## [**5.1.0**](https://github.com/ljharb/qs/issues?milestone=29&state=closed)
-- [**#117**](https://github.com/ljharb/qs/issues/117) make URI encoding stringified results optional
-- [**#106**](https://github.com/ljharb/qs/issues/106) Add flag `skipNulls` to optionally skip null values in stringify
-
-## [**5.0.0**](https://github.com/ljharb/qs/issues?milestone=28&state=closed)
-- [**#114**](https://github.com/ljharb/qs/issues/114) default allowDots to false
-- [**#100**](https://github.com/ljharb/qs/issues/100) include dist to npm
-
-## [**4.0.0**](https://github.com/ljharb/qs/issues?milestone=26&state=closed)
-- [**#98**](https://github.com/ljharb/qs/issues/98) make returning plain objects and allowing prototype overwriting properties optional
-
-## [**3.1.0**](https://github.com/ljharb/qs/issues?milestone=24&state=closed)
-- [**#89**](https://github.com/ljharb/qs/issues/89) Add option to disable "Transform dot notation to bracket notation"
-
-## [**3.0.0**](https://github.com/ljharb/qs/issues?milestone=23&state=closed)
-- [**#80**](https://github.com/ljharb/qs/issues/80) qs.parse silently drops properties
-- [**#77**](https://github.com/ljharb/qs/issues/77) Perf boost
-- [**#60**](https://github.com/ljharb/qs/issues/60) Add explicit option to disable array parsing
-- [**#74**](https://github.com/ljharb/qs/issues/74) Bad parse when turning array into object
-- [**#81**](https://github.com/ljharb/qs/issues/81) Add a `filter` option
-- [**#68**](https://github.com/ljharb/qs/issues/68) Fixed issue with recursion and passing strings into objects.
-- [**#66**](https://github.com/ljharb/qs/issues/66) Add mixed array and object dot notation support Closes: #47
-- [**#76**](https://github.com/ljharb/qs/issues/76) RFC 3986
-- [**#85**](https://github.com/ljharb/qs/issues/85) No equal sign
-- [**#84**](https://github.com/ljharb/qs/issues/84) update license attribute
-
-## [**2.4.1**](https://github.com/ljharb/qs/issues?milestone=20&state=closed)
-- [**#73**](https://github.com/ljharb/qs/issues/73) Property 'hasOwnProperty' of object #<Object> is not a function
-
-## [**2.4.0**](https://github.com/ljharb/qs/issues?milestone=19&state=closed)
-- [**#70**](https://github.com/ljharb/qs/issues/70) Add arrayFormat option
-
-## [**2.3.3**](https://github.com/ljharb/qs/issues?milestone=18&state=closed)
-- [**#59**](https://github.com/ljharb/qs/issues/59) make sure array indexes are >= 0, closes #57
-- [**#58**](https://github.com/ljharb/qs/issues/58) make qs usable for browser loader
-
-## [**2.3.2**](https://github.com/ljharb/qs/issues?milestone=17&state=closed)
-- [**#55**](https://github.com/ljharb/qs/issues/55) allow merging a string into an object
-
-## [**2.3.1**](https://github.com/ljharb/qs/issues?milestone=16&state=closed)
-- [**#52**](https://github.com/ljharb/qs/issues/52) Return "undefined" and "false" instead of throwing "TypeError".
-
-## [**2.3.0**](https://github.com/ljharb/qs/issues?milestone=15&state=closed)
-- [**#50**](https://github.com/ljharb/qs/issues/50) add option to omit array indices, closes #46
-
-## [**2.2.5**](https://github.com/ljharb/qs/issues?milestone=14&state=closed)
-- [**#39**](https://github.com/ljharb/qs/issues/39) Is there an alternative to Buffer.isBuffer?
-- [**#49**](https://github.com/ljharb/qs/issues/49) refactor utils.merge, fixes #45
-- [**#41**](https://github.com/ljharb/qs/issues/41) avoid browserifying Buffer, for #39
-
-## [**2.2.4**](https://github.com/ljharb/qs/issues?milestone=13&state=closed)
-- [**#38**](https://github.com/ljharb/qs/issues/38) how to handle object keys beginning with a number
-
-## [**2.2.3**](https://github.com/ljharb/qs/issues?milestone=12&state=closed)
-- [**#37**](https://github.com/ljharb/qs/issues/37) parser discards first empty value in array
-- [**#36**](https://github.com/ljharb/qs/issues/36) Update to lab 4.x
-
-## [**2.2.2**](https://github.com/ljharb/qs/issues?milestone=11&state=closed)
-- [**#33**](https://github.com/ljharb/qs/issues/33) Error when plain object in a value
-- [**#34**](https://github.com/ljharb/qs/issues/34) use Object.prototype.hasOwnProperty.call instead of obj.hasOwnProperty
-- [**#24**](https://github.com/ljharb/qs/issues/24) Changelog? Semver?
-
-## [**2.2.1**](https://github.com/ljharb/qs/issues?milestone=10&state=closed)
-- [**#32**](https://github.com/ljharb/qs/issues/32) account for circular references properly, closes #31
-- [**#31**](https://github.com/ljharb/qs/issues/31) qs.parse stackoverflow on circular objects
-
-## [**2.2.0**](https://github.com/ljharb/qs/issues?milestone=9&state=closed)
-- [**#26**](https://github.com/ljharb/qs/issues/26) Don't use Buffer global if it's not present
-- [**#30**](https://github.com/ljharb/qs/issues/30) Bug when merging non-object values into arrays
-- [**#29**](https://github.com/ljharb/qs/issues/29) Don't call Utils.clone at the top of Utils.merge
-- [**#23**](https://github.com/ljharb/qs/issues/23) Ability to not limit parameters?
-
-## [**2.1.0**](https://github.com/ljharb/qs/issues?milestone=8&state=closed)
-- [**#22**](https://github.com/ljharb/qs/issues/22) Enable using a RegExp as delimiter
-
-## [**2.0.0**](https://github.com/ljharb/qs/issues?milestone=7&state=closed)
-- [**#18**](https://github.com/ljharb/qs/issues/18) Why is there arrayLimit?
-- [**#20**](https://github.com/ljharb/qs/issues/20) Configurable parametersLimit
-- [**#21**](https://github.com/ljharb/qs/issues/21) make all limits optional, for #18, for #20
-
-## [**1.2.2**](https://github.com/ljharb/qs/issues?milestone=6&state=closed)
-- [**#19**](https://github.com/ljharb/qs/issues/19) Don't overwrite null values
-
-## [**1.2.1**](https://github.com/ljharb/qs/issues?milestone=5&state=closed)
-- [**#16**](https://github.com/ljharb/qs/issues/16) ignore non-string delimiters
-- [**#15**](https://github.com/ljharb/qs/issues/15) Close code block
-
-## [**1.2.0**](https://github.com/ljharb/qs/issues?milestone=4&state=closed)
-- [**#12**](https://github.com/ljharb/qs/issues/12) Add optional delim argument
-- [**#13**](https://github.com/ljharb/qs/issues/13) fix #11: flattened keys in array are now correctly parsed
-
-## [**1.1.0**](https://github.com/ljharb/qs/issues?milestone=3&state=closed)
-- [**#7**](https://github.com/ljharb/qs/issues/7) Empty values of a POST array disappear after being submitted
-- [**#9**](https://github.com/ljharb/qs/issues/9) Should not omit equals signs (=) when value is null
-- [**#6**](https://github.com/ljharb/qs/issues/6) Minor grammar fix in README
-
-## [**1.0.2**](https://github.com/ljharb/qs/issues?milestone=2&state=closed)
-- [**#5**](https://github.com/ljharb/qs/issues/5) array holes incorrectly copied into object on large index
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [v1.1.0](https://github.com/ljharb/side-channel/compare/v1.0.6...v1.1.0) - 2024-12-11
+
+### Commits
+
+- [Refactor] extract implementations to `side-channel-weakmap`, `side-channel-map`, `side-channel-list` [`ada5955`](https://github.com/ljharb/side-channel/commit/ada595549a5c4c6c853756d598846b180941c6da)
+- [New] add `channel.delete` [`c01d2d3`](https://github.com/ljharb/side-channel/commit/c01d2d3fd51dbb1ce6da72ad7916e61bd6172aad)
+- [types] improve types [`0c54356`](https://github.com/ljharb/side-channel/commit/0c5435651417df41b8cc1a5f7cdce8bffae68cde)
+- [readme] add content [`be24868`](https://github.com/ljharb/side-channel/commit/be248682ac294b0e22c883092c45985aa91c490a)
+- [actions] split out node 10-20, and 20+ [`c4488e2`](https://github.com/ljharb/side-channel/commit/c4488e241ef3d49a19fe266ac830a2e644305911)
+- [types] use shared tsconfig [`0e0d57c`](https://github.com/ljharb/side-channel/commit/0e0d57c2ff17c7b45c6cbd43ebcf553edc9e3adc)
+- [Dev Deps] update `@ljharb/eslint-config`, `@ljharb/tsconfig`, `@types/get-intrinsic`, `@types/object-inspect`, `@types/tape`, `auto-changelog`, `tape` [`fb4f622`](https://github.com/ljharb/side-channel/commit/fb4f622e64a99a1e40b6e5cd7691674a9dc429e4)
+- [Deps] update `call-bind`, `get-intrinsic`, `object-inspect` [`b78336b`](https://github.com/ljharb/side-channel/commit/b78336b886172d1b457d414ac9e28de8c5fecc78)
+- [Tests] replace `aud` with `npm audit` [`ee3ab46`](https://github.com/ljharb/side-channel/commit/ee3ab4690d954311c35115651bcfd45edd205aa1)
+- [Dev Deps] add missing peer dep [`c03e21a`](https://github.com/ljharb/side-channel/commit/c03e21a7def3b67cdc15ae22316884fefcb2f6a8)
+
+## [v1.0.6](https://github.com/ljharb/side-channel/compare/v1.0.5...v1.0.6) - 2024-02-29
+
+### Commits
+
+- add types [`9beef66`](https://github.com/ljharb/side-channel/commit/9beef6643e6d717ea57bedabf86448123a7dd9e9)
+- [meta] simplify `exports` [`4334cf9`](https://github.com/ljharb/side-channel/commit/4334cf9df654151504c383b62a2f9ebdc8d9d5ac)
+- [Deps] update `call-bind` [`d6043c4`](https://github.com/ljharb/side-channel/commit/d6043c4d8f4d7be9037dd0f0419c7a2e0e39ec6a)
+- [Dev Deps] update `tape` [`6aca376`](https://github.com/ljharb/side-channel/commit/6aca3761868dc8cd5ff7fd9799bf6b95e09a6eb0)
+
+## [v1.0.5](https://github.com/ljharb/side-channel/compare/v1.0.4...v1.0.5) - 2024-02-06
+
+### Commits
+
+- [actions] reuse common workflows [`3d2e1ff`](https://github.com/ljharb/side-channel/commit/3d2e1ffd16dd6eaaf3e40ff57951f840d2d63c04)
+- [meta] use `npmignore` to autogenerate an npmignore file [`04296ea`](https://github.com/ljharb/side-channel/commit/04296ea17d1544b0a5d20fd5bfb31aa4f6513eb9)
+- [meta] add `.editorconfig`; add `eclint` [`130f0a6`](https://github.com/ljharb/side-channel/commit/130f0a6adbc04d385c7456a601d38344dce3d6a9)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `safe-publish-latest`, `tape` [`d480c2f`](https://github.com/ljharb/side-channel/commit/d480c2fbe757489ae9b4275491ffbcc3ac4725e9)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `tape` [`ecbe70e`](https://github.com/ljharb/side-channel/commit/ecbe70e53a418234081a77971fec1fdfae20c841)
+- [actions] update rebase action [`75240b9`](https://github.com/ljharb/side-channel/commit/75240b9963b816e8846400d2287cb68f88c7fba7)
+- [Dev Deps] update `@ljharb/eslint-config`, `aud`, `npmignore`, `tape` [`ae8d281`](https://github.com/ljharb/side-channel/commit/ae8d281572430099109870fd9430d2ca3f320b8d)
+- [Dev Deps] update `@ljharb/eslint-config`, `aud`, `tape` [`7125b88`](https://github.com/ljharb/side-channel/commit/7125b885fd0eacad4fee9b073b72d14065ece278)
+- [Deps] update `call-bind`, `get-intrinsic`, `object-inspect` [`82577c9`](https://github.com/ljharb/side-channel/commit/82577c9796304519139a570f82a317211b5f3b86)
+- [Deps] update `call-bind`, `get-intrinsic`, `object-inspect` [`550aadf`](https://github.com/ljharb/side-channel/commit/550aadf20475a6081fd70304cc54f77259a5c8a8)
+- [Tests] increase coverage [`5130877`](https://github.com/ljharb/side-channel/commit/5130877a7b27c862e64e6d1c12a178b28808859d)
+- [Deps] update `get-intrinsic`, `object-inspect` [`ba0194c`](https://github.com/ljharb/side-channel/commit/ba0194c505b1a8a0427be14cadd5b8a46d4d01b8)
+- [meta] add missing `engines.node` [`985fd24`](https://github.com/ljharb/side-channel/commit/985fd249663cb06617a693a94fe08cad12f5cb70)
+- [Refactor] use `es-errors`, so things that only need those do not need `get-intrinsic` [`40227a8`](https://github.com/ljharb/side-channel/commit/40227a87b01709ad2c0eebf87eb4223a800099b9)
+- [Deps] update `get-intrinsic` [`a989b40`](https://github.com/ljharb/side-channel/commit/a989b4024958737ae7be9fbffdeff2078f33a0fd)
+- [Deps] update `object-inspect` [`aec42d2`](https://github.com/ljharb/side-channel/commit/aec42d2ec541a31aaa02475692c87d489237d9a3)
+
+## [v1.0.4](https://github.com/ljharb/side-channel/compare/v1.0.3...v1.0.4) - 2020-12-29
+
+### Commits
+
+- [Tests] migrate tests to Github Actions [`10909cb`](https://github.com/ljharb/side-channel/commit/10909cbf8ce9c0bf96f604cf13d7ffd5a22c2d40)
+- [Refactor] Use a linked list rather than an array, and move accessed nodes to the beginning [`195613f`](https://github.com/ljharb/side-channel/commit/195613f28b5c1e6072ef0b61b5beebaf2b6a304e)
+- [meta] do not publish github action workflow files [`290ec29`](https://github.com/ljharb/side-channel/commit/290ec29cd21a60585145b4a7237ec55228c52c27)
+- [Tests] run `nyc` on all tests; use `tape` runner [`ea6d030`](https://github.com/ljharb/side-channel/commit/ea6d030ff3fe6be2eca39e859d644c51ecd88869)
+- [actions] add "Allow Edits" workflow [`d464d8f`](https://github.com/ljharb/side-channel/commit/d464d8fe52b5eddf1504a0ed97f0941a90f32c15)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog` [`02daca8`](https://github.com/ljharb/side-channel/commit/02daca87c6809821c97be468d1afa2f5ef447383)
+- [Refactor] use `call-bind` and `get-intrinsic` instead of `es-abstract` [`e09d481`](https://github.com/ljharb/side-channel/commit/e09d481528452ebafa5cdeae1af665c35aa2deee)
+- [Deps] update `object.assign` [`ee83aa8`](https://github.com/ljharb/side-channel/commit/ee83aa81df313b5e46319a63adb05cf0c179079a)
+- [actions] update rebase action to use checkout v2 [`7726b0b`](https://github.com/ljharb/side-channel/commit/7726b0b058b632fccea709f58960871defaaa9d7)
+
+## [v1.0.3](https://github.com/ljharb/side-channel/compare/v1.0.2...v1.0.3) - 2020-08-23
+
+### Commits
+
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `tape` [`1f10561`](https://github.com/ljharb/side-channel/commit/1f105611ef3acf32dec8032ae5c0baa5e56bb868)
+- [Deps] update `es-abstract`, `object-inspect` [`bc20159`](https://github.com/ljharb/side-channel/commit/bc201597949a505e37cef9eaf24c7010831e6f03)
+- [Dev Deps] update `@ljharb/eslint-config`, `tape` [`b9b2b22`](https://github.com/ljharb/side-channel/commit/b9b2b225f9e0ea72a6ec2b89348f0bd690bc9ed1)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `tape` [`7055ab4`](https://github.com/ljharb/side-channel/commit/7055ab4de0860606efd2003674a74f1fe6ebc07e)
+- [Dev Deps] update `auto-changelog`; add `aud` [`d278c37`](https://github.com/ljharb/side-channel/commit/d278c37d08227be4f84aa769fcd919e73feeba40)
+- [actions] switch Automatic Rebase workflow to `pull_request_target` event [`3bcf982`](https://github.com/ljharb/side-channel/commit/3bcf982faa122745b39c33ce83d32fdf003741c6)
+- [Tests] only audit prod deps [`18d01c4`](https://github.com/ljharb/side-channel/commit/18d01c4015b82a3d75044c4d5ba7917b2eac01ec)
+- [Deps] update `es-abstract` [`6ab096d`](https://github.com/ljharb/side-channel/commit/6ab096d9de2b482cf5e0717e34e212f5b2b9bc9a)
+- [Dev Deps] update `tape` [`9dc174c`](https://github.com/ljharb/side-channel/commit/9dc174cc651dfd300b4b72da936a0a7eda5f9452)
+- [Deps] update `es-abstract` [`431d0f0`](https://github.com/ljharb/side-channel/commit/431d0f0ff11fbd2ae6f3115582a356d3a1cfce82)
+- [Deps] update `es-abstract` [`49869fd`](https://github.com/ljharb/side-channel/commit/49869fd323bf4453f0ba515c0fb265cf5ab7b932)
+- [meta] Add package.json to package's exports [`77d9cdc`](https://github.com/ljharb/side-channel/commit/77d9cdceb2a9e47700074f2ae0c0a202e7dac0d4)
+
+## [v1.0.2](https://github.com/ljharb/side-channel/compare/v1.0.1...v1.0.2) - 2019-12-20
+
+### Commits
+
+- [Dev Deps] update `@ljharb/eslint-config`, `tape` [`4a526df`](https://github.com/ljharb/side-channel/commit/4a526df44e4701566ed001ec78546193f818b082)
+- [Deps] update `es-abstract` [`d4f6e62`](https://github.com/ljharb/side-channel/commit/d4f6e629b6fb93a07415db7f30d3c90fd7f264fe)
+
+## [v1.0.1](https://github.com/ljharb/side-channel/compare/v1.0.0...v1.0.1) - 2019-12-01
+
+### Commits
+
+- [Fix] add missing "exports" [`d212907`](https://github.com/ljharb/side-channel/commit/d2129073abf0701a5343bf28aa2145617604dc2e)
+
+## v1.0.0 - 2019-12-01
+
+### Commits
+
+- Initial implementation [`dbebd3a`](https://github.com/ljharb/side-channel/commit/dbebd3a4b5ed64242f9a6810efe7c4214cd8cde4)
+- Initial tests [`73bdefe`](https://github.com/ljharb/side-channel/commit/73bdefe568c9076cf8c0b8719bc2141aec0e19b8)
+- Initial commit [`43c03e1`](https://github.com/ljharb/side-channel/commit/43c03e1c2849ec50a87b7a5cd76238a62b0b8770)
+- npm init [`5c090a7`](https://github.com/ljharb/side-channel/commit/5c090a765d66a5527d9889b89aeff78dee91348c)
+- [meta] add `auto-changelog` [`a5c4e56`](https://github.com/ljharb/side-channel/commit/a5c4e5675ec02d5eb4d84b4243aeea2a1d38fbec)
+- [actions] add automatic rebasing / merge commit blocking [`bab1683`](https://github.com/ljharb/side-channel/commit/bab1683d8f9754b086e94397699fdc645e0d7077)
+- [meta] add `funding` field; create FUNDING.yml [`63d7aea`](https://github.com/ljharb/side-channel/commit/63d7aeaf34f5650650ae97ca4b9fae685bd0937c)
+- [Tests] add `npm run lint` [`46a5a81`](https://github.com/ljharb/side-channel/commit/46a5a81705cd2664f83df232c01dbbf2ee952885)
+- Only apps should have lockfiles [`8b16b03`](https://github.com/ljharb/side-channel/commit/8b16b0305f00895d90c4e2e5773c854cfea0e448)
+- [meta] add `safe-publish-latest` [`2f098ef`](https://github.com/ljharb/side-channel/commit/2f098ef092a39399cfe548b19a1fc03c2fd2f490)

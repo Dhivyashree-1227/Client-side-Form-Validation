@@ -8,6 +8,6 @@
 	"branches": 76.06,
 	"exclude": [
 		"coverage",
-		"dist"
+		"test"
 	]
 }
