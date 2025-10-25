@@ -1,54 +1,80 @@
-# dunder-proto <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
+# EE First
 
-[![github actions][actions-image]][actions-url]
-[![coverage][codecov-image]][codecov-url]
+[![NPM version][npm-image]][npm-url]
+[![Build status][travis-image]][travis-url]
+[![Test coverage][coveralls-image]][coveralls-url]
 [![License][license-image]][license-url]
 [![Downloads][downloads-image]][downloads-url]
+[![Gittip][gittip-image]][gittip-url]
 
-[![npm badge][npm-badge-png]][package-url]
+Get the first event in a set of event emitters and event pairs,
+then clean up after itself.
 
-If available, the `Object.prototype.__proto__` accessor and mutator, call-bound.
-
-## Getting started
+## Install
 
 ```sh
-npm install --save dunder-proto
+$ npm install ee-first
 ```
 
-## Usage/Examples
+## API
 
 ```js
-const assert = require('assert');
-const getDunder = require('dunder-proto/get');
-const setDunder = require('dunder-proto/set');
-
-const obj = {};
-
-assert.equal('toString' in obj, true);
-assert.equal(getDunder(obj), Object.prototype);
-
-setDunder(obj, null);
-
-assert.equal('toString' in obj, false);
-assert.equal(getDunder(obj), null);
+var first = require('ee-first')
 ```
 
-## Tests
+### first(arr, listener)
 
-Clone the repo, `npm install`, and run `npm test`
+Invoke `listener` on the first event from the list specified in `arr`. `arr` is
+an array of arrays, with each array in the format `[ee, ...event]`. `listener`
+will be called only once, the first time any of the given events are emitted. If
+`error` is one of the listened events, then if that fires first, the `listener`
+will be given the `err` argument.
 
-[package-url]: https://npmjs.org/package/dunder-proto
-[npm-version-svg]: https://versionbadg.es/es-shims/dunder-proto.svg
-[deps-svg]: https://david-dm.org/es-shims/dunder-proto.svg
-[deps-url]: https://david-dm.org/es-shims/dunder-proto
-[dev-deps-svg]: https://david-dm.org/es-shims/dunder-proto/dev-status.svg
-[dev-deps-url]: https://david-dm.org/es-shims/dunder-proto#info=devDependencies
-[npm-badge-png]: https://nodei.co/npm/dunder-proto.png?downloads=true&stars=true
-[license-image]: https://img.shields.io/npm/l/dunder-proto.svg
-[license-url]: LICENSE
-[downloads-image]: https://img.shields.io/npm/dm/dunder-proto.svg
-[downloads-url]: https://npm-stat.com/charts.html?package=dunder-proto
-[codecov-image]: https://codecov.io/gh/es-shims/dunder-proto/branch/main/graphs/badge.svg
-[codecov-url]: https://app.codecov.io/gh/es-shims/dunder-proto/
-[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/es-shims/dunder-proto
-[actions-url]: https://github.com/es-shims/dunder-proto/actions
+The `listener` is invoked as `listener(err, ee, event, args)`, where `err` is the
+first argument emitted from an `error` event, if applicable; `ee` is the event
+emitter that fired; `event` is the string event name that fired; and `args` is an
+array of the arguments that were emitted on the event.
+
+```js
+var ee1 = new EventEmitter()
+var ee2 = new EventEmitter()
+
+first([
+  [ee1, 'close', 'end', 'error'],
+  [ee2, 'error']
+], function (err, ee, event, args) {
+  // listener invoked
+})
+```
+
+#### .cancel()
+
+The group of listeners can be cancelled before being invoked and have all the event
+listeners removed from the underlying event emitters.
+
+```js
+var thunk = first([
+  [ee1, 'close', 'end', 'error'],
+  [ee2, 'error']
+], function (err, ee, event, args) {
+  // listener invoked
+})
+
+// cancel and clean up
+thunk.cancel()
+```
+
+[npm-image]: https://img.shields.io/npm/v/ee-first.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/ee-first
+[github-tag]: http://img.shields.io/github/tag/jonathanong/ee-first.svg?style=flat-square
+[github-url]: https://github.com/jonathanong/ee-first/tags
+[travis-image]: https://img.shields.io/travis/jonathanong/ee-first.svg?style=flat-square
+[travis-url]: https://travis-ci.org/jonathanong/ee-first
+[coveralls-image]: https://img.shields.io/coveralls/jonathanong/ee-first.svg?style=flat-square
+[coveralls-url]: https://coveralls.io/r/jonathanong/ee-first?branch=master
+[license-image]: http://img.shields.io/npm/l/ee-first.svg?style=flat-square
+[license-url]: LICENSE.md
+[downloads-image]: http://img.shields.io/npm/dm/ee-first.svg?style=flat-square
+[downloads-url]: https://npmjs.org/package/ee-first
+[gittip-image]: https://img.shields.io/gittip/jonathanong.svg?style=flat-square
+[gittip-url]: https://www.gittip.com/jonathanong/
