@@ -1,5 +1,5 @@
-declare function getProto<O extends object>(object: O): object | null;
+declare function gOPD<O extends object, K extends keyof O>(obj: O, prop: K): PropertyDescriptor | undefined;
 
-declare const x: typeof getProto | null;
+declare const fn: typeof gOPD | undefined | null;
 
-export = x;
+export = fn;
