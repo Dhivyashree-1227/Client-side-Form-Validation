@@ -1,4 +1,4 @@
-declare namespace getSideChannelList {
+declare namespace getSideChannelMap {
 	type Channel<K, V> = {
 		assert: (key: K) => void;
 		has: (key: K) => boolean;
@@ -8,6 +8,8 @@ declare namespace getSideChannelList {
 	};
 }
 
-declare function getSideChannelList<V, K>(): getSideChannelList.Channel<K, V>;
+declare function getSideChannelMap<K, V>(): getSideChannelMap.Channel<K, V>;
 
-export = getSideChannelList;
+declare const x: false | typeof getSideChannelMap;
+
+export = x;

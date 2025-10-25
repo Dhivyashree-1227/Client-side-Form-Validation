@@ -1,4 +1,4 @@
-# side-channel-list <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
+# side-channel-map <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
 [![github actions][actions-image]][actions-url]
 [![coverage][codecov-image]][codecov-url]
@@ -7,24 +7,24 @@
 
 [![npm badge][npm-badge-png]][package-url]
 
-Store information about any JS value in a side channel, using a linked list.
+Store information about any JS value in a side channel, using a Map.
 
-Warning: this implementation will leak memory until you `delete` the `key`.
+Warning: if the `key` is an object, this implementation will leak memory until you `delete` it.
 Use [`side-channel`](https://npmjs.com/side-channel) for the best available strategy.
 
 ## Getting started
 
 ```sh
-npm install --save side-channel-list
+npm install --save side-channel-map
 ```
 
 ## Usage/Examples
 
 ```js
 const assert = require('assert');
-const getSideChannelList = require('side-channel-list');
+const getSideChannelMap = require('side-channel-map');
 
-const channel = getSideChannelList();
+const channel = getSideChannelMap();
 
 const key = {};
 assert.equal(channel.has(key), false);
@@ -45,18 +45,18 @@ assert.throws(() => channel.assert(key), TypeError);
 
 Clone the repo, `npm install`, and run `npm test`
 
-[package-url]: https://npmjs.org/package/side-channel-list
-[npm-version-svg]: https://versionbadg.es/ljharb/side-channel-list.svg
-[deps-svg]: https://david-dm.org/ljharb/side-channel-list.svg
-[deps-url]: https://david-dm.org/ljharb/side-channel-list
-[dev-deps-svg]: https://david-dm.org/ljharb/side-channel-list/dev-status.svg
-[dev-deps-url]: https://david-dm.org/ljharb/side-channel-list#info=devDependencies
-[npm-badge-png]: https://nodei.co/npm/side-channel-list.png?downloads=true&stars=true
-[license-image]: https://img.shields.io/npm/l/side-channel-list.svg
+[package-url]: https://npmjs.org/package/side-channel-map
+[npm-version-svg]: https://versionbadg.es/ljharb/side-channel-map.svg
+[deps-svg]: https://david-dm.org/ljharb/side-channel-map.svg
+[deps-url]: https://david-dm.org/ljharb/side-channel-map
+[dev-deps-svg]: https://david-dm.org/ljharb/side-channel-map/dev-status.svg
+[dev-deps-url]: https://david-dm.org/ljharb/side-channel-map#info=devDependencies
+[npm-badge-png]: https://nodei.co/npm/side-channel-map.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/side-channel-map.svg
 [license-url]: LICENSE
-[downloads-image]: https://img.shields.io/npm/dm/side-channel-list.svg
-[downloads-url]: https://npm-stat.com/charts.html?package=side-channel-list
-[codecov-image]: https://codecov.io/gh/ljharb/side-channel-list/branch/main/graphs/badge.svg
-[codecov-url]: https://app.codecov.io/gh/ljharb/side-channel-list/
-[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/ljharb/side-channel-list
-[actions-url]: https://github.com/ljharb/side-channel-list/actions
+[downloads-image]: https://img.shields.io/npm/dm/side-channel-map.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=side-channel-map
+[codecov-image]: https://codecov.io/gh/ljharb/side-channel-map/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/ljharb/side-channel-map/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/ljharb/side-channel-map
+[actions-url]: https://github.com/ljharb/side-channel-map/actions
