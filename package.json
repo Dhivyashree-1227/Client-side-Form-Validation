@@ -1,27 +1,46 @@
 {
-    "name": "@types/estree",
-    "version": "1.0.8",
-    "description": "TypeScript definitions for estree",
-    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/estree",
-    "license": "MIT",
-    "contributors": [
-        {
-            "name": "RReverser",
-            "githubUsername": "RReverser",
-            "url": "https://github.com/RReverser"
-        }
-    ],
-    "main": "",
-    "types": "index.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
-        "directory": "types/estree"
-    },
-    "scripts": {},
-    "dependencies": {},
-    "peerDependencies": {},
-    "typesPublisherContentHash": "7a167b6e4a4d9f6e9a2cb9fd3fc45c885f89cbdeb44b3e5961bb057a45c082fd",
-    "typeScriptVersion": "5.1",
-    "nonNpm": true
+  "name": "esbuild",
+  "version": "0.21.5",
+  "description": "An extremely fast JavaScript and CSS bundler and minifier.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanw/esbuild.git"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "main": "lib/main.js",
+  "types": "lib/main.d.ts",
+  "engines": {
+    "node": ">=12"
+  },
+  "bin": {
+    "esbuild": "bin/esbuild"
+  },
+  "optionalDependencies": {
+    "@esbuild/aix-ppc64": "0.21.5",
+    "@esbuild/android-arm": "0.21.5",
+    "@esbuild/android-arm64": "0.21.5",
+    "@esbuild/android-x64": "0.21.5",
+    "@esbuild/darwin-arm64": "0.21.5",
+    "@esbuild/darwin-x64": "0.21.5",
+    "@esbuild/freebsd-arm64": "0.21.5",
+    "@esbuild/freebsd-x64": "0.21.5",
+    "@esbuild/linux-arm": "0.21.5",
+    "@esbuild/linux-arm64": "0.21.5",
+    "@esbuild/linux-ia32": "0.21.5",
+    "@esbuild/linux-loong64": "0.21.5",
+    "@esbuild/linux-mips64el": "0.21.5",
+    "@esbuild/linux-ppc64": "0.21.5",
+    "@esbuild/linux-riscv64": "0.21.5",
+    "@esbuild/linux-s390x": "0.21.5",
+    "@esbuild/linux-x64": "0.21.5",
+    "@esbuild/netbsd-x64": "0.21.5",
+    "@esbuild/openbsd-x64": "0.21.5",
+    "@esbuild/sunos-x64": "0.21.5",
+    "@esbuild/win32-arm64": "0.21.5",
+    "@esbuild/win32-ia32": "0.21.5",
+    "@esbuild/win32-x64": "0.21.5"
+  },
+  "license": "MIT"
 }
