@@ -1,90 +1,137 @@
 /*!
- * forwarded
- * Copyright(c) 2014-2017 Douglas Christopher Wilson
+ * fresh
+ * Copyright(c) 2012 TJ Holowaychuk
+ * Copyright(c) 2016-2017 Douglas Christopher Wilson
  * MIT Licensed
  */
 
 'use strict'
 
 /**
+ * RegExp to check for no-cache token in Cache-Control.
+ * @private
+ */
+
+var CACHE_CONTROL_NO_CACHE_REGEXP = /(?:^|,)\s*?no-cache\s*?(?:,|$)/
+
+/**
  * Module exports.
  * @public
  */
 
-module.exports = forwarded
+module.exports = fresh
 
 /**
- * Get all addresses in the request, using the `X-Forwarded-For` header.
+ * Check freshness of the response using request and response headers.
  *
- * @param {object} req
- * @return {array}
+ * @param {Object} reqHeaders
+ * @param {Object} resHeaders
+ * @return {Boolean}
  * @public
  */
 
-function forwarded (req) {
-  if (!req) {
-    throw new TypeError('argument req is required')
+function fresh (reqHeaders, resHeaders) {
+  // fields
+  var modifiedSince = reqHeaders['if-modified-since']
+  var noneMatch = reqHeaders['if-none-match']
+
+  // unconditional request
+  if (!modifiedSince && !noneMatch) {
+    return false
   }
 
-  // simple header parsing
-  var proxyAddrs = parse(req.headers['x-forwarded-for'] || '')
-  var socketAddr = getSocketAddr(req)
-  var addrs = [socketAddr].concat(proxyAddrs)
+  // Always return stale when Cache-Control: no-cache
+  // to support end-to-end reload requests
+  // https://tools.ietf.org/html/rfc2616#section-14.9.4
+  var cacheControl = reqHeaders['cache-control']
+  if (cacheControl && CACHE_CONTROL_NO_CACHE_REGEXP.test(cacheControl)) {
+    return false
+  }
 
-  // return all addresses
-  return addrs
+  // if-none-match
+  if (noneMatch && noneMatch !== '*') {
+    var etag = resHeaders['etag']
+
+    if (!etag) {
+      return false
+    }
+
+    var etagStale = true
+    var matches = parseTokenList(noneMatch)
+    for (var i = 0; i < matches.length; i++) {
+      var match = matches[i]
+      if (match === etag || match === 'W/' + etag || 'W/' + match === etag) {
+        etagStale = false
+        break
+      }
+    }
+
+    if (etagStale) {
+      return false
+    }
+  }
+
+  // if-modified-since
+  if (modifiedSince) {
+    var lastModified = resHeaders['last-modified']
+    var modifiedStale = !lastModified || !(parseHttpDate(lastModified) <= parseHttpDate(modifiedSince))
+
+    if (modifiedStale) {
+      return false
+    }
+  }
+
+  return true
 }
 
 /**
- * Get the socket address for a request.
+ * Parse an HTTP Date into a number.
  *
- * @param {object} req
- * @return {string}
+ * @param {string} date
  * @private
  */
 
-function getSocketAddr (req) {
-  return req.socket
-    ? req.socket.remoteAddress
-    : req.connection.remoteAddress
+function parseHttpDate (date) {
+  var timestamp = date && Date.parse(date)
+
+  // istanbul ignore next: guard against date.js Date.parse patching
+  return typeof timestamp === 'number'
+    ? timestamp
+    : NaN
 }
 
 /**
- * Parse the X-Forwarded-For header.
+ * Parse a HTTP token list.
  *
- * @param {string} header
+ * @param {string} str
  * @private
  */
 
-function parse (header) {
-  var end = header.length
+function parseTokenList (str) {
+  var end = 0
   var list = []
-  var start = header.length
+  var start = 0
 
-  // gather addresses, backwards
-  for (var i = header.length - 1; i >= 0; i--) {
-    switch (header.charCodeAt(i)) {
+  // gather tokens
+  for (var i = 0, len = str.length; i < len; i++) {
+    switch (str.charCodeAt(i)) {
       case 0x20: /*   */
         if (start === end) {
-          start = end = i
+          start = end = i + 1
         }
         break
       case 0x2c: /* , */
-        if (start !== end) {
-          list.push(header.substring(start, end))
-        }
-        start = end = i
+        list.push(str.substring(start, end))
+        start = end = i + 1
         break
       default:
-        start = i
+        end = i + 1
         break
     }
   }
 
-  // final address
-  if (start !== end) {
-    list.push(header.substring(start, end))
-  }
+  // final token
+  list.push(str.substring(start, end))
 
   return list
 }
