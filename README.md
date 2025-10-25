@@ -1,136 +1,61 @@
-# statuses
+# toidentifier
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
-[![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][ci-image]][ci-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Build Status][github-actions-ci-image]][github-actions-ci-url]
+[![Test Coverage][codecov-image]][codecov-url]
 
-HTTP status utility for node.
+> Convert a string of words to a JavaScript identifier
 
-This module provides a list of status codes and messages sourced from
-a few different projects:
-
-  * The [IANA Status Code Registry](https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml)
-  * The [Node.js project](https://nodejs.org/)
-  * The [NGINX project](https://www.nginx.com/)
-  * The [Apache HTTP Server project](https://httpd.apache.org/)
-
-## Installation
+## Install
 
 This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/). Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-```sh
-$ npm install statuses
+```bash
+$ npm install toidentifier
+```
+
+## Example
+
+```js
+var toIdentifier = require('toidentifier')
+
+console.log(toIdentifier('Bad Request'))
+// => "BadRequest"
 ```
 
 ## API
 
-<!-- eslint-disable no-unused-vars -->
+This CommonJS module exports a single default function: `toIdentifier`.
 
-```js
-var status = require('statuses')
-```
+### toIdentifier(string)
 
-### status(code)
+Given a string as the argument, it will be transformed according to
+the following rules and the new string will be returned:
 
-Returns the status message string for a known HTTP status code. The code
-may be a number or a string. An error is thrown for an unknown status code.
-
-<!-- eslint-disable no-undef -->
-
-```js
-status(403) // => 'Forbidden'
-status('403') // => 'Forbidden'
-status(306) // throws
-```
-
-### status(msg)
-
-Returns the numeric status code for a known HTTP status message. The message
-is case-insensitive. An error is thrown for an unknown status message.
-
-<!-- eslint-disable no-undef -->
-
-```js
-status('forbidden') // => 403
-status('Forbidden') // => 403
-status('foo') // throws
-```
-
-### status.codes
-
-Returns an array of all the status codes as `Integer`s.
-
-### status.code[msg]
-
-Returns the numeric status code for a known status message (in lower-case),
-otherwise `undefined`.
-
-<!-- eslint-disable no-undef, no-unused-expressions -->
-
-```js
-status['not found'] // => 404
-```
-
-### status.empty[code]
-
-Returns `true` if a status code expects an empty body.
-
-<!-- eslint-disable no-undef, no-unused-expressions -->
-
-```js
-status.empty[200] // => undefined
-status.empty[204] // => true
-status.empty[304] // => true
-```
-
-### status.message[code]
-
-Returns the string message for a known numeric status code, otherwise
-`undefined`. This object is the same format as the
-[Node.js http module `http.STATUS_CODES`](https://nodejs.org/dist/latest/docs/api/http.html#http_http_status_codes).
-
-<!-- eslint-disable no-undef, no-unused-expressions -->
-
-```js
-status.message[404] // => 'Not Found'
-```
-
-### status.redirect[code]
-
-Returns `true` if a status code is a valid redirect status.
-
-<!-- eslint-disable no-undef, no-unused-expressions -->
-
-```js
-status.redirect[200] // => undefined
-status.redirect[301] // => true
-```
-
-### status.retry[code]
-
-Returns `true` if you should retry the rest.
-
-<!-- eslint-disable no-undef, no-unused-expressions -->
-
-```js
-status.retry[501] // => undefined
-status.retry[503] // => true
-```
+1. Split into words separated by space characters (`0x20`).
+2. Upper case the first character of each word.
+3. Join the words together with no separator.
+4. Remove all non-word (`[0-9a-z_]`) characters.
 
 ## License
 
 [MIT](LICENSE)
 
-[ci-image]: https://badgen.net/github/checks/jshttp/statuses/master?label=ci
-[ci-url]: https://github.com/jshttp/statuses/actions?query=workflow%3Aci
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/statuses/master
-[coveralls-url]: https://coveralls.io/r/jshttp/statuses?branch=master
-[node-version-image]: https://badgen.net/npm/node/statuses
-[node-version-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/statuses
-[npm-url]: https://npmjs.org/package/statuses
-[npm-version-image]: https://badgen.net/npm/v/statuses
+[codecov-image]: https://img.shields.io/codecov/c/github/component/toidentifier.svg
+[codecov-url]: https://codecov.io/gh/component/toidentifier
+[downloads-image]: https://img.shields.io/npm/dm/toidentifier.svg
+[downloads-url]: https://npmjs.org/package/toidentifier
+[github-actions-ci-image]: https://img.shields.io/github/workflow/status/component/toidentifier/ci/master?label=ci
+[github-actions-ci-url]: https://github.com/component/toidentifier?query=workflow%3Aci
+[npm-image]: https://img.shields.io/npm/v/toidentifier.svg
+[npm-url]: https://npmjs.org/package/toidentifier
+
+
+##
+
+[npm]: https://www.npmjs.com/
+
+[yarn]: https://yarnpkg.com/
