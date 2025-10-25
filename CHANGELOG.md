@@ -5,36 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.3.0](https://github.com/ljharb/es-errors/compare/v1.2.1...v1.3.0) - 2024-02-05
+## [v1.1.1](https://github.com/ljharb/es-object-atoms/compare/v1.1.0...v1.1.1) - 2025-01-14
 
 ### Commits
 
-- [New] add `EvalError` and `URIError` [`1927627`](https://github.com/ljharb/es-errors/commit/1927627ba68cb6c829d307231376c967db53acdf)
+- [types] `ToObject`: improve types [`cfe8c8a`](https://github.com/ljharb/es-object-atoms/commit/cfe8c8a105c44820cb22e26f62d12ef0ad9715c8)
 
-## [v1.2.1](https://github.com/ljharb/es-errors/compare/v1.2.0...v1.2.1) - 2024-02-04
-
-### Commits
-
-- [Fix] add missing `exports` entry [`5bb5f28`](https://github.com/ljharb/es-errors/commit/5bb5f280f98922701109d6ebb82eea2257cecc7e)
-
-## [v1.2.0](https://github.com/ljharb/es-errors/compare/v1.1.0...v1.2.0) - 2024-02-04
+## [v1.1.0](https://github.com/ljharb/es-object-atoms/compare/v1.0.1...v1.1.0) - 2025-01-14
 
 ### Commits
 
-- [New] add `ReferenceError` [`6d8cf5b`](https://github.com/ljharb/es-errors/commit/6d8cf5bbb6f3f598d02cf6f30e468ba2caa8e143)
+- [New] add `isObject` [`51e4042`](https://github.com/ljharb/es-object-atoms/commit/51e4042df722eb3165f40dc5f4bf33d0197ecb07)
 
-## [v1.1.0](https://github.com/ljharb/es-errors/compare/v1.0.0...v1.1.0) - 2024-02-04
-
-### Commits
-
-- [New] add base Error [`2983ab6`](https://github.com/ljharb/es-errors/commit/2983ab65f7bc5441276cb021dc3aa03c78881698)
-
-## v1.0.0 - 2024-02-03
+## [v1.0.1](https://github.com/ljharb/es-object-atoms/compare/v1.0.0...v1.0.1) - 2025-01-13
 
 ### Commits
 
-- Initial implementation, tests, readme, type [`8f47631`](https://github.com/ljharb/es-errors/commit/8f476317e9ad76f40ad648081829b1a1a3a1288b)
-- Initial commit [`ea5d099`](https://github.com/ljharb/es-errors/commit/ea5d099ef18e550509ab9e2be000526afd81c385)
-- npm init [`6f5ebf9`](https://github.com/ljharb/es-errors/commit/6f5ebf9cead474dadd72b9e63dad315820a089ae)
-- Only apps should have lockfiles [`e1a0aeb`](https://github.com/ljharb/es-errors/commit/e1a0aeb7b80f5cfc56be54d6b2100e915d47def8)
-- [meta] add `sideEffects` flag [`a9c7d46`](https://github.com/ljharb/es-errors/commit/a9c7d460a492f1d8a241c836bc25a322a19cc043)
+- [Dev Deps] update `@ljharb/eslint-config`, `@ljharb/tsconfig`, `@types/tape`, `auto-changelog`, `tape` [`38ab9eb`](https://github.com/ljharb/es-object-atoms/commit/38ab9eb00b62c2f4668644f5e513d9b414ebd595)
+- [types] improve types [`7d1beb8`](https://github.com/ljharb/es-object-atoms/commit/7d1beb887958b78b6a728a210a1c8370ab7e2aa1)
+- [Tests] replace `aud` with `npm audit` [`25863ba`](https://github.com/ljharb/es-object-atoms/commit/25863baf99178f1d1ad33d1120498db28631907e)
+- [Dev Deps] add missing peer dep [`c012309`](https://github.com/ljharb/es-object-atoms/commit/c0123091287e6132d6f4240496340c427433df28)
+
+## v1.0.0 - 2024-03-16
+
+### Commits
+
+- Initial implementation, tests, readme, types [`f1499db`](https://github.com/ljharb/es-object-atoms/commit/f1499db7d3e1741e64979c61d645ab3137705e82)
+- Initial commit [`99eedc7`](https://github.com/ljharb/es-object-atoms/commit/99eedc7b5fde38a50a28d3c8b724706e3e4c5f6a)
+- [meta] rename repo [`fc851fa`](https://github.com/ljharb/es-object-atoms/commit/fc851fa70616d2d182aaf0bd02c2ed7084dea8fa)
+- npm init [`b909377`](https://github.com/ljharb/es-object-atoms/commit/b909377c50049bd0ec575562d20b0f9ebae8947f)
+- Only apps should have lockfiles [`7249edd`](https://github.com/ljharb/es-object-atoms/commit/7249edd2178c1b9ddfc66ffcc6d07fdf0d28efc1)

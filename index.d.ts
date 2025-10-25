@@ -1,3 +1,3 @@
-declare const Error: ErrorConstructor;
+declare const Object: ObjectConstructor;
 
-export = Error;
+export = Object;
