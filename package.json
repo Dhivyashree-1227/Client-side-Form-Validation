@@ -1,51 +1,34 @@
 {
-  "name": "safe-buffer",
-  "description": "Safer Node.js Buffer API",
-  "version": "5.2.1",
+  "name": "safer-buffer",
+  "version": "2.1.2",
+  "description": "Modern Buffer API polyfill without footguns",
+  "main": "safer.js",
+  "scripts": {
+    "browserify-test": "browserify --external tape tests.js > browserify-tests.js && tape browserify-tests.js",
+    "test": "standard && tape tests.js"
+  },
   "author": {
-    "name": "Feross Aboukhadijeh",
-    "email": "feross@feross.org",
-    "url": "https://feross.org"
+    "name": "Nikita Skovoroda",
+    "email": "chalkerx@gmail.com",
+    "url": "https://github.com/ChALkeR"
   },
-  "bugs": {
-    "url": "https://github.com/feross/safe-buffer/issues"
-  },
-  "devDependencies": {
-    "standard": "*",
-    "tape": "^5.0.0"
-  },
-  "homepage": "https://github.com/feross/safe-buffer",
-  "keywords": [
-    "buffer",
-    "buffer allocate",
-    "node security",
-    "safe",
-    "safe-buffer",
-    "security",
-    "uninitialized"
-  ],
   "license": "MIT",
-  "main": "index.js",
-  "types": "index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git://github.com/feross/safe-buffer.git"
+    "url": "git+https://github.com/ChALkeR/safer-buffer.git"
   },
-  "scripts": {
-    "test": "standard && tape test/*.js"
+  "bugs": {
+    "url": "https://github.com/ChALkeR/safer-buffer/issues"
   },
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/feross"
-    },
-    {
-      "type": "patreon",
-      "url": "https://www.patreon.com/feross"
-    },
-    {
-      "type": "consulting",
-      "url": "https://feross.org/support"
-    }
+  "devDependencies": {
+    "standard": "^11.0.1",
+    "tape": "^4.9.0"
+  },
+  "files": [
+    "Porting-Buffer.md",
+    "Readme.md",
+    "tests.js",
+    "dangerous.js",
+    "safer.js"
   ]
 }
