@@ -1,104 +1,113 @@
 'use strict';
 
-var test = require('tape');
+var inspect = require('object-inspect');
 
-var getSideChannel = require('../');
+var $TypeError = require('es-errors/type');
 
-test('getSideChannel', function (t) {
-	t.test('export', function (st) {
-		st.equal(typeof getSideChannel, 'function', 'is a function');
+/*
+* This function traverses the list returning the node corresponding to the given key.
+*
+* That node is also moved to the head of the list, so that if it's accessed again we don't need to traverse the whole list.
+* By doing so, all the recently used nodes can be accessed relatively quickly.
+*/
+/** @type {import('./list.d.ts').listGetNode} */
+// eslint-disable-next-line consistent-return
+var listGetNode = function (list, key, isDelete) {
+	/** @type {typeof list | NonNullable<(typeof list)['next']>} */
+	var prev = list;
+	/** @type {(typeof list)['next']} */
+	var curr;
+	// eslint-disable-next-line eqeqeq
+	for (; (curr = prev.next) != null; prev = curr) {
+		if (curr.key === key) {
+			prev.next = curr.next;
+			if (!isDelete) {
+				// eslint-disable-next-line no-extra-parens
+				curr.next = /** @type {NonNullable<typeof list.next>} */ (list.next);
+				list.next = curr; // eslint-disable-line no-param-reassign
+			}
+			return curr;
+		}
+	}
+};
 
-		st.equal(getSideChannel.length, 0, 'takes no arguments');
+/** @type {import('./list.d.ts').listGet} */
+var listGet = function (objects, key) {
+	if (!objects) {
+		return void undefined;
+	}
+	var node = listGetNode(objects, key);
+	return node && node.value;
+};
+/** @type {import('./list.d.ts').listSet} */
+var listSet = function (objects, key, value) {
+	var node = listGetNode(objects, key);
+	if (node) {
+		node.value = value;
+	} else {
+		// Prepend the new node to the beginning of the list
+		objects.next = /** @type {import('./list.d.ts').ListNode<typeof value, typeof key>} */ ({ // eslint-disable-line no-param-reassign, no-extra-parens
+			key: key,
+			next: objects.next,
+			value: value
+		});
+	}
+};
+/** @type {import('./list.d.ts').listHas} */
+var listHas = function (objects, key) {
+	if (!objects) {
+		return false;
+	}
+	return !!listGetNode(objects, key);
+};
+/** @type {import('./list.d.ts').listDelete} */
+// eslint-disable-next-line consistent-return
+var listDelete = function (objects, key) {
+	if (objects) {
+		return listGetNode(objects, key, true);
+	}
+};
 
-		var channel = getSideChannel();
-		st.ok(channel, 'is truthy');
-		st.equal(typeof channel, 'object', 'is an object');
-		st.end();
-	});
+/** @type {import('.')} */
+module.exports = function getSideChannelList() {
+	/** @typedef {ReturnType<typeof getSideChannelList>} Channel */
+	/** @typedef {Parameters<Channel['get']>[0]} K */
+	/** @typedef {Parameters<Channel['set']>[1]} V */
 
-	t.test('assert', function (st) {
-		var channel = getSideChannel();
-		st['throws'](
-			function () { channel.assert({}); },
-			TypeError,
-			'nonexistent value throws'
-		);
+	/** @type {import('./list.d.ts').RootNode<V, K> | undefined} */ var $o;
 
-		var o = {};
-		channel.set(o, 'data');
-		st.doesNotThrow(function () { channel.assert(o); }, 'existent value noops');
-
-		st.end();
-	});
-
-	t.test('has', function (st) {
-		var channel = getSideChannel();
-		/** @type {unknown[]} */ var o = [];
-
-		st.equal(channel.has(o), false, 'nonexistent value yields false');
-
-		channel.set(o, 'foo');
-		st.equal(channel.has(o), true, 'existent value yields true');
-
-		st.equal(channel.has('abc'), false, 'non object value non existent yields false');
-
-		channel.set('abc', 'foo');
-		st.equal(channel.has('abc'), true, 'non object value that exists yields true');
-
-		st.end();
-	});
-
-	t.test('get', function (st) {
-		var channel = getSideChannel();
-		var o = {};
-		st.equal(channel.get(o), undefined, 'nonexistent value yields undefined');
-
-		var data = {};
-		channel.set(o, data);
-		st.equal(channel.get(o), data, '"get" yields data set by "set"');
-
-		st.end();
-	});
-
-	t.test('set', function (st) {
-		var channel = getSideChannel();
-		var o = function () {};
-		st.equal(channel.get(o), undefined, 'value not set');
-
-		channel.set(o, 42);
-		st.equal(channel.get(o), 42, 'value was set');
-
-		channel.set(o, Infinity);
-		st.equal(channel.get(o), Infinity, 'value was set again');
-
-		var o2 = {};
-		channel.set(o2, 17);
-		st.equal(channel.get(o), Infinity, 'o is not modified');
-		st.equal(channel.get(o2), 17, 'o2 is set');
-
-		channel.set(o, 14);
-		st.equal(channel.get(o), 14, 'o is modified');
-		st.equal(channel.get(o2), 17, 'o2 is not modified');
-
-		st.end();
-	});
-
-	t.test('delete', function (st) {
-		var channel = getSideChannel();
-		var o = {};
-		st.equal(channel['delete']({}), false, 'nonexistent value yields false');
-
-		channel.set(o, 42);
-		st.equal(channel.has(o), true, 'value is set');
-
-		st.equal(channel['delete']({}), false, 'nonexistent value still yields false');
-
-		st.equal(channel['delete'](o), true, 'deleted value yields true');
-
-		st.equal(channel.has(o), false, 'value is no longer set');
-
-		st.end();
-	});
-
-	t.end();
-});
+	/** @type {Channel} */
+	var channel = {
+		assert: function (key) {
+			if (!channel.has(key)) {
+				throw new $TypeError('Side channel does not contain ' + inspect(key));
+			}
+		},
+		'delete': function (key) {
+			var root = $o && $o.next;
+			var deletedNode = listDelete($o, key);
+			if (deletedNode && root && root === deletedNode) {
+				$o = void undefined;
+			}
+			return !!deletedNode;
+		},
+		get: function (key) {
+			return listGet($o, key);
+		},
+		has: function (key) {
+			return listHas($o, key);
+		},
+		set: function (key, value) {
+			if (!$o) {
+				// Initialize the linked list as an empty node, so that we don't have to special-case handling of the first node: we can always refer to it as (previous node).next, instead of something like (list).head
+				$o = {
+					next: void undefined
+				};
+			}
+			// eslint-disable-next-line no-extra-parens
+			listSet(/** @type {NonNullable<typeof $o>} */ ($o), key, value);
+		}
+	};
+	// @ts-expect-error TODO: figure out why this is erroring
+	return channel;
+};

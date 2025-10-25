@@ -1,14 +1,13 @@
-import getSideChannelList from 'side-channel-list';
-import getSideChannelMap from 'side-channel-map';
-import getSideChannelWeakMap from 'side-channel-weakmap';
-
-declare namespace getSideChannel {
-	type Channel<K, V> =
-		| getSideChannelList.Channel<K, V>
-		| ReturnType<Exclude<typeof getSideChannelMap<K, V>, false>>
-		| ReturnType<Exclude<typeof getSideChannelWeakMap<K, V>, false>>;
+declare namespace getSideChannelList {
+	type Channel<K, V> = {
+		assert: (key: K) => void;
+		has: (key: K) => boolean;
+		get: (key: K) => V | undefined;
+		set: (key: K, value: V) => void;
+		delete: (key: K) => boolean;
+	};
 }
 
-declare function getSideChannel<K, V>(): getSideChannel.Channel<K, V>;
+declare function getSideChannelList<V, K>(): getSideChannelList.Channel<K, V>;
 
-export = getSideChannel;
+export = getSideChannelList;
