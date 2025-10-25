@@ -1,3 +1,3 @@
-# `@rollup/rollup-win32-x64-gnu`
+# `@rollup/rollup-win32-x64-msvc`
 
-This is the **x86_64-pc-windows-gnu** binary for `rollup`
+This is the **x86_64-pc-windows-msvc** binary for `rollup`
