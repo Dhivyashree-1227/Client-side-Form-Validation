@@ -1,3 +1,3 @@
-# esbuild
+# `@rollup/rollup-win32-x64-gnu`
 
-This is the Windows 64-bit binary for esbuild, a JavaScript bundler and minifier. See https://github.com/evanw/esbuild for details.
+This is the **x86_64-pc-windows-gnu** binary for `rollup`
