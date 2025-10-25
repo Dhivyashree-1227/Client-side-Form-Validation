@@ -1,43 +1,34 @@
-# unpipe
+# utils-merge
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Node.js Version][node-image]][node-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+[![Version](https://img.shields.io/npm/v/utils-merge.svg?label=version)](https://www.npmjs.com/package/utils-merge)
+[![Build](https://img.shields.io/travis/jaredhanson/utils-merge.svg)](https://travis-ci.org/jaredhanson/utils-merge)
+[![Quality](https://img.shields.io/codeclimate/github/jaredhanson/utils-merge.svg?label=quality)](https://codeclimate.com/github/jaredhanson/utils-merge)
+[![Coverage](https://img.shields.io/coveralls/jaredhanson/utils-merge.svg)](https://coveralls.io/r/jaredhanson/utils-merge)
+[![Dependencies](https://img.shields.io/david/jaredhanson/utils-merge.svg)](https://david-dm.org/jaredhanson/utils-merge)
 
-Unpipe a stream from all destinations.
 
-## Installation
+Merges the properties from a source object into a destination object.
 
-```sh
-$ npm install unpipe
+## Install
+
+```bash
+$ npm install utils-merge
 ```
 
-## API
+## Usage
 
-```js
-var unpipe = require('unpipe')
+```javascript
+var a = { foo: 'bar' }
+  , b = { bar: 'baz' };
+
+merge(a, b);
+// => { foo: 'bar', bar: 'baz' }
 ```
-
-### unpipe(stream)
-
-Unpipes all destinations from a given stream. With stream 2+, this is
-equivalent to `stream.unpipe()`. When used with streams 1 style streams
-(typically Node.js 0.8 and below), this module attempts to undo the
-actions done in `stream.pipe(dest)`.
 
 ## License
 
-[MIT](LICENSE)
+[The MIT License](http://opensource.org/licenses/MIT)
 
-[npm-image]: https://img.shields.io/npm/v/unpipe.svg
-[npm-url]: https://npmjs.org/package/unpipe
-[node-image]: https://img.shields.io/node/v/unpipe.svg
-[node-url]: http://nodejs.org/download/
-[travis-image]: https://img.shields.io/travis/stream-utils/unpipe.svg
-[travis-url]: https://travis-ci.org/stream-utils/unpipe
-[coveralls-image]: https://img.shields.io/coveralls/stream-utils/unpipe.svg
-[coveralls-url]: https://coveralls.io/r/stream-utils/unpipe?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/unpipe.svg
-[downloads-url]: https://npmjs.org/package/unpipe
+Copyright (c) 2013-2017 Jared Hanson <[http://jaredhanson.net/](http://jaredhanson.net/)>
+
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/vK9dyjRnnWsMzzJTQ57fRJpH/jaredhanson/utils-merge'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/vK9dyjRnnWsMzzJTQ57fRJpH/jaredhanson/utils-merge.svg' /></a>
