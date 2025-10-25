@@ -1,21 +1,29 @@
-# picocolors
+# PostCSS
 
-The tiniest and the fastest library for terminal output formatting with ANSI colors.
+<img align="right" width="95" height="95"
+     alt="Philosopher’s stone, logo of PostCSS"
+     src="https://postcss.org/logo.svg">
 
-```javascript
-import pc from "picocolors"
+PostCSS is a tool for transforming styles with JS plugins.
+These plugins can lint your CSS, support variables and mixins,
+transpile future CSS syntax, inline images, and more.
 
-console.log(
-  pc.green(`How are ${pc.italic(`you`)} doing?`)
-)
-```
+PostCSS is used by industry leaders including Wikipedia, Twitter, Alibaba,
+and JetBrains. The [Autoprefixer] and [Stylelint] PostCSS plugins are some of the most popular CSS tools.
 
-- **No dependencies.**
-- **14 times** smaller and **2 times** faster than chalk.
-- Used by popular tools like PostCSS, SVGO, Stylelint, and Browserslist.
-- Node.js v6+ & browsers support. Support for both CJS and ESM projects.
-- TypeScript type declarations included.
-- [`NO_COLOR`](https://no-color.org/) friendly.
+---
+
+<img src="https://cdn.evilmartians.com/badges/logo-no-label.svg" alt="" width="22" height="16" />  Built by
+ <b><a href="https://evilmartians.com/devtools?utm_source=postcss&utm_campaign=devtools-button&utm_medium=github">Evil Martians</a></b>, go-to agency for <b>developer tools</b>.
+
+---
+
+[Abstract Syntax Tree]: https://en.wikipedia.org/wiki/Abstract_syntax_tree
+[Evil Martians]:        https://evilmartians.com/?utm_source=postcss
+[Autoprefixer]:         https://github.com/postcss/autoprefixer
+[Stylelint]:            https://stylelint.io/
+[plugins]:              https://github.com/postcss/postcss#plugins
+
 
 ## Docs
-Read **[full docs](https://github.com/alexeyraspopov/picocolors#readme)** on GitHub.
+Read full docs **[here](https://postcss.org/)**.
