@@ -1,108 +1,98 @@
-0.6.3 / 2022-01-22
+2.4.1 / 2022-02-22
 ==================
 
-  * Revert "Lazy-load modules from main entry point"
+  * Fix error on early async hooks implementations
 
-0.6.2 / 2019-04-29
+2.4.0 / 2022-02-21
 ==================
 
-  * Fix sorting charset, encoding, and language with extra parameters
+  * Prevent loss of async hooks context
 
-0.6.1 / 2016-05-02
+2.3.0 / 2015-05-26
 ==================
 
-  * perf: improve `Accept` parsing speed
-  * perf: improve `Accept-Charset` parsing speed
-  * perf: improve `Accept-Encoding` parsing speed
-  * perf: improve `Accept-Language` parsing speed
+  * Add defined behavior for HTTP `CONNECT` requests
+  * Add defined behavior for HTTP `Upgrade` requests
+  * deps: ee-first@1.1.1
 
-0.6.0 / 2015-09-29
+2.2.1 / 2015-04-22
 ==================
 
-  * Fix including type extensions in parameters in `Accept` parsing
-  * Fix parsing `Accept` parameters with quoted equals
-  * Fix parsing `Accept` parameters with quoted semicolons
-  * Lazy-load modules from main entry point
-  * perf: delay type concatenation until needed
-  * perf: enable strict mode
-  * perf: hoist regular expressions
-  * perf: remove closures getting spec properties
-  * perf: remove a closure from media type parsing
-  * perf: remove property delete from media type parsing
+  * Fix `isFinished(req)` when data buffered
 
-0.5.3 / 2015-05-10
+2.2.0 / 2014-12-22
 ==================
 
-  * Fix media type parameter matching to be case-insensitive
+  * Add message object to callback arguments
 
-0.5.2 / 2015-05-06
+2.1.1 / 2014-10-22
 ==================
 
-  * Fix comparing media types with quoted values
-  * Fix splitting media types with quoted commas
+  * Fix handling of pipelined requests
 
-0.5.1 / 2015-02-14
+2.1.0 / 2014-08-16
 ==================
 
-  * Fix preference sorting to be stable for long acceptable lists
+  * Check if `socket` is detached
+  * Return `undefined` for `isFinished` if state unknown
 
-0.5.0 / 2014-12-18
+2.0.0 / 2014-08-16
 ==================
 
-  * Fix list return order when large accepted list
-  * Fix missing identity encoding when q=0 exists
-  * Remove dynamic building of Negotiator class
+  * Add `isFinished` function
+  * Move to `jshttp` organization
+  * Remove support for plain socket argument
+  * Rename to `on-finished`
+  * Support both `req` and `res` as arguments
+  * deps: ee-first@1.0.5
 
-0.4.9 / 2014-10-14
+1.2.2 / 2014-06-10
 ==================
 
-  * Fix error when media type has invalid parameter
+  * Reduce listeners added to emitters
+    - avoids "event emitter leak" warnings when used multiple times on same request
 
-0.4.8 / 2014-09-28
+1.2.1 / 2014-06-08
 ==================
 
-  * Fix all negotiations to be case-insensitive
-  * Stable sort preferences of same quality according to client order
-  * Support Node.js 0.6
+  * Fix returned value when already finished
 
-0.4.7 / 2014-06-24
+1.2.0 / 2014-06-05
 ==================
 
-  * Handle invalid provided languages
-  * Handle invalid provided media types
+  * Call callback when called on already-finished socket
 
-0.4.6 / 2014-06-11
+1.1.4 / 2014-05-27
 ==================
 
-  *  Order by specificity when quality is the same
+  * Support node.js 0.8
 
-0.4.5 / 2014-05-29
+1.1.3 / 2014-04-30
 ==================
 
-  * Fix regression in empty header handling
+  * Make sure errors passed as instanceof `Error`
 
-0.4.4 / 2014-05-29
+1.1.2 / 2014-04-18
 ==================
 
-  * Fix behaviors when headers are not present
+  * Default the `socket` to passed-in object
 
-0.4.3 / 2014-04-16
+1.1.1 / 2014-01-16
 ==================
 
-  * Handle slashes on media params correctly
+  * Rename module to `finished`
 
-0.4.2 / 2014-02-28
+1.1.0 / 2013-12-25
 ==================
 
-  * Fix media type sorting
-  * Handle media types params strictly
+  * Call callback when called on already-errored socket
 
-0.4.1 / 2014-01-16
+1.0.1 / 2013-12-20
 ==================
 
-  * Use most specific matches
+  * Actually pass the error to the callback
 
-0.4.0 / 2014-01-09
+1.0.0 / 2013-12-20
 ==================
 
-  * Remove preferred prefix from methods
+  * Initial release
