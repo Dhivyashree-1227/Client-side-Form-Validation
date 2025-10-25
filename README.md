@@ -1,40 +1,46 @@
-# hasown <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
+# has-symbols <sup>[![Version Badge][2]][1]</sup>
 
 [![github actions][actions-image]][actions-url]
 [![coverage][codecov-image]][codecov-url]
+[![dependency status][5]][6]
+[![dev dependency status][7]][8]
 [![License][license-image]][license-url]
 [![Downloads][downloads-image]][downloads-url]
 
-[![npm badge][npm-badge-png]][package-url]
+[![npm badge][11]][1]
 
-A robust, ES3 compatible, "has own property" predicate.
+Determine if the JS environment has Symbol support. Supports spec, or shams.
 
 ## Example
 
 ```js
-const assert = require('assert');
-const hasOwn = require('hasown');
+var hasSymbols = require('has-symbols');
 
-assert.equal(hasOwn({}, 'toString'), false);
-assert.equal(hasOwn([], 'length'), true);
-assert.equal(hasOwn({ a: 42 }, 'a'), true);
+hasSymbols() === true; // if the environment has native Symbol support. Not polyfillable, not forgeable.
+
+var hasSymbolsKinda = require('has-symbols/shams');
+hasSymbolsKinda() === true; // if the environment has a Symbol sham that mostly follows the spec.
 ```
+
+## Supported Symbol shams
+ - get-own-property-symbols [npm](https://www.npmjs.com/package/get-own-property-symbols) | [github](https://github.com/WebReflection/get-own-property-symbols)
+ - core-js [npm](https://www.npmjs.com/package/core-js) | [github](https://github.com/zloirock/core-js)
 
 ## Tests
 Simply clone the repo, `npm install`, and run `npm test`
 
-[package-url]: https://npmjs.org/package/hasown
-[npm-version-svg]: https://versionbadg.es/inspect-js/hasown.svg
-[deps-svg]: https://david-dm.org/inspect-js/hasOwn.svg
-[deps-url]: https://david-dm.org/inspect-js/hasOwn
-[dev-deps-svg]: https://david-dm.org/inspect-js/hasOwn/dev-status.svg
-[dev-deps-url]: https://david-dm.org/inspect-js/hasOwn#info=devDependencies
-[npm-badge-png]: https://nodei.co/npm/hasown.png?downloads=true&stars=true
-[license-image]: https://img.shields.io/npm/l/hasown.svg
+[1]: https://npmjs.org/package/has-symbols
+[2]: https://versionbadg.es/inspect-js/has-symbols.svg
+[5]: https://david-dm.org/inspect-js/has-symbols.svg
+[6]: https://david-dm.org/inspect-js/has-symbols
+[7]: https://david-dm.org/inspect-js/has-symbols/dev-status.svg
+[8]: https://david-dm.org/inspect-js/has-symbols#info=devDependencies
+[11]: https://nodei.co/npm/has-symbols.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/has-symbols.svg
 [license-url]: LICENSE
-[downloads-image]: https://img.shields.io/npm/dm/hasown.svg
-[downloads-url]: https://npm-stat.com/charts.html?package=hasown
-[codecov-image]: https://codecov.io/gh/inspect-js/hasOwn/branch/main/graphs/badge.svg
-[codecov-url]: https://app.codecov.io/gh/inspect-js/hasOwn/
-[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/inspect-js/hasOwn
-[actions-url]: https://github.com/inspect-js/hasOwn/actions
+[downloads-image]: https://img.shields.io/npm/dm/has-symbols.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=has-symbols
+[codecov-image]: https://codecov.io/gh/inspect-js/has-symbols/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/inspect-js/has-symbols/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/inspect-js/has-symbols
+[actions-url]: https://github.com/inspect-js/has-symbols/actions
