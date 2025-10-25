@@ -1,128 +1,257 @@
-# encodeurl
+# serve-static
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-[![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][travis-image]][travis-url]
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-url]
+[![Linux Build][github-actions-ci-image]][github-actions-ci-url]
+[![Windows Build][appveyor-image]][appveyor-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-Encode a URL to a percent-encoded form, excluding already-encoded sequences
-
-## Installation
+## Install
 
 This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/). Installation is done using the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```sh
-$ npm install encodeurl
+$ npm install serve-static
 ```
 
 ## API
 
 ```js
-var encodeUrl = require('encodeurl')
+var serveStatic = require('serve-static')
 ```
 
-### encodeUrl(url)
+### serveStatic(root, options)
 
-Encode a URL to a percent-encoded form, excluding already-encoded sequences.
+Create a new middleware function to serve files from within a given root
+directory. The file to serve will be determined by combining `req.url`
+with the provided root directory. When a file is not found, instead of
+sending a 404 response, this module will instead call `next()` to move on
+to the next middleware, allowing for stacking and fall-backs.
 
-This function will take an already-encoded URL and encode all the non-URL
-code points (as UTF-8 byte sequences). This function will not encode the
-"%" character unless it is not part of a valid sequence (`%20` will be
-left as-is, but `%foo` will be encoded as `%25foo`).
+#### Options
 
-This encode is meant to be "safe" and does not throw errors. It will try as
-hard as it can to properly encode the given URL, including replacing any raw,
-unpaired surrogate pairs with the Unicode replacement character prior to
-encoding.
+##### acceptRanges
 
-This function is _similar_ to the intrinsic function `encodeURI`, except it
-will not encode the `%` character if that is part of a valid sequence, will
-not encode `[` and `]` (for IPv6 hostnames) and will replace raw, unpaired
-surrogate pairs with the Unicode replacement character (instead of throwing).
+Enable or disable accepting ranged requests, defaults to true.
+Disabling this will not send `Accept-Ranges` and ignore the contents
+of the `Range` request header.
+
+##### cacheControl
+
+Enable or disable setting `Cache-Control` response header, defaults to
+true. Disabling this will ignore the `immutable` and `maxAge` options.
+
+##### dotfiles
+
+ Set how "dotfiles" are treated when encountered. A dotfile is a file
+or directory that begins with a dot ("."). Note this check is done on
+the path itself without checking if the path actually exists on the
+disk. If `root` is specified, only the dotfiles above the root are
+checked (i.e. the root itself can be within a dotfile when set
+to "deny").
+
+  - `'allow'` No special treatment for dotfiles.
+  - `'deny'` Deny a request for a dotfile and 403/`next()`.
+  - `'ignore'` Pretend like the dotfile does not exist and 404/`next()`.
+
+The default value is similar to `'ignore'`, with the exception that this
+default will not ignore the files within a directory that begins with a dot.
+
+##### etag
+
+Enable or disable etag generation, defaults to true.
+
+##### extensions
+
+Set file extension fallbacks. When set, if a file is not found, the given
+extensions will be added to the file name and search for. The first that
+exists will be served. Example: `['html', 'htm']`.
+
+The default value is `false`.
+
+##### fallthrough
+
+Set the middleware to have client errors fall-through as just unhandled
+requests, otherwise forward a client error. The difference is that client
+errors like a bad request or a request to a non-existent file will cause
+this middleware to simply `next()` to your next middleware when this value
+is `true`. When this value is `false`, these errors (even 404s), will invoke
+`next(err)`.
+
+Typically `true` is desired such that multiple physical directories can be
+mapped to the same web address or for routes to fill in non-existent files.
+
+The value `false` can be used if this middleware is mounted at a path that
+is designed to be strictly a single file system directory, which allows for
+short-circuiting 404s for less overhead. This middleware will also reply to
+all methods.
+
+The default value is `true`.
+
+##### immutable
+
+Enable or disable the `immutable` directive in the `Cache-Control` response
+header, defaults to `false`. If set to `true`, the `maxAge` option should
+also be specified to enable caching. The `immutable` directive will prevent
+supported clients from making conditional requests during the life of the
+`maxAge` option to check if the file has changed.
+
+##### index
+
+By default this module will send "index.html" files in response to a request
+on a directory. To disable this set `false` or to supply a new index pass a
+string or an array in preferred order.
+
+##### lastModified
+
+Enable or disable `Last-Modified` header, defaults to true. Uses the file
+system's last modified value.
+
+##### maxAge
+
+Provide a max-age in milliseconds for http caching, defaults to 0. This
+can also be a string accepted by the [ms](https://www.npmjs.org/package/ms#readme)
+module.
+
+##### redirect
+
+Redirect to trailing "/" when the pathname is a dir. Defaults to `true`.
+
+##### setHeaders
+
+Function to set custom headers on response. Alterations to the headers need to
+occur synchronously. The function is called as `fn(res, path, stat)`, where
+the arguments are:
+
+  - `res` the response object
+  - `path` the file path that is being sent
+  - `stat` the stat object of the file that is being sent
 
 ## Examples
 
-### Encode a URL containing user-controled data
+### Serve files with vanilla node.js http server
 
 ```js
-var encodeUrl = require('encodeurl')
-var escapeHtml = require('escape-html')
+var finalhandler = require('finalhandler')
+var http = require('http')
+var serveStatic = require('serve-static')
 
-http.createServer(function onRequest (req, res) {
-  // get encoded form of inbound url
-  var url = encodeUrl(req.url)
+// Serve up public/ftp folder
+var serve = serveStatic('public/ftp', { index: ['index.html', 'index.htm'] })
 
-  // create html message
-  var body = '<p>Location ' + escapeHtml(url) + ' not found</p>'
-
-  // send a 404
-  res.statusCode = 404
-  res.setHeader('Content-Type', 'text/html; charset=UTF-8')
-  res.setHeader('Content-Length', String(Buffer.byteLength(body, 'utf-8')))
-  res.end(body, 'utf-8')
+// Create server
+var server = http.createServer(function onRequest (req, res) {
+  serve(req, res, finalhandler(req, res))
 })
+
+// Listen
+server.listen(3000)
 ```
 
-### Encode a URL for use in a header field
+### Serve all files as downloads
 
 ```js
-var encodeUrl = require('encodeurl')
-var escapeHtml = require('escape-html')
-var url = require('url')
+var contentDisposition = require('content-disposition')
+var finalhandler = require('finalhandler')
+var http = require('http')
+var serveStatic = require('serve-static')
 
-http.createServer(function onRequest (req, res) {
-  // parse inbound url
-  var href = url.parse(req)
-
-  // set new host for redirect
-  href.host = 'localhost'
-  href.protocol = 'https:'
-  href.slashes = true
-
-  // create location header
-  var location = encodeUrl(url.format(href))
-
-  // create html message
-  var body = '<p>Redirecting to new site: ' + escapeHtml(location) + '</p>'
-
-  // send a 301
-  res.statusCode = 301
-  res.setHeader('Content-Type', 'text/html; charset=UTF-8')
-  res.setHeader('Content-Length', String(Buffer.byteLength(body, 'utf-8')))
-  res.setHeader('Location', location)
-  res.end(body, 'utf-8')
+// Serve up public/ftp folder
+var serve = serveStatic('public/ftp', {
+  index: false,
+  setHeaders: setHeaders
 })
+
+// Set header to force download
+function setHeaders (res, path) {
+  res.setHeader('Content-Disposition', contentDisposition(path))
+}
+
+// Create server
+var server = http.createServer(function onRequest (req, res) {
+  serve(req, res, finalhandler(req, res))
+})
+
+// Listen
+server.listen(3000)
 ```
 
-## Testing
+### Serving using express
 
-```sh
-$ npm test
-$ npm run lint
+#### Simple
+
+This is a simple example of using Express.
+
+```js
+var express = require('express')
+var serveStatic = require('serve-static')
+
+var app = express()
+
+app.use(serveStatic('public/ftp', { index: ['default.html', 'default.htm'] }))
+app.listen(3000)
 ```
 
-## References
+#### Multiple roots
 
-- [RFC 3986: Uniform Resource Identifier (URI): Generic Syntax][rfc-3986]
-- [WHATWG URL Living Standard][whatwg-url]
+This example shows a simple way to search through multiple directories.
+Files are searched for in `public-optimized/` first, then `public/` second
+as a fallback.
 
-[rfc-3986]: https://tools.ietf.org/html/rfc3986
-[whatwg-url]: https://url.spec.whatwg.org/
+```js
+var express = require('express')
+var path = require('path')
+var serveStatic = require('serve-static')
+
+var app = express()
+
+app.use(serveStatic(path.join(__dirname, 'public-optimized')))
+app.use(serveStatic(path.join(__dirname, 'public')))
+app.listen(3000)
+```
+
+#### Different settings for paths
+
+This example shows how to set a different max age depending on the served
+file type. In this example, HTML files are not cached, while everything else
+is for 1 day.
+
+```js
+var express = require('express')
+var path = require('path')
+var serveStatic = require('serve-static')
+
+var app = express()
+
+app.use(serveStatic(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders: setCustomCacheControl
+}))
+
+app.listen(3000)
+
+function setCustomCacheControl (res, path) {
+  if (serveStatic.mime.lookup(path) === 'text/html') {
+    // Custom Cache-Control for HTML files
+    res.setHeader('Cache-Control', 'public, max-age=0')
+  }
+}
+```
 
 ## License
 
 [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/encodeurl.svg
-[npm-url]: https://npmjs.org/package/encodeurl
-[node-version-image]: https://img.shields.io/node/v/encodeurl.svg
-[node-version-url]: https://nodejs.org/en/download
-[travis-image]: https://img.shields.io/travis/pillarjs/encodeurl.svg
-[travis-url]: https://travis-ci.org/pillarjs/encodeurl
-[coveralls-image]: https://img.shields.io/coveralls/pillarjs/encodeurl.svg
-[coveralls-url]: https://coveralls.io/r/pillarjs/encodeurl?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/encodeurl.svg
-[downloads-url]: https://npmjs.org/package/encodeurl
+[appveyor-image]: https://badgen.net/appveyor/ci/dougwilson/serve-static/master?label=windows
+[appveyor-url]: https://ci.appveyor.com/project/dougwilson/serve-static
+[coveralls-image]: https://badgen.net/coveralls/c/github/expressjs/serve-static/master
+[coveralls-url]: https://coveralls.io/r/expressjs/serve-static?branch=master
+[github-actions-ci-image]: https://badgen.net/github/checks/expressjs/serve-static/master?label=linux
+[github-actions-ci-url]: https://github.com/expressjs/serve-static/actions/workflows/ci.yml
+[node-image]: https://badgen.net/npm/node/serve-static
+[node-url]: https://nodejs.org/en/download/
+[npm-downloads-image]: https://badgen.net/npm/dm/serve-static
+[npm-url]: https://npmjs.org/package/serve-static
+[npm-version-image]: https://badgen.net/npm/v/serve-static

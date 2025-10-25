@@ -1,162 +1,209 @@
-/**
- * Helpers.
+/*!
+ * serve-static
+ * Copyright(c) 2010 Sencha Inc.
+ * Copyright(c) 2011 TJ Holowaychuk
+ * Copyright(c) 2014-2016 Douglas Christopher Wilson
+ * MIT Licensed
  */
 
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var w = d * 7;
-var y = d * 365.25;
+'use strict'
 
 /**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} [options]
- * @throws {Error} throw an error if val is not a non-empty string or a number
- * @return {String|Number}
- * @api public
+ * Module dependencies.
+ * @private
  */
 
-module.exports = function (val, options) {
-  options = options || {};
-  var type = typeof val;
-  if (type === 'string' && val.length > 0) {
-    return parse(val);
-  } else if (type === 'number' && isFinite(val)) {
-    return options.long ? fmtLong(val) : fmtShort(val);
-  }
-  throw new Error(
-    'val is not a non-empty string or a valid number. val=' +
-      JSON.stringify(val)
-  );
-};
+var encodeUrl = require('encodeurl')
+var escapeHtml = require('escape-html')
+var parseUrl = require('parseurl')
+var resolve = require('path').resolve
+var send = require('send')
+var url = require('url')
 
 /**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
+ * Module exports.
+ * @public
  */
 
-function parse(str) {
-  str = String(str);
-  if (str.length > 100) {
-    return;
+module.exports = serveStatic
+module.exports.mime = send.mime
+
+/**
+ * @param {string} root
+ * @param {object} [options]
+ * @return {function}
+ * @public
+ */
+
+function serveStatic (root, options) {
+  if (!root) {
+    throw new TypeError('root path required')
   }
-  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-    str
-  );
-  if (!match) {
-    return;
+
+  if (typeof root !== 'string') {
+    throw new TypeError('root path must be a string')
   }
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'weeks':
-    case 'week':
-    case 'w':
-      return n * w;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-    default:
-      return undefined;
+
+  // copy options object
+  var opts = Object.create(options || null)
+
+  // fall-though
+  var fallthrough = opts.fallthrough !== false
+
+  // default redirect
+  var redirect = opts.redirect !== false
+
+  // headers listener
+  var setHeaders = opts.setHeaders
+
+  if (setHeaders && typeof setHeaders !== 'function') {
+    throw new TypeError('option setHeaders must be function')
+  }
+
+  // setup options for send
+  opts.maxage = opts.maxage || opts.maxAge || 0
+  opts.root = resolve(root)
+
+  // construct directory listener
+  var onDirectory = redirect
+    ? createRedirectDirectoryListener()
+    : createNotFoundDirectoryListener()
+
+  return function serveStatic (req, res, next) {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      if (fallthrough) {
+        return next()
+      }
+
+      // method not allowed
+      res.statusCode = 405
+      res.setHeader('Allow', 'GET, HEAD')
+      res.setHeader('Content-Length', '0')
+      res.end()
+      return
+    }
+
+    var forwardError = !fallthrough
+    var originalUrl = parseUrl.original(req)
+    var path = parseUrl(req).pathname
+
+    // make sure redirect occurs at mount
+    if (path === '/' && originalUrl.pathname.substr(-1) !== '/') {
+      path = ''
+    }
+
+    // create send stream
+    var stream = send(req, path, opts)
+
+    // add directory handler
+    stream.on('directory', onDirectory)
+
+    // add headers listener
+    if (setHeaders) {
+      stream.on('headers', setHeaders)
+    }
+
+    // add file listener for fallthrough
+    if (fallthrough) {
+      stream.on('file', function onFile () {
+        // once file is determined, always forward error
+        forwardError = true
+      })
+    }
+
+    // forward errors
+    stream.on('error', function error (err) {
+      if (forwardError || !(err.statusCode < 500)) {
+        next(err)
+        return
+      }
+
+      next()
+    })
+
+    // pipe
+    stream.pipe(res)
   }
 }
 
 /**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
+ * Collapse all leading slashes into a single slash
+ * @private
  */
+function collapseLeadingSlashes (str) {
+  for (var i = 0; i < str.length; i++) {
+    if (str.charCodeAt(i) !== 0x2f /* / */) {
+      break
+    }
+  }
 
-function fmtShort(ms) {
-  var msAbs = Math.abs(ms);
-  if (msAbs >= d) {
-    return Math.round(ms / d) + 'd';
-  }
-  if (msAbs >= h) {
-    return Math.round(ms / h) + 'h';
-  }
-  if (msAbs >= m) {
-    return Math.round(ms / m) + 'm';
-  }
-  if (msAbs >= s) {
-    return Math.round(ms / s) + 's';
-  }
-  return ms + 'ms';
+  return i > 1
+    ? '/' + str.substr(i)
+    : str
 }
 
 /**
- * Long format for `ms`.
+ * Create a minimal HTML document.
  *
- * @param {Number} ms
- * @return {String}
- * @api private
+ * @param {string} title
+ * @param {string} body
+ * @private
  */
 
-function fmtLong(ms) {
-  var msAbs = Math.abs(ms);
-  if (msAbs >= d) {
-    return plural(ms, msAbs, d, 'day');
-  }
-  if (msAbs >= h) {
-    return plural(ms, msAbs, h, 'hour');
-  }
-  if (msAbs >= m) {
-    return plural(ms, msAbs, m, 'minute');
-  }
-  if (msAbs >= s) {
-    return plural(ms, msAbs, s, 'second');
-  }
-  return ms + ' ms';
+function createHtmlDocument (title, body) {
+  return '<!DOCTYPE html>\n' +
+    '<html lang="en">\n' +
+    '<head>\n' +
+    '<meta charset="utf-8">\n' +
+    '<title>' + title + '</title>\n' +
+    '</head>\n' +
+    '<body>\n' +
+    '<pre>' + body + '</pre>\n' +
+    '</body>\n' +
+    '</html>\n'
 }
 
 /**
- * Pluralization helper.
+ * Create a directory listener that just 404s.
+ * @private
  */
 
-function plural(ms, msAbs, n, name) {
-  var isPlural = msAbs >= n * 1.5;
-  return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
+function createNotFoundDirectoryListener () {
+  return function notFound () {
+    this.error(404)
+  }
+}
+
+/**
+ * Create a directory listener that performs a redirect.
+ * @private
+ */
+
+function createRedirectDirectoryListener () {
+  return function redirect (res) {
+    if (this.hasTrailingSlash()) {
+      this.error(404)
+      return
+    }
+
+    // get original URL
+    var originalUrl = parseUrl.original(this.req)
+
+    // append trailing slash
+    originalUrl.path = null
+    originalUrl.pathname = collapseLeadingSlashes(originalUrl.pathname + '/')
+
+    // reformat the URL
+    var loc = encodeUrl(url.format(originalUrl))
+    var doc = createHtmlDocument('Redirecting', 'Redirecting to ' + escapeHtml(loc))
+
+    // send redirect response
+    res.statusCode = 301
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8')
+    res.setHeader('Content-Length', Buffer.byteLength(doc))
+    res.setHeader('Content-Security-Policy', "default-src 'none'")
+    res.setHeader('X-Content-Type-Options', 'nosniff')
+    res.setHeader('Location', loc)
+    res.end(doc)
+  }
 }
