@@ -1,265 +1,136 @@
 'use strict';
 
-var formats = require('./formats');
+var test = require('tape');
+var inspect = require('object-inspect');
+var SaferBuffer = require('safer-buffer').Buffer;
+var forEach = require('for-each');
+var utils = require('../lib/utils');
 
-var has = Object.prototype.hasOwnProperty;
-var isArray = Array.isArray;
+test('merge()', function (t) {
+    t.deepEqual(utils.merge(null, true), [null, true], 'merges true into null');
 
-var hexTable = (function () {
-    var array = [];
-    for (var i = 0; i < 256; ++i) {
-        array.push('%' + ((i < 16 ? '0' : '') + i.toString(16)).toUpperCase());
-    }
+    t.deepEqual(utils.merge(null, [42]), [null, 42], 'merges null into an array');
 
-    return array;
-}());
+    t.deepEqual(utils.merge({ a: 'b' }, { a: 'c' }), { a: ['b', 'c'] }, 'merges two objects with the same key');
 
-var compactQueue = function compactQueue(queue) {
-    while (queue.length > 1) {
-        var item = queue.pop();
-        var obj = item.obj[item.prop];
+    var oneMerged = utils.merge({ foo: 'bar' }, { foo: { first: '123' } });
+    t.deepEqual(oneMerged, { foo: ['bar', { first: '123' }] }, 'merges a standalone and an object into an array');
 
-        if (isArray(obj)) {
-            var compacted = [];
+    var twoMerged = utils.merge({ foo: ['bar', { first: '123' }] }, { foo: { second: '456' } });
+    t.deepEqual(twoMerged, { foo: { 0: 'bar', 1: { first: '123' }, second: '456' } }, 'merges a standalone and two objects into an array');
 
-            for (var j = 0; j < obj.length; ++j) {
-                if (typeof obj[j] !== 'undefined') {
-                    compacted.push(obj[j]);
-                }
-            }
+    var sandwiched = utils.merge({ foo: ['bar', { first: '123', second: '456' }] }, { foo: 'baz' });
+    t.deepEqual(sandwiched, { foo: ['bar', { first: '123', second: '456' }, 'baz'] }, 'merges an object sandwiched by two standalones into an array');
 
-            item.obj[item.prop] = compacted;
+    var nestedArrays = utils.merge({ foo: ['baz'] }, { foo: ['bar', 'xyzzy'] });
+    t.deepEqual(nestedArrays, { foo: ['baz', 'bar', 'xyzzy'] });
+
+    var noOptionsNonObjectSource = utils.merge({ foo: 'baz' }, 'bar');
+    t.deepEqual(noOptionsNonObjectSource, { foo: 'baz', bar: true });
+
+    t.test(
+        'avoids invoking array setters unnecessarily',
+        { skip: typeof Object.defineProperty !== 'function' },
+        function (st) {
+            var setCount = 0;
+            var getCount = 0;
+            var observed = [];
+            Object.defineProperty(observed, 0, {
+                get: function () {
+                    getCount += 1;
+                    return { bar: 'baz' };
+                },
+                set: function () { setCount += 1; }
+            });
+            utils.merge(observed, [null]);
+            st.equal(setCount, 0);
+            st.equal(getCount, 1);
+            observed[0] = observed[0]; // eslint-disable-line no-self-assign
+            st.equal(setCount, 1);
+            st.equal(getCount, 2);
+            st.end();
         }
-    }
-};
+    );
 
-var arrayToObject = function arrayToObject(source, options) {
-    var obj = options && options.plainObjects ? Object.create(null) : {};
-    for (var i = 0; i < source.length; ++i) {
-        if (typeof source[i] !== 'undefined') {
-            obj[i] = source[i];
-        }
-    }
+    t.end();
+});
 
-    return obj;
-};
+test('assign()', function (t) {
+    var target = { a: 1, b: 2 };
+    var source = { b: 3, c: 4 };
+    var result = utils.assign(target, source);
 
-var merge = function merge(target, source, options) {
-    /* eslint no-param-reassign: 0 */
-    if (!source) {
-        return target;
-    }
+    t.equal(result, target, 'returns the target');
+    t.deepEqual(target, { a: 1, b: 3, c: 4 }, 'target and source are merged');
+    t.deepEqual(source, { b: 3, c: 4 }, 'source is untouched');
 
-    if (typeof source !== 'object') {
-        if (isArray(target)) {
-            target.push(source);
-        } else if (target && typeof target === 'object') {
-            if ((options && (options.plainObjects || options.allowPrototypes)) || !has.call(Object.prototype, source)) {
-                target[source] = true;
-            }
-        } else {
-            return [target, source];
-        }
+    t.end();
+});
 
-        return target;
-    }
+test('combine()', function (t) {
+    t.test('both arrays', function (st) {
+        var a = [1];
+        var b = [2];
+        var combined = utils.combine(a, b);
 
-    if (!target || typeof target !== 'object') {
-        return [target].concat(source);
-    }
+        st.deepEqual(a, [1], 'a is not mutated');
+        st.deepEqual(b, [2], 'b is not mutated');
+        st.notEqual(a, combined, 'a !== combined');
+        st.notEqual(b, combined, 'b !== combined');
+        st.deepEqual(combined, [1, 2], 'combined is a + b');
 
-    var mergeTarget = target;
-    if (isArray(target) && !isArray(source)) {
-        mergeTarget = arrayToObject(target, options);
-    }
+        st.end();
+    });
 
-    if (isArray(target) && isArray(source)) {
-        source.forEach(function (item, i) {
-            if (has.call(target, i)) {
-                var targetItem = target[i];
-                if (targetItem && typeof targetItem === 'object' && item && typeof item === 'object') {
-                    target[i] = merge(targetItem, item, options);
-                } else {
-                    target.push(item);
-                }
-            } else {
-                target[i] = item;
-            }
-        });
-        return target;
-    }
+    t.test('one array, one non-array', function (st) {
+        var aN = 1;
+        var a = [aN];
+        var bN = 2;
+        var b = [bN];
 
-    return Object.keys(source).reduce(function (acc, key) {
-        var value = source[key];
+        var combinedAnB = utils.combine(aN, b);
+        st.deepEqual(b, [bN], 'b is not mutated');
+        st.notEqual(aN, combinedAnB, 'aN + b !== aN');
+        st.notEqual(a, combinedAnB, 'aN + b !== a');
+        st.notEqual(bN, combinedAnB, 'aN + b !== bN');
+        st.notEqual(b, combinedAnB, 'aN + b !== b');
+        st.deepEqual([1, 2], combinedAnB, 'first argument is array-wrapped when not an array');
 
-        if (has.call(acc, key)) {
-            acc[key] = merge(acc[key], value, options);
-        } else {
-            acc[key] = value;
-        }
-        return acc;
-    }, mergeTarget);
-};
+        var combinedABn = utils.combine(a, bN);
+        st.deepEqual(a, [aN], 'a is not mutated');
+        st.notEqual(aN, combinedABn, 'a + bN !== aN');
+        st.notEqual(a, combinedABn, 'a + bN !== a');
+        st.notEqual(bN, combinedABn, 'a + bN !== bN');
+        st.notEqual(b, combinedABn, 'a + bN !== b');
+        st.deepEqual([1, 2], combinedABn, 'second argument is array-wrapped when not an array');
 
-var assign = function assignSingleSource(target, source) {
-    return Object.keys(source).reduce(function (acc, key) {
-        acc[key] = source[key];
-        return acc;
-    }, target);
-};
+        st.end();
+    });
 
-var decode = function (str, decoder, charset) {
-    var strWithoutPlus = str.replace(/\+/g, ' ');
-    if (charset === 'iso-8859-1') {
-        // unescape never throws, no try...catch needed:
-        return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
-    }
-    // utf-8
-    try {
-        return decodeURIComponent(strWithoutPlus);
-    } catch (e) {
-        return strWithoutPlus;
-    }
-};
+    t.test('neither is an array', function (st) {
+        var combined = utils.combine(1, 2);
+        st.notEqual(1, combined, '1 + 2 !== 1');
+        st.notEqual(2, combined, '1 + 2 !== 2');
+        st.deepEqual([1, 2], combined, 'both arguments are array-wrapped when not an array');
 
-var limit = 1024;
+        st.end();
+    });
 
-/* eslint operator-linebreak: [2, "before"] */
+    t.end();
+});
 
-var encode = function encode(str, defaultEncoder, charset, kind, format) {
-    // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
-    // It has been adapted here for stricter adherence to RFC 3986
-    if (str.length === 0) {
-        return str;
-    }
+test('isBuffer()', function (t) {
+    forEach([null, undefined, true, false, '', 'abc', 42, 0, NaN, {}, [], function () {}, /a/g], function (x) {
+        t.equal(utils.isBuffer(x), false, inspect(x) + ' is not a buffer');
+    });
 
-    var string = str;
-    if (typeof str === 'symbol') {
-        string = Symbol.prototype.toString.call(str);
-    } else if (typeof str !== 'string') {
-        string = String(str);
-    }
+    var fakeBuffer = { constructor: Buffer };
+    t.equal(utils.isBuffer(fakeBuffer), false, 'fake buffer is not a buffer');
 
-    if (charset === 'iso-8859-1') {
-        return escape(string).replace(/%u[0-9a-f]{4}/gi, function ($0) {
-            return '%26%23' + parseInt($0.slice(2), 16) + '%3B';
-        });
-    }
+    var saferBuffer = SaferBuffer.from('abc');
+    t.equal(utils.isBuffer(saferBuffer), true, 'SaferBuffer instance is a buffer');
 
-    var out = '';
-    for (var j = 0; j < string.length; j += limit) {
-        var segment = string.length >= limit ? string.slice(j, j + limit) : string;
-        var arr = [];
-
-        for (var i = 0; i < segment.length; ++i) {
-            var c = segment.charCodeAt(i);
-            if (
-                c === 0x2D // -
-                || c === 0x2E // .
-                || c === 0x5F // _
-                || c === 0x7E // ~
-                || (c >= 0x30 && c <= 0x39) // 0-9
-                || (c >= 0x41 && c <= 0x5A) // a-z
-                || (c >= 0x61 && c <= 0x7A) // A-Z
-                || (format === formats.RFC1738 && (c === 0x28 || c === 0x29)) // ( )
-            ) {
-                arr[arr.length] = segment.charAt(i);
-                continue;
-            }
-
-            if (c < 0x80) {
-                arr[arr.length] = hexTable[c];
-                continue;
-            }
-
-            if (c < 0x800) {
-                arr[arr.length] = hexTable[0xC0 | (c >> 6)]
-                    + hexTable[0x80 | (c & 0x3F)];
-                continue;
-            }
-
-            if (c < 0xD800 || c >= 0xE000) {
-                arr[arr.length] = hexTable[0xE0 | (c >> 12)]
-                    + hexTable[0x80 | ((c >> 6) & 0x3F)]
-                    + hexTable[0x80 | (c & 0x3F)];
-                continue;
-            }
-
-            i += 1;
-            c = 0x10000 + (((c & 0x3FF) << 10) | (segment.charCodeAt(i) & 0x3FF));
-
-            arr[arr.length] = hexTable[0xF0 | (c >> 18)]
-                + hexTable[0x80 | ((c >> 12) & 0x3F)]
-                + hexTable[0x80 | ((c >> 6) & 0x3F)]
-                + hexTable[0x80 | (c & 0x3F)];
-        }
-
-        out += arr.join('');
-    }
-
-    return out;
-};
-
-var compact = function compact(value) {
-    var queue = [{ obj: { o: value }, prop: 'o' }];
-    var refs = [];
-
-    for (var i = 0; i < queue.length; ++i) {
-        var item = queue[i];
-        var obj = item.obj[item.prop];
-
-        var keys = Object.keys(obj);
-        for (var j = 0; j < keys.length; ++j) {
-            var key = keys[j];
-            var val = obj[key];
-            if (typeof val === 'object' && val !== null && refs.indexOf(val) === -1) {
-                queue.push({ obj: obj, prop: key });
-                refs.push(val);
-            }
-        }
-    }
-
-    compactQueue(queue);
-
-    return value;
-};
-
-var isRegExp = function isRegExp(obj) {
-    return Object.prototype.toString.call(obj) === '[object RegExp]';
-};
-
-var isBuffer = function isBuffer(obj) {
-    if (!obj || typeof obj !== 'object') {
-        return false;
-    }
-
-    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
-};
-
-var combine = function combine(a, b) {
-    return [].concat(a, b);
-};
-
-var maybeMap = function maybeMap(val, fn) {
-    if (isArray(val)) {
-        var mapped = [];
-        for (var i = 0; i < val.length; i += 1) {
-            mapped.push(fn(val[i]));
-        }
-        return mapped;
-    }
-    return fn(val);
-};
-
-module.exports = {
-    arrayToObject: arrayToObject,
-    assign: assign,
-    combine: combine,
-    compact: compact,
-    decode: decode,
-    encode: encode,
-    isBuffer: isBuffer,
-    isRegExp: isRegExp,
-    maybeMap: maybeMap,
-    merge: merge
-};
+    var buffer = Buffer.from && Buffer.alloc ? Buffer.from('abc') : new Buffer('abc');
+    t.equal(utils.isBuffer(buffer), true, 'real Buffer instance is a buffer');
+    t.end();
+});
