@@ -1,71 +1,191 @@
 {
-  "name": "source-map-js",
-  "description": "Generates and consumes source maps",
-  "version": "1.2.1",
-  "homepage": "https://github.com/7rulnik/source-map-js",
-  "author": "Valentin 7rulnik Semirulnik <v7rulnik@gmail.com>",
-  "contributors": [
-    "Nick Fitzgerald <nfitzgerald@mozilla.com>",
-    "Tobias Koppers <tobias.koppers@googlemail.com>",
-    "Duncan Beevers <duncan@dweebd.com>",
-    "Stephen Crane <scrane@mozilla.com>",
-    "Ryan Seddon <seddon.ryan@gmail.com>",
-    "Miles Elam <miles.elam@deem.com>",
-    "Mihai Bazon <mihai.bazon@gmail.com>",
-    "Michael Ficarra <github.public.email@michael.ficarra.me>",
-    "Todd Wolfson <todd@twolfson.com>",
-    "Alexander Solovyov <alexander@solovyov.net>",
-    "Felix Gnass <fgnass@gmail.com>",
-    "Conrad Irwin <conrad.irwin@gmail.com>",
-    "usrbincc <usrbincc@yahoo.com>",
-    "David Glasser <glasser@davidglasser.net>",
-    "Chase Douglas <chase@newrelic.com>",
-    "Evan Wallace <evan.exe@gmail.com>",
-    "Heather Arthur <fayearthur@gmail.com>",
-    "Hugh Kennedy <hughskennedy@gmail.com>",
-    "David Glasser <glasser@davidglasser.net>",
-    "Simon Lydell <simon.lydell@gmail.com>",
-    "Jmeas Smith <jellyes2@gmail.com>",
-    "Michael Z Goddard <mzgoddard@gmail.com>",
-    "azu <azu@users.noreply.github.com>",
-    "John Gozde <john@gozde.ca>",
-    "Adam Kirkton <akirkton@truefitinnovation.com>",
-    "Chris Montgomery <christopher.montgomery@dowjones.com>",
-    "J. Ryan Stinnett <jryans@gmail.com>",
-    "Jack Herrington <jherrington@walmartlabs.com>",
-    "Chris Truter <jeffpalentine@gmail.com>",
-    "Daniel Espeset <daniel@danielespeset.com>",
-    "Jamie Wong <jamie.lf.wong@gmail.com>",
-    "Eddy Bruël <ejpbruel@mozilla.com>",
-    "Hawken Rives <hawkrives@gmail.com>",
-    "Gilad Peleg <giladp007@gmail.com>",
-    "djchie <djchie.dev@gmail.com>",
-    "Gary Ye <garysye@gmail.com>",
-    "Nicolas Lalevée <nicolas.lalevee@hibnet.org>"
+  "name": "vite",
+  "version": "5.4.21",
+  "type": "module",
+  "license": "MIT",
+  "author": "Evan You",
+  "description": "Native-ESM powered web dev build tool",
+  "bin": {
+    "vite": "bin/vite.js"
+  },
+  "keywords": [
+    "frontend",
+    "framework",
+    "hmr",
+    "dev-server",
+    "build-tool",
+    "vite"
   ],
-  "repository": "7rulnik/source-map-js",
-  "main": "./source-map.js",
+  "main": "./dist/node/index.js",
+  "types": "./dist/node/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/node/index.d.ts",
+        "default": "./dist/node/index.js"
+      },
+      "require": {
+        "types": "./index.d.cts",
+        "default": "./index.cjs"
+      }
+    },
+    "./client": {
+      "types": "./client.d.ts"
+    },
+    "./runtime": {
+      "types": "./dist/node/runtime.d.ts",
+      "import": "./dist/node/runtime.js"
+    },
+    "./dist/client/*": "./dist/client/*",
+    "./types/*": {
+      "types": "./types/*"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "runtime": [
+        "dist/node/runtime.d.ts"
+      ]
+    }
+  },
   "files": [
-    "source-map.js",
-    "source-map.d.ts",
-    "lib/"
+    "bin",
+    "dist",
+    "client.d.ts",
+    "index.cjs",
+    "index.d.cts",
+    "types"
   ],
   "engines": {
-    "node": ">=0.10.0"
+    "node": "^18.0.0 || >=20.0.0"
   },
-  "license": "BSD-3-Clause",
-  "scripts": {
-    "test": "npm run build && node test/run-tests.js",
-    "build": "webpack --color",
-    "toc": "doctoc --title '## Table of Contents' README.md && doctoc --title '## Table of Contents' CONTRIBUTING.md"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitejs/vite.git",
+    "directory": "packages/vite"
+  },
+  "bugs": {
+    "url": "https://github.com/vitejs/vite/issues"
+  },
+  "homepage": "https://vite.dev",
+  "funding": "https://github.com/vitejs/vite?sponsor=1",
+  "//": "READ CONTRIBUTING.md to understand what to put under deps vs. devDeps!",
+  "dependencies": {
+    "esbuild": "^0.21.3",
+    "postcss": "^8.4.43",
+    "rollup": "^4.20.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "~2.3.3"
   },
   "devDependencies": {
-    "clean-publish": "^3.1.0",
-    "doctoc": "^0.15.0",
-    "webpack": "^1.12.0"
+    "@ampproject/remapping": "^2.3.0",
+    "@babel/parser": "^7.25.6",
+    "@jridgewell/trace-mapping": "^0.3.25",
+    "@polka/compression": "^1.0.0-next.25",
+    "@rollup/plugin-alias": "^5.1.0",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-dynamic-import-vars": "^2.1.2",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/pluginutils": "^5.1.0",
+    "@types/escape-html": "^1.0.4",
+    "@types/pnpapi": "^0.0.5",
+    "artichokie": "^0.2.1",
+    "cac": "^6.7.14",
+    "chokidar": "^3.6.0",
+    "connect": "^3.7.0",
+    "convert-source-map": "^2.0.0",
+    "cors": "^2.8.5",
+    "cross-spawn": "^7.0.3",
+    "debug": "^4.3.6",
+    "dep-types": "link:./src/types",
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^11.0.6",
+    "es-module-lexer": "^1.5.4",
+    "escape-html": "^1.0.3",
+    "estree-walker": "^3.0.3",
+    "etag": "^1.8.1",
+    "fast-glob": "^3.3.2",
+    "http-proxy": "^1.18.1",
+    "launch-editor-middleware": "^2.9.1",
+    "lightningcss": "^1.26.0",
+    "magic-string": "^0.30.11",
+    "micromatch": "^4.0.8",
+    "mlly": "^1.7.1",
+    "mrmime": "^2.0.0",
+    "open": "^8.4.2",
+    "parse5": "^7.1.2",
+    "pathe": "^1.1.2",
+    "periscopic": "^4.0.2",
+    "picocolors": "^1.0.1",
+    "picomatch": "^2.3.1",
+    "postcss-import": "^16.1.0",
+    "postcss-load-config": "^4.0.2",
+    "postcss-modules": "^6.0.0",
+    "resolve.exports": "^2.0.2",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-esbuild": "^6.1.1",
+    "rollup-plugin-license": "^3.5.2",
+    "sass": "^1.77.8",
+    "sass-embedded": "^1.77.8",
+    "sirv": "^2.0.4",
+    "source-map-support": "^0.5.21",
+    "strip-ansi": "^7.1.0",
+    "strip-literal": "^2.1.0",
+    "tsconfck": "^3.1.4",
+    "tslib": "^2.7.0",
+    "types": "link:./types",
+    "ufo": "^1.5.4",
+    "ws": "^8.18.0"
   },
-  "clean-publish": {
-    "cleanDocs": true
+  "peerDependencies": {
+    "@types/node": "^18.0.0 || >=20.0.0",
+    "less": "*",
+    "lightningcss": "^1.21.0",
+    "sass": "*",
+    "sass-embedded": "*",
+    "stylus": "*",
+    "sugarss": "*",
+    "terser": "^5.4.0"
   },
-  "typings": "source-map.d.ts"
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "sass": {
+      "optional": true
+    },
+    "sass-embedded": {
+      "optional": true
+    },
+    "stylus": {
+      "optional": true
+    },
+    "less": {
+      "optional": true
+    },
+    "sugarss": {
+      "optional": true
+    },
+    "lightningcss": {
+      "optional": true
+    },
+    "terser": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "build": "rimraf dist && run-s build-bundle build-types",
+    "build-bundle": "rollup --config rollup.config.ts --configPlugin esbuild",
+    "build-types": "run-s build-types-temp build-types-roll build-types-check",
+    "build-types-temp": "tsc --emitDeclarationOnly --outDir temp -p src/node",
+    "build-types-roll": "rollup --config rollup.dts.config.ts --configPlugin esbuild && rimraf temp",
+    "build-types-check": "tsc --project tsconfig.check.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --cache --ext .ts src/**",
+    "format": "prettier --write --cache --parser typescript \"src/**/*.ts\""
+  }
 }
