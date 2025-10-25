@@ -1,51 +1,61 @@
-# ms
+# object-assign [![Build Status](https://travis-ci.org/sindresorhus/object-assign.svg?branch=master)](https://travis-ci.org/sindresorhus/object-assign)
 
-[![Build Status](https://travis-ci.org/zeit/ms.svg?branch=master)](https://travis-ci.org/zeit/ms)
-[![Slack Channel](http://zeit-slackin.now.sh/badge.svg)](https://zeit.chat/)
+> ES2015 [`Object.assign()`](http://www.2ality.com/2014/01/object-assign.html) [ponyfill](https://ponyfill.com)
 
-Use this package to easily convert various time formats to milliseconds.
 
-## Examples
+## Use the built-in
 
-```js
-ms('2 days')  // 172800000
-ms('1d')      // 86400000
-ms('10h')     // 36000000
-ms('2.5 hrs') // 9000000
-ms('2h')      // 7200000
-ms('1m')      // 60000
-ms('5s')      // 5000
-ms('1y')      // 31557600000
-ms('100')     // 100
+Node.js 4 and up, as well as every evergreen browser (Chrome, Edge, Firefox, Opera, Safari),
+support `Object.assign()` :tada:. If you target only those environments, then by all
+means, use `Object.assign()` instead of this package.
+
+
+## Install
+
+```
+$ npm install --save object-assign
 ```
 
-### Convert from milliseconds
+
+## Usage
 
 ```js
-ms(60000)             // "1m"
-ms(2 * 60000)         // "2m"
-ms(ms('10 hours'))    // "10h"
+const objectAssign = require('object-assign');
+
+objectAssign({foo: 0}, {bar: 1});
+//=> {foo: 0, bar: 1}
+
+// multiple sources
+objectAssign({foo: 0}, {bar: 1}, {baz: 2});
+//=> {foo: 0, bar: 1, baz: 2}
+
+// overwrites equal keys
+objectAssign({foo: 0}, {foo: 1}, {foo: 2});
+//=> {foo: 2}
+
+// ignores null and undefined sources
+objectAssign({foo: 0}, null, {bar: 1}, undefined);
+//=> {foo: 0, bar: 1}
 ```
 
-### Time format written-out
 
-```js
-ms(60000, { long: true })             // "1 minute"
-ms(2 * 60000, { long: true })         // "2 minutes"
-ms(ms('10 hours'), { long: true })    // "10 hours"
-```
+## API
 
-## Features
+### objectAssign(target, [source, ...])
 
-- Works both in [node](https://nodejs.org) and in the browser.
-- If a number is supplied to `ms`, a string with a unit is returned.
-- If a string that contains the number is supplied, it returns it as a number (e.g.: it returns `100` for `'100'`).
-- If you pass a string with a number and a valid unit, the number of equivalent ms is returned.
+Assigns enumerable own properties of `source` objects to the `target` object and returns the `target` object. Additional `source` objects will overwrite previous ones.
 
-## Caught a bug?
 
-1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device
-2. Link the package to the global module directory: `npm link`
-3. Within the module you want to test your local development instance of ms, just link it to the dependencies: `npm link ms`. Instead of the default one from npm, node will now use your clone of ms!
+## Resources
 
-As always, you can run the tests using: `npm test`
+- [ES2015 spec - Object.assign](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign)
+
+
+## Related
+
+- [deep-assign](https://github.com/sindresorhus/deep-assign) - Recursive `Object.assign()`
+
+
+## License
+
+MIT © [Sindre Sorhus](https://sindresorhus.com)

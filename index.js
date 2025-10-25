@@ -1,82 +1,90 @@
-/*!
- * negotiator
- * Copyright(c) 2012 Federico Romero
- * Copyright(c) 2012-2014 Isaac Z. Schlueter
- * Copyright(c) 2015 Douglas Christopher Wilson
- * MIT Licensed
- */
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
 
 'use strict';
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-var preferredCharsets = require('./lib/charset')
-var preferredEncodings = require('./lib/encoding')
-var preferredLanguages = require('./lib/language')
-var preferredMediaTypes = require('./lib/mediaType')
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
 
-/**
- * Module exports.
- * @public
- */
-
-module.exports = Negotiator;
-module.exports.Negotiator = Negotiator;
-
-/**
- * Create a Negotiator instance from a request.
- * @param {object} request
- * @public
- */
-
-function Negotiator(request) {
-  if (!(this instanceof Negotiator)) {
-    return new Negotiator(request);
-  }
-
-  this.request = request;
+	return Object(val);
 }
 
-Negotiator.prototype.charset = function charset(available) {
-  var set = this.charsets(available);
-  return set && set[0];
-};
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
 
-Negotiator.prototype.charsets = function charsets(available) {
-  return preferredCharsets(this.request.headers['accept-charset'], available);
-};
+		// Detect buggy property enumeration order in older V8 versions.
 
-Negotiator.prototype.encoding = function encoding(available) {
-  var set = this.encodings(available);
-  return set && set[0];
-};
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
 
-Negotiator.prototype.encodings = function encodings(available) {
-  return preferredEncodings(this.request.headers['accept-encoding'], available);
-};
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
 
-Negotiator.prototype.language = function language(available) {
-  var set = this.languages(available);
-  return set && set[0];
-};
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
 
-Negotiator.prototype.languages = function languages(available) {
-  return preferredLanguages(this.request.headers['accept-language'], available);
-};
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
 
-Negotiator.prototype.mediaType = function mediaType(available) {
-  var set = this.mediaTypes(available);
-  return set && set[0];
-};
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
 
-Negotiator.prototype.mediaTypes = function mediaTypes(available) {
-  return preferredMediaTypes(this.request.headers.accept, available);
-};
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
 
-// Backwards compatibility
-Negotiator.prototype.preferredCharset = Negotiator.prototype.charset;
-Negotiator.prototype.preferredCharsets = Negotiator.prototype.charsets;
-Negotiator.prototype.preferredEncoding = Negotiator.prototype.encoding;
-Negotiator.prototype.preferredEncodings = Negotiator.prototype.encodings;
-Negotiator.prototype.preferredLanguage = Negotiator.prototype.language;
-Negotiator.prototype.preferredLanguages = Negotiator.prototype.languages;
-Negotiator.prototype.preferredMediaType = Negotiator.prototype.mediaType;
-Negotiator.prototype.preferredMediaTypes = Negotiator.prototype.mediaTypes;
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
