@@ -1,0 +1,52 @@
+[
+  {
+    "username": "Dhivya",
+    "email": "dhivya@gmail.com",
+    "phone": "0123456789",
+    "dob": "2005-06-05",
+    "skills": [
+      "Artificial Intelligence ",
+      "Data Science"
+    ],
+    "address": "87, Uthukottai Taluk, Tiruvallur District, TamilNadu, 602026",
+    "registeredAt": "2025-10-25T04:57:52.374Z"
+  },
+  {
+    "username": "Meena",
+    "email": "meena@gmail.com",
+    "phone": "1234567890",
+    "dob": "2006-05-08",
+    "skills": [
+      "React",
+      "Express",
+      "Nodejs"
+    ],
+    "address": "36, Tiruvannamalai District, TamilNadu",
+    "registeredAt": "2025-10-25T05:02:44.146Z"
+  },
+  {
+    "username": "Gopika",
+    "email": "gopikasri@gmail.com",
+    "phone": "1597536842",
+    "dob": "2006-12-15",
+    "skills": [
+      "React",
+      "Data Science"
+    ],
+    "address": "03, Villupuram District, TamilNadu",
+    "registeredAt": "2025-10-25T05:06:37.358Z"
+  },
+  {
+    "username": "Ajay",
+    "email": "ajay@gmail.com",
+    "phone": "4598761230",
+    "dob": "2004-04-05",
+    "skills": [
+      "Cyber Security",
+      "Nodejs",
+      "Javascript"
+    ],
+    "address": "302, Thiruverkadu, Tiruvallur Disrtict, TamilNadu ",
+    "registeredAt": "2025-10-25T05:11:44.283Z"
+  }
+]
