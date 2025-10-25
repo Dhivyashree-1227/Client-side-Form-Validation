@@ -1,46 +1,30 @@
 {
-  "name": "esbuild",
-  "version": "0.21.5",
-  "description": "An extremely fast JavaScript and CSS bundler and minifier.",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/evanw/esbuild.git"
-  },
+  "name": "js-tokens",
+  "version": "4.0.0",
+  "author": "Simon Lydell",
+  "license": "MIT",
+  "description": "A regex that tokenizes JavaScript.",
+  "keywords": [
+    "JavaScript",
+    "js",
+    "token",
+    "tokenize",
+    "regex"
+  ],
+  "files": [
+    "index.js"
+  ],
+  "repository": "lydell/js-tokens",
   "scripts": {
-    "postinstall": "node install.js"
+    "test": "mocha --ui tdd",
+    "esprima-compare": "node esprima-compare ./index.js everything.js/es5.js",
+    "build": "node generate-index.js",
+    "dev": "npm run build && npm test"
   },
-  "main": "lib/main.js",
-  "types": "lib/main.d.ts",
-  "engines": {
-    "node": ">=12"
-  },
-  "bin": {
-    "esbuild": "bin/esbuild"
-  },
-  "optionalDependencies": {
-    "@esbuild/aix-ppc64": "0.21.5",
-    "@esbuild/android-arm": "0.21.5",
-    "@esbuild/android-arm64": "0.21.5",
-    "@esbuild/android-x64": "0.21.5",
-    "@esbuild/darwin-arm64": "0.21.5",
-    "@esbuild/darwin-x64": "0.21.5",
-    "@esbuild/freebsd-arm64": "0.21.5",
-    "@esbuild/freebsd-x64": "0.21.5",
-    "@esbuild/linux-arm": "0.21.5",
-    "@esbuild/linux-arm64": "0.21.5",
-    "@esbuild/linux-ia32": "0.21.5",
-    "@esbuild/linux-loong64": "0.21.5",
-    "@esbuild/linux-mips64el": "0.21.5",
-    "@esbuild/linux-ppc64": "0.21.5",
-    "@esbuild/linux-riscv64": "0.21.5",
-    "@esbuild/linux-s390x": "0.21.5",
-    "@esbuild/linux-x64": "0.21.5",
-    "@esbuild/netbsd-x64": "0.21.5",
-    "@esbuild/openbsd-x64": "0.21.5",
-    "@esbuild/sunos-x64": "0.21.5",
-    "@esbuild/win32-arm64": "0.21.5",
-    "@esbuild/win32-ia32": "0.21.5",
-    "@esbuild/win32-x64": "0.21.5"
-  },
-  "license": "MIT"
+  "devDependencies": {
+    "coffeescript": "2.1.1",
+    "esprima": "4.0.0",
+    "everything.js": "1.0.3",
+    "mocha": "5.0.0"
+  }
 }
