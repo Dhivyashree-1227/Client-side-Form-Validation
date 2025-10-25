@@ -1,45 +1,39 @@
-# loose-envify
+# Nano ID
 
-[![Build Status](https://travis-ci.org/zertosh/loose-envify.svg?branch=master)](https://travis-ci.org/zertosh/loose-envify)
+<img src="https://ai.github.io/nanoid/logo.svg" align="right"
+     alt="Nano ID logo by Anton Lovchikov" width="180" height="94">
 
-Fast (and loose) selective `process.env` replacer using [js-tokens](https://github.com/lydell/js-tokens) instead of an AST. Works just like [envify](https://github.com/hughsk/envify) but much faster.
+**English** | [Русский](./README.ru.md) | [简体中文](./README.zh-CN.md) | [Bahasa Indonesia](./README.id-ID.md)
 
-## Gotchas
+A tiny, secure, URL-friendly, unique string ID generator for JavaScript.
 
-* Doesn't handle broken syntax.
-* Doesn't look inside embedded expressions in template strings.
-  - **this won't work:**
-  ```js
-  console.log(`the current env is ${process.env.NODE_ENV}`);
-  ```
-* Doesn't replace oddly-spaced or oddly-commented expressions.
-  - **this won't work:**
-  ```js
-  console.log(process./*won't*/env./*work*/NODE_ENV);
-  ```
+> “An amazing level of senseless perfectionism,
+> which is simply impossible not to respect.”
 
-## Usage/Options
+* **Small.** 130 bytes (minified and gzipped). No dependencies.
+  [Size Limit] controls the size.
+* **Fast.** It is 2 times faster than UUID.
+* **Safe.** It uses hardware random generator. Can be used in clusters.
+* **Short IDs.** It uses a larger alphabet than UUID (`A-Za-z0-9_-`).
+  So ID size was reduced from 36 to 21 symbols.
+* **Portable.** Nano ID was ported
+  to [20 programming languages](#other-programming-languages).
 
-loose-envify has the exact same interface as [envify](https://github.com/hughsk/envify), including the CLI.
-
-## Benchmark
-
+```js
+import { nanoid } from 'nanoid'
+model.id = nanoid() //=> "V1StGXR8_Z5jdHi6B-myT"
 ```
-envify:
 
-  $ for i in {1..5}; do node bench/bench.js 'envify'; done
-  708ms
-  727ms
-  791ms
-  719ms
-  720ms
+Supports modern browsers, IE [with Babel], Node.js and React Native.
 
-loose-envify:
+[online tool]: https://gitpod.io/#https://github.com/ai/nanoid/
+[with Babel]:  https://developer.epages.com/blog/coding/how-to-transpile-node-modules-with-babel-and-webpack-in-a-monorepo/
+[Size Limit]:  https://github.com/ai/size-limit
 
-  $ for i in {1..5}; do node bench/bench.js '../'; done
-  51ms
-  52ms
-  52ms
-  52ms
-  52ms
-```
+<a href="https://evilmartians.com/?utm_source=nanoid">
+  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
+       alt="Sponsored by Evil Martians" width="236" height="54">
+</a>
+
+## Docs
+Read full docs **[here](https://github.com/ai/nanoid#readme)**.
