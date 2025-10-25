@@ -1,12 +1,12 @@
-# parseurl
+# proxy-addr
 
 [![NPM Version][npm-version-image]][npm-url]
 [![NPM Downloads][npm-downloads-image]][npm-url]
 [![Node.js Version][node-image]][node-url]
-[![Build Status][travis-image]][travis-url]
+[![Build Status][ci-image]][ci-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-Parse a URL with memoization.
+Determine address of proxied request
 
 ## Install
 
@@ -15,119 +15,125 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```sh
-$ npm install parseurl
+$ npm install proxy-addr
 ```
 
 ## API
 
 ```js
-var parseurl = require('parseurl')
+var proxyaddr = require('proxy-addr')
 ```
 
-### parseurl(req)
+### proxyaddr(req, trust)
 
-Parse the URL of the given request object (looks at the `req.url` property)
-and return the result. The result is the same as `url.parse` in Node.js core.
-Calling this function multiple times on the same `req` where `req.url` does
-not change will return a cached parsed object, rather than parsing again.
+Return the address of the request, using the given `trust` parameter.
 
-### parseurl.original(req)
+The `trust` argument is a function that returns `true` if you trust
+the address, `false` if you don't. The closest untrusted address is
+returned.
 
-Parse the original URL of the given request object and return the result.
-This works by trying to parse `req.originalUrl` if it is a string, otherwise
-parses `req.url`. The result is the same as `url.parse` in Node.js core.
-Calling this function multiple times on the same `req` where `req.originalUrl`
-does not change will return a cached parsed object, rather than parsing again.
+```js
+proxyaddr(req, function (addr) { return addr === '127.0.0.1' })
+proxyaddr(req, function (addr, i) { return i < 1 })
+```
 
-## Benchmark
+The `trust` arugment may also be a single IP address string or an
+array of trusted addresses, as plain IP addresses, CIDR-formatted
+strings, or IP/netmask strings.
 
-```bash
+```js
+proxyaddr(req, '127.0.0.1')
+proxyaddr(req, ['127.0.0.0/8', '10.0.0.0/8'])
+proxyaddr(req, ['127.0.0.0/255.0.0.0', '192.168.0.0/255.255.0.0'])
+```
+
+This module also supports IPv6. Your IPv6 addresses will be normalized
+automatically (i.e. `fe80::00ed:1` equals `fe80:0:0:0:0:0:ed:1`).
+
+```js
+proxyaddr(req, '::1')
+proxyaddr(req, ['::1/128', 'fe80::/10'])
+```
+
+This module will automatically work with IPv4-mapped IPv6 addresses
+as well to support node.js in IPv6-only mode. This means that you do
+not have to specify both `::ffff:a00:1` and `10.0.0.1`.
+
+As a convenience, this module also takes certain pre-defined names
+in addition to IP addresses, which expand into IP addresses:
+
+```js
+proxyaddr(req, 'loopback')
+proxyaddr(req, ['loopback', 'fc00:ac:1ab5:fff::1/64'])
+```
+
+  * `loopback`: IPv4 and IPv6 loopback addresses (like `::1` and
+    `127.0.0.1`).
+  * `linklocal`: IPv4 and IPv6 link-local addresses (like
+    `fe80::1:1:1:1` and `169.254.0.1`).
+  * `uniquelocal`: IPv4 private addresses and IPv6 unique-local
+    addresses (like `fc00:ac:1ab5:fff::1` and `192.168.0.1`).
+
+When `trust` is specified as a function, it will be called for each
+address to determine if it is a trusted address. The function is
+given two arguments: `addr` and `i`, where `addr` is a string of
+the address to check and `i` is a number that represents the distance
+from the socket address.
+
+### proxyaddr.all(req, [trust])
+
+Return all the addresses of the request, optionally stopping at the
+first untrusted. This array is ordered from closest to furthest
+(i.e. `arr[0] === req.connection.remoteAddress`).
+
+```js
+proxyaddr.all(req)
+```
+
+The optional `trust` argument takes the same arguments as `trust`
+does in `proxyaddr(req, trust)`.
+
+```js
+proxyaddr.all(req, 'loopback')
+```
+
+### proxyaddr.compile(val)
+
+Compiles argument `val` into a `trust` function. This function takes
+the same arguments as `trust` does in `proxyaddr(req, trust)` and
+returns a function suitable for `proxyaddr(req, trust)`.
+
+```js
+var trust = proxyaddr.compile('loopback')
+var addr = proxyaddr(req, trust)
+```
+
+This function is meant to be optimized for use against every request.
+It is recommend to compile a trust function up-front for the trusted
+configuration and pass that to `proxyaddr(req, trust)` for each request.
+
+## Testing
+
+```sh
+$ npm test
+```
+
+## Benchmarks
+
+```sh
 $ npm run-script bench
-
-> parseurl@1.3.3 bench nodejs-parseurl
-> node benchmark/index.js
-
-  http_parser@2.8.0
-  node@10.6.0
-  v8@6.7.288.46-node.13
-  uv@1.21.0
-  zlib@1.2.11
-  ares@1.14.0
-  modules@64
-  nghttp2@1.32.0
-  napi@3
-  openssl@1.1.0h
-  icu@61.1
-  unicode@10.0
-  cldr@33.0
-  tz@2018c
-
-> node benchmark/fullurl.js
-
-  Parsing URL "http://localhost:8888/foo/bar?user=tj&pet=fluffy"
-
-  4 tests completed.
-
-  fasturl            x 2,207,842 ops/sec ±3.76% (184 runs sampled)
-  nativeurl - legacy x   507,180 ops/sec ±0.82% (191 runs sampled)
-  nativeurl - whatwg x   290,044 ops/sec ±1.96% (189 runs sampled)
-  parseurl           x   488,907 ops/sec ±2.13% (192 runs sampled)
-
-> node benchmark/pathquery.js
-
-  Parsing URL "/foo/bar?user=tj&pet=fluffy"
-
-  4 tests completed.
-
-  fasturl            x 3,812,564 ops/sec ±3.15% (188 runs sampled)
-  nativeurl - legacy x 2,651,631 ops/sec ±1.68% (189 runs sampled)
-  nativeurl - whatwg x   161,837 ops/sec ±2.26% (189 runs sampled)
-  parseurl           x 4,166,338 ops/sec ±2.23% (184 runs sampled)
-
-> node benchmark/samerequest.js
-
-  Parsing URL "/foo/bar?user=tj&pet=fluffy" on same request object
-
-  4 tests completed.
-
-  fasturl            x  3,821,651 ops/sec ±2.42% (185 runs sampled)
-  nativeurl - legacy x  2,651,162 ops/sec ±1.90% (187 runs sampled)
-  nativeurl - whatwg x    175,166 ops/sec ±1.44% (188 runs sampled)
-  parseurl           x 14,912,606 ops/sec ±3.59% (183 runs sampled)
-
-> node benchmark/simplepath.js
-
-  Parsing URL "/foo/bar"
-
-  4 tests completed.
-
-  fasturl            x 12,421,765 ops/sec ±2.04% (191 runs sampled)
-  nativeurl - legacy x  7,546,036 ops/sec ±1.41% (188 runs sampled)
-  nativeurl - whatwg x    198,843 ops/sec ±1.83% (189 runs sampled)
-  parseurl           x 24,244,006 ops/sec ±0.51% (194 runs sampled)
-
-> node benchmark/slash.js
-
-  Parsing URL "/"
-
-  4 tests completed.
-
-  fasturl            x 17,159,456 ops/sec ±3.25% (188 runs sampled)
-  nativeurl - legacy x 11,635,097 ops/sec ±3.79% (184 runs sampled)
-  nativeurl - whatwg x    240,693 ops/sec ±0.83% (189 runs sampled)
-  parseurl           x 42,279,067 ops/sec ±0.55% (190 runs sampled)
 ```
 
 ## License
 
-  [MIT](LICENSE)
+[MIT](LICENSE)
 
-[coveralls-image]: https://badgen.net/coveralls/c/github/pillarjs/parseurl/master
-[coveralls-url]: https://coveralls.io/r/pillarjs/parseurl?branch=master
-[node-image]: https://badgen.net/npm/node/parseurl
+[ci-image]: https://badgen.net/github/checks/jshttp/proxy-addr/master?label=ci
+[ci-url]: https://github.com/jshttp/proxy-addr/actions?query=workflow%3Aci
+[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/proxy-addr/master
+[coveralls-url]: https://coveralls.io/r/jshttp/proxy-addr?branch=master
+[node-image]: https://badgen.net/npm/node/proxy-addr
 [node-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/parseurl
-[npm-url]: https://npmjs.org/package/parseurl
-[npm-version-image]: https://badgen.net/npm/v/parseurl
-[travis-image]: https://badgen.net/travis/pillarjs/parseurl/master
-[travis-url]: https://travis-ci.org/pillarjs/parseurl
+[npm-downloads-image]: https://badgen.net/npm/dm/proxy-addr
+[npm-url]: https://npmjs.org/package/proxy-addr
+[npm-version-image]: https://badgen.net/npm/v/proxy-addr
