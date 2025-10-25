@@ -1,63 +1,54 @@
-# destroy
+# dunder-proto <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
-[![NPM version][npm-image]][npm-url]
-[![Build Status][github-actions-ci-image]][github-actions-ci-url]
-[![Test coverage][coveralls-image]][coveralls-url]
+[![github actions][actions-image]][actions-url]
+[![coverage][codecov-image]][codecov-url]
 [![License][license-image]][license-url]
 [![Downloads][downloads-image]][downloads-url]
 
-Destroy a stream.
+[![npm badge][npm-badge-png]][package-url]
 
-This module is meant to ensure a stream gets destroyed, handling different APIs
-and Node.js bugs.
+If available, the `Object.prototype.__proto__` accessor and mutator, call-bound.
 
-## API
+## Getting started
 
-```js
-var destroy = require('destroy')
+```sh
+npm install --save dunder-proto
 ```
 
-### destroy(stream [, suppress])
-
-Destroy the given stream, and optionally suppress any future `error` events.
-
-In most cases, this is identical to a simple `stream.destroy()` call. The rules
-are as follows for a given stream:
-
-  1. If the `stream` is an instance of `ReadStream`, then call `stream.destroy()`
-     and add a listener to the `open` event to call `stream.close()` if it is
-     fired. This is for a Node.js bug that will leak a file descriptor if
-     `.destroy()` is called before `open`.
-  2. If the `stream` is an instance of a zlib stream, then call `stream.destroy()`
-     and close the underlying zlib handle if open, otherwise call `stream.close()`.
-     This is for consistency across Node.js versions and a Node.js bug that will
-     leak a native zlib handle.
-  3. If the `stream` is not an instance of `Stream`, then nothing happens.
-  4. If the `stream` has a `.destroy()` method, then call it.
-
-The function returns the `stream` passed in as the argument.
-
-## Example
+## Usage/Examples
 
 ```js
-var destroy = require('destroy')
+const assert = require('assert');
+const getDunder = require('dunder-proto/get');
+const setDunder = require('dunder-proto/set');
 
-var fs = require('fs')
-var stream = fs.createReadStream('package.json')
+const obj = {};
 
-// ... and later
-destroy(stream)
+assert.equal('toString' in obj, true);
+assert.equal(getDunder(obj), Object.prototype);
+
+setDunder(obj, null);
+
+assert.equal('toString' in obj, false);
+assert.equal(getDunder(obj), null);
 ```
 
-[npm-image]: https://img.shields.io/npm/v/destroy.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/destroy
-[github-tag]: http://img.shields.io/github/tag/stream-utils/destroy.svg?style=flat-square
-[github-url]: https://github.com/stream-utils/destroy/tags
-[coveralls-image]: https://img.shields.io/coveralls/stream-utils/destroy.svg?style=flat-square
-[coveralls-url]: https://coveralls.io/r/stream-utils/destroy?branch=master
-[license-image]: http://img.shields.io/npm/l/destroy.svg?style=flat-square
-[license-url]: LICENSE.md
-[downloads-image]: http://img.shields.io/npm/dm/destroy.svg?style=flat-square
-[downloads-url]: https://npmjs.org/package/destroy
-[github-actions-ci-image]: https://img.shields.io/github/workflow/status/stream-utils/destroy/ci/master?label=ci&style=flat-square
-[github-actions-ci-url]: https://github.com/stream-utils/destroy/actions/workflows/ci.yml
+## Tests
+
+Clone the repo, `npm install`, and run `npm test`
+
+[package-url]: https://npmjs.org/package/dunder-proto
+[npm-version-svg]: https://versionbadg.es/es-shims/dunder-proto.svg
+[deps-svg]: https://david-dm.org/es-shims/dunder-proto.svg
+[deps-url]: https://david-dm.org/es-shims/dunder-proto
+[dev-deps-svg]: https://david-dm.org/es-shims/dunder-proto/dev-status.svg
+[dev-deps-url]: https://david-dm.org/es-shims/dunder-proto#info=devDependencies
+[npm-badge-png]: https://nodei.co/npm/dunder-proto.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/dunder-proto.svg
+[license-url]: LICENSE
+[downloads-image]: https://img.shields.io/npm/dm/dunder-proto.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=dunder-proto
+[codecov-image]: https://codecov.io/gh/es-shims/dunder-proto/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/es-shims/dunder-proto/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/es-shims/dunder-proto
+[actions-url]: https://github.com/es-shims/dunder-proto/actions
