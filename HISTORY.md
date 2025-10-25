@@ -1,22 +1,21 @@
-0.3.0 / 2014-09-07
+1.0.1 / 2016-01-17
 ==================
 
-  * Support Node.js 0.6
-  * Throw error when parameter format invalid on parse
+  * perf: enable strict mode
 
-0.2.0 / 2014-06-18
+1.0.0 / 2015-03-01
 ==================
 
-  * Add `typer.format()` to format media types
+  * Add option to only add new descriptors
+  * Add simple argument validation
+  * Add jsdoc to source file
 
-0.1.0 / 2014-06-17
+0.0.2 / 2013-12-14
 ==================
 
-  * Accept `req` as argument to `parse`
-  * Accept `res` as argument to `parse`
-  * Parse media type with extra LWS between type and first parameter
+  * Move repository to `component` organization
 
-0.0.0 / 2014-06-13
+0.0.1 / 2013-10-29
 ==================
 
-  * Initial implementation
+  * Initial release
