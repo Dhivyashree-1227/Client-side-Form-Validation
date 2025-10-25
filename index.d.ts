@@ -1,91 +1,56 @@
 /**
- * Generate secure URL-friendly unique ID.
+ * Generate secure URL-friendly unique ID. The non-blocking version.
  *
  * By default, the ID will have 21 symbols to have a collision probability
  * similar to UUID v4.
  *
  * ```js
- * import { nanoid } from 'nanoid'
- * model.id = nanoid() //=> "Uakgb_J5m9g-0JDMbcJqL"
+ * import { nanoid } from 'nanoid/async'
+ * nanoid().then(id => {
+ *   model.id = id
+ * })
  * ```
  *
  * @param size Size of the ID. The default size is 21.
- * @returns A random string.
+ * @returns A promise with a random string.
  */
-export function nanoid(size?: number): string
+export function nanoid(size?: number): Promise<string>
 
 /**
- * Generate secure unique ID with custom alphabet.
+ * A low-level function.
+ * Generate secure unique ID with custom alphabet. The non-blocking version.
  *
  * Alphabet must contain 256 symbols or less. Otherwise, the generator
  * will not be secure.
  *
  * @param alphabet Alphabet used to generate the ID.
  * @param defaultSize Size of the ID. The default size is 21.
- * @returns A random string generator.
+ * @returns A function that returns a promise with a random string.
  *
  * ```js
- * const { customAlphabet } = require('nanoid')
+ * import { customAlphabet } from 'nanoid/async'
  * const nanoid = customAlphabet('0123456789абвгдеё', 5)
- * nanoid() //=> "8ё56а"
+ * nanoid().then(id => {
+ *   model.id = id //=> "8ё56а"
+ * })
  * ```
  */
 export function customAlphabet(
   alphabet: string,
   defaultSize?: number
-): (size?: number) => string
-
-/**
- * Generate unique ID with custom random generator and alphabet.
- *
- * Alphabet must contain 256 symbols or less. Otherwise, the generator
- * will not be secure.
- *
- * ```js
- * import { customRandom } from 'nanoid/format'
- *
- * const nanoid = customRandom('abcdef', 5, size => {
- *   const random = []
- *   for (let i = 0; i < size; i++) {
- *     random.push(randomByte())
- *   }
- *   return random
- * })
- *
- * nanoid() //=> "fbaef"
- * ```
- *
- * @param alphabet Alphabet used to generate a random string.
- * @param size Size of the random string.
- * @param random A random bytes generator.
- * @returns A random string generator.
- */
-export function customRandom(
-  alphabet: string,
-  size: number,
-  random: (bytes: number) => Uint8Array
-): () => string
-
-/**
- * URL safe symbols.
- *
- * ```js
- * import { urlAlphabet } from 'nanoid'
- * const nanoid = customAlphabet(urlAlphabet, 10)
- * nanoid() //=> "Uakgb_J5m9"
- * ```
- */
-export const urlAlphabet: string
+): (size?: number) => Promise<string>
 
 /**
  * Generate an array of random bytes collected from hardware noise.
  *
  * ```js
- * import { customRandom, random } from 'nanoid'
- * const nanoid = customRandom("abcdef", 5, random)
+ * import { random } from 'nanoid/async'
+ * random(5).then(bytes => {
+ *   bytes //=> [10, 67, 212, 67, 89]
+ * })
  * ```
  *
  * @param bytes Size of the array.
- * @returns An array of random bytes.
+ * @returns A promise with a random bytes array.
  */
-export function random(bytes: number): Uint8Array
+export function random(bytes: number): Promise<Uint8Array>

@@ -1,15 +1,6 @@
-import crypto from 'crypto'
+import { getRandomBytesAsync } from 'expo-random'
 import { urlAlphabet } from '../url-alphabet/index.js'
-let random = bytes =>
-  new Promise((resolve, reject) => {
-    crypto.randomFill(Buffer.allocUnsafe(bytes), (err, buf) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(buf)
-      }
-    })
-  })
+let random = getRandomBytesAsync
 let customAlphabet = (alphabet, defaultSize = 21) => {
   let mask = (2 << (31 - Math.clz32((alphabet.length - 1) | 1))) - 1
   let step = Math.ceil((1.6 * mask * defaultSize) / alphabet.length)
