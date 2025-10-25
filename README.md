@@ -1,113 +1,203 @@
-# mime-types
+# negotiator
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
 [![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][ci-image]][ci-url]
+[![Build Status][github-actions-ci-image]][github-actions-ci-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-The ultimate javascript content-type utility.
+An HTTP content negotiator for Node.js
 
-Similar to [the `mime@1.x` module](https://www.npmjs.com/package/mime), except:
-
-- __No fallbacks.__ Instead of naively returning the first available type,
-  `mime-types` simply returns `false`, so do
-  `var type = mime.lookup('unrecognized') || 'application/octet-stream'`.
-- No `new Mime()` business, so you could do `var lookup = require('mime-types').lookup`.
-- No `.define()` functionality
-- Bug fixes for `.lookup(path)`
-
-Otherwise, the API is compatible with `mime` 1.x.
-
-## Install
-
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+## Installation
 
 ```sh
-$ npm install mime-types
+$ npm install negotiator
 ```
-
-## Adding Types
-
-All mime types are based on [mime-db](https://www.npmjs.com/package/mime-db),
-so open a PR there if you'd like to add mime types.
 
 ## API
 
 ```js
-var mime = require('mime-types')
+var Negotiator = require('negotiator')
 ```
 
-All functions return `false` if input is invalid or not found.
-
-### mime.lookup(path)
-
-Lookup the content-type associated with a file.
+### Accept Negotiation
 
 ```js
-mime.lookup('json') // 'application/json'
-mime.lookup('.md') // 'text/markdown'
-mime.lookup('file.html') // 'text/html'
-mime.lookup('folder/file.js') // 'application/javascript'
-mime.lookup('folder/.htaccess') // false
+availableMediaTypes = ['text/html', 'text/plain', 'application/json']
 
-mime.lookup('cats') // false
+// The negotiator constructor receives a request object
+negotiator = new Negotiator(request)
+
+// Let's say Accept header is 'text/html, application/*;q=0.2, image/jpeg;q=0.8'
+
+negotiator.mediaTypes()
+// -> ['text/html', 'image/jpeg', 'application/*']
+
+negotiator.mediaTypes(availableMediaTypes)
+// -> ['text/html', 'application/json']
+
+negotiator.mediaType(availableMediaTypes)
+// -> 'text/html'
 ```
 
-### mime.contentType(type)
+You can check a working example at `examples/accept.js`.
 
-Create a full content-type header given a content-type or extension.
-When given an extension, `mime.lookup` is used to get the matching
-content-type, otherwise the given content-type is used. Then if the
-content-type does not already have a `charset` parameter, `mime.charset`
-is used to get the default charset and add to the returned content-type.
+#### Methods
+
+##### mediaType()
+
+Returns the most preferred media type from the client.
+
+##### mediaType(availableMediaType)
+
+Returns the most preferred media type from a list of available media types.
+
+##### mediaTypes()
+
+Returns an array of preferred media types ordered by the client preference.
+
+##### mediaTypes(availableMediaTypes)
+
+Returns an array of preferred media types ordered by priority from a list of
+available media types.
+
+### Accept-Language Negotiation
 
 ```js
-mime.contentType('markdown') // 'text/x-markdown; charset=utf-8'
-mime.contentType('file.json') // 'application/json; charset=utf-8'
-mime.contentType('text/html') // 'text/html; charset=utf-8'
-mime.contentType('text/html; charset=iso-8859-1') // 'text/html; charset=iso-8859-1'
+negotiator = new Negotiator(request)
 
-// from a full path
-mime.contentType(path.extname('/path/to/file.json')) // 'application/json; charset=utf-8'
+availableLanguages = ['en', 'es', 'fr']
+
+// Let's say Accept-Language header is 'en;q=0.8, es, pt'
+
+negotiator.languages()
+// -> ['es', 'pt', 'en']
+
+negotiator.languages(availableLanguages)
+// -> ['es', 'en']
+
+language = negotiator.language(availableLanguages)
+// -> 'es'
 ```
 
-### mime.extension(type)
+You can check a working example at `examples/language.js`.
 
-Get the default extension for a content-type.
+#### Methods
+
+##### language()
+
+Returns the most preferred language from the client.
+
+##### language(availableLanguages)
+
+Returns the most preferred language from a list of available languages.
+
+##### languages()
+
+Returns an array of preferred languages ordered by the client preference.
+
+##### languages(availableLanguages)
+
+Returns an array of preferred languages ordered by priority from a list of
+available languages.
+
+### Accept-Charset Negotiation
 
 ```js
-mime.extension('application/octet-stream') // 'bin'
+availableCharsets = ['utf-8', 'iso-8859-1', 'iso-8859-5']
+
+negotiator = new Negotiator(request)
+
+// Let's say Accept-Charset header is 'utf-8, iso-8859-1;q=0.8, utf-7;q=0.2'
+
+negotiator.charsets()
+// -> ['utf-8', 'iso-8859-1', 'utf-7']
+
+negotiator.charsets(availableCharsets)
+// -> ['utf-8', 'iso-8859-1']
+
+negotiator.charset(availableCharsets)
+// -> 'utf-8'
 ```
 
-### mime.charset(type)
+You can check a working example at `examples/charset.js`.
 
-Lookup the implied default charset of a content-type.
+#### Methods
+
+##### charset()
+
+Returns the most preferred charset from the client.
+
+##### charset(availableCharsets)
+
+Returns the most preferred charset from a list of available charsets.
+
+##### charsets()
+
+Returns an array of preferred charsets ordered by the client preference.
+
+##### charsets(availableCharsets)
+
+Returns an array of preferred charsets ordered by priority from a list of
+available charsets.
+
+### Accept-Encoding Negotiation
 
 ```js
-mime.charset('text/markdown') // 'UTF-8'
+availableEncodings = ['identity', 'gzip']
+
+negotiator = new Negotiator(request)
+
+// Let's say Accept-Encoding header is 'gzip, compress;q=0.2, identity;q=0.5'
+
+negotiator.encodings()
+// -> ['gzip', 'identity', 'compress']
+
+negotiator.encodings(availableEncodings)
+// -> ['gzip', 'identity']
+
+negotiator.encoding(availableEncodings)
+// -> 'gzip'
 ```
 
-### var type = mime.types[extension]
+You can check a working example at `examples/encoding.js`.
 
-A map of content-types by extension.
+#### Methods
 
-### [extensions...] = mime.extensions[type]
+##### encoding()
 
-A map of extensions by content-type.
+Returns the most preferred encoding from the client.
+
+##### encoding(availableEncodings)
+
+Returns the most preferred encoding from a list of available encodings.
+
+##### encodings()
+
+Returns an array of preferred encodings ordered by the client preference.
+
+##### encodings(availableEncodings)
+
+Returns an array of preferred encodings ordered by priority from a list of
+available encodings.
+
+## See Also
+
+The [accepts](https://npmjs.org/package/accepts#readme) module builds on
+this module and provides an alternative interface, mime type validation,
+and more.
 
 ## License
 
 [MIT](LICENSE)
 
-[ci-image]: https://badgen.net/github/checks/jshttp/mime-types/master?label=ci
-[ci-url]: https://github.com/jshttp/mime-types/actions/workflows/ci.yml
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/mime-types/master
-[coveralls-url]: https://coveralls.io/r/jshttp/mime-types?branch=master
-[node-version-image]: https://badgen.net/npm/node/mime-types
-[node-version-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/mime-types
-[npm-url]: https://npmjs.org/package/mime-types
-[npm-version-image]: https://badgen.net/npm/v/mime-types
+[npm-image]: https://img.shields.io/npm/v/negotiator.svg
+[npm-url]: https://npmjs.org/package/negotiator
+[node-version-image]: https://img.shields.io/node/v/negotiator.svg
+[node-version-url]: https://nodejs.org/en/download/
+[coveralls-image]: https://img.shields.io/coveralls/jshttp/negotiator/master.svg
+[coveralls-url]: https://coveralls.io/r/jshttp/negotiator?branch=master
+[downloads-image]: https://img.shields.io/npm/dm/negotiator.svg
+[downloads-url]: https://npmjs.org/package/negotiator
+[github-actions-ci-image]: https://img.shields.io/github/workflow/status/jshttp/negotiator/ci/master?label=ci
+[github-actions-ci-url]: https://github.com/jshttp/negotiator/actions/workflows/ci.yml
