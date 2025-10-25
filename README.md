@@ -1,37 +1,60 @@
-# `react`
+# `react-dom`
 
-React is a JavaScript library for creating user interfaces.
+This package serves as the entry point to the DOM and server renderers for React. It is intended to be paired with the generic React package, which is shipped as `react` to npm.
 
-The `react` package contains only the functionality necessary to define React components. It is typically used together with a React renderer like `react-dom` for the web, or `react-native` for the native environments.
+## Installation
 
-**Note:** by default, React will be in development mode. The development version includes extra warnings about common mistakes, whereas the production version includes extra performance optimizations and strips all error messages. Don't forget to use the [production build](https://reactjs.org/docs/optimizing-performance.html#use-the-production-build) when deploying your application.
+```sh
+npm install react react-dom
+```
 
 ## Usage
 
+### In the browser
+
 ```js
-import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
-function Counter() {
-  const [count, setCount] = useState(0);
-  return (
-    <>
-      <h1>{count}</h1>
-      <button onClick={() => setCount(count + 1)}>
-        Increment
-      </button>
-    </>
-  );
+function App() {
+  return <div>Hello World</div>;
 }
 
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 ```
 
-## Documentation
+### On the server
 
-See https://reactjs.org/
+```js
+import { renderToPipeableStream } from 'react-dom/server';
+
+function App() {
+  return <div>Hello World</div>;
+}
+
+function handleRequest(res) {
+  // ... in your server handler ...
+  const stream = renderToPipeableStream(<App />, {
+    onShellReady() {
+      res.statusCode = 200;
+      res.setHeader('Content-type', 'text/html');
+      stream.pipe(res);
+    },
+    // ...
+  });
+}
+```
 
 ## API
 
-See https://reactjs.org/docs/react-api.html
+### `react-dom`
+
+See https://reactjs.org/docs/react-dom.html
+
+### `react-dom/client`
+
+See https://reactjs.org/docs/react-dom-client.html
+
+### `react-dom/server`
+
+See https://reactjs.org/docs/react-dom-server.html
