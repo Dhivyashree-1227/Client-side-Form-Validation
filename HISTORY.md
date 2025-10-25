@@ -1,98 +1,58 @@
-2.4.1 / 2022-02-22
+1.3.3 / 2019-04-15
 ==================
 
-  * Fix error on early async hooks implementations
+  * Fix Node.js 0.8 return value inconsistencies
 
-2.4.0 / 2022-02-21
+1.3.2 / 2017-09-09
 ==================
 
-  * Prevent loss of async hooks context
+  * perf: reduce overhead for full URLs
+  * perf: unroll the "fast-path" `RegExp`
 
-2.3.0 / 2015-05-26
+1.3.1 / 2016-01-17
 ==================
 
-  * Add defined behavior for HTTP `CONNECT` requests
-  * Add defined behavior for HTTP `Upgrade` requests
-  * deps: ee-first@1.1.1
+  * perf: enable strict mode
 
-2.2.1 / 2015-04-22
+1.3.0 / 2014-08-09
 ==================
 
-  * Fix `isFinished(req)` when data buffered
+  * Add `parseurl.original` for parsing `req.originalUrl` with fallback
+  * Return `undefined` if `req.url` is `undefined`
 
-2.2.0 / 2014-12-22
+1.2.0 / 2014-07-21
 ==================
 
-  * Add message object to callback arguments
+  * Cache URLs based on original value
+  * Remove no-longer-needed URL mis-parse work-around
+  * Simplify the "fast-path" `RegExp`
 
-2.1.1 / 2014-10-22
+1.1.3 / 2014-07-08
 ==================
 
-  * Fix handling of pipelined requests
+  * Fix typo
 
-2.1.0 / 2014-08-16
+1.1.2 / 2014-07-08
 ==================
 
-  * Check if `socket` is detached
-  * Return `undefined` for `isFinished` if state unknown
+  * Seriously fix Node.js 0.8 compatibility
 
-2.0.0 / 2014-08-16
+1.1.1 / 2014-07-08
 ==================
 
-  * Add `isFinished` function
-  * Move to `jshttp` organization
-  * Remove support for plain socket argument
-  * Rename to `on-finished`
-  * Support both `req` and `res` as arguments
-  * deps: ee-first@1.0.5
+  * Fix Node.js 0.8 compatibility
 
-1.2.2 / 2014-06-10
+1.1.0 / 2014-07-08
 ==================
 
-  * Reduce listeners added to emitters
-    - avoids "event emitter leak" warnings when used multiple times on same request
+  * Incorporate URL href-only parse fast-path
 
-1.2.1 / 2014-06-08
+1.0.1 / 2014-03-08
 ==================
 
-  * Fix returned value when already finished
+  * Add missing `require`
 
-1.2.0 / 2014-06-05
+1.0.0 / 2014-03-08
 ==================
 
-  * Call callback when called on already-finished socket
-
-1.1.4 / 2014-05-27
-==================
-
-  * Support node.js 0.8
-
-1.1.3 / 2014-04-30
-==================
-
-  * Make sure errors passed as instanceof `Error`
-
-1.1.2 / 2014-04-18
-==================
-
-  * Default the `socket` to passed-in object
-
-1.1.1 / 2014-01-16
-==================
-
-  * Rename module to `finished`
-
-1.1.0 / 2013-12-25
-==================
-
-  * Call callback when called on already-errored socket
-
-1.0.1 / 2013-12-20
-==================
-
-  * Actually pass the error to the callback
-
-1.0.0 / 2013-12-20
-==================
-
-  * Initial release
+  * Genesis from `connect`

@@ -1,12 +1,12 @@
-# on-finished
+# parseurl
 
 [![NPM Version][npm-version-image]][npm-url]
 [![NPM Downloads][npm-downloads-image]][npm-url]
 [![Node.js Version][node-image]][node-url]
-[![Build Status][ci-image]][ci-url]
-[![Coverage Status][coveralls-image]][coveralls-url]
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
-Execute a callback when a HTTP request closes, finishes, or errors.
+Parse a URL with memoization.
 
 ## Install
 
@@ -15,148 +15,119 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```sh
-$ npm install on-finished
+$ npm install parseurl
 ```
 
 ## API
 
 ```js
-var onFinished = require('on-finished')
+var parseurl = require('parseurl')
 ```
 
-### onFinished(res, listener)
+### parseurl(req)
 
-Attach a listener to listen for the response to finish. The listener will
-be invoked only once when the response finished. If the response finished
-to an error, the first argument will contain the error. If the response
-has already finished, the listener will be invoked.
+Parse the URL of the given request object (looks at the `req.url` property)
+and return the result. The result is the same as `url.parse` in Node.js core.
+Calling this function multiple times on the same `req` where `req.url` does
+not change will return a cached parsed object, rather than parsing again.
 
-Listening to the end of a response would be used to close things associated
-with the response, like open files.
+### parseurl.original(req)
 
-Listener is invoked as `listener(err, res)`.
+Parse the original URL of the given request object and return the result.
+This works by trying to parse `req.originalUrl` if it is a string, otherwise
+parses `req.url`. The result is the same as `url.parse` in Node.js core.
+Calling this function multiple times on the same `req` where `req.originalUrl`
+does not change will return a cached parsed object, rather than parsing again.
 
-<!-- eslint-disable handle-callback-err -->
+## Benchmark
 
-```js
-onFinished(res, function (err, res) {
-  // clean up open fds, etc.
-  // err contains the error if request error'd
-})
-```
+```bash
+$ npm run-script bench
 
-### onFinished(req, listener)
+> parseurl@1.3.3 bench nodejs-parseurl
+> node benchmark/index.js
 
-Attach a listener to listen for the request to finish. The listener will
-be invoked only once when the request finished. If the request finished
-to an error, the first argument will contain the error. If the request
-has already finished, the listener will be invoked.
+  http_parser@2.8.0
+  node@10.6.0
+  v8@6.7.288.46-node.13
+  uv@1.21.0
+  zlib@1.2.11
+  ares@1.14.0
+  modules@64
+  nghttp2@1.32.0
+  napi@3
+  openssl@1.1.0h
+  icu@61.1
+  unicode@10.0
+  cldr@33.0
+  tz@2018c
 
-Listening to the end of a request would be used to know when to continue
-after reading the data.
+> node benchmark/fullurl.js
 
-Listener is invoked as `listener(err, req)`.
+  Parsing URL "http://localhost:8888/foo/bar?user=tj&pet=fluffy"
 
-<!-- eslint-disable handle-callback-err -->
+  4 tests completed.
 
-```js
-var data = ''
+  fasturl            x 2,207,842 ops/sec ±3.76% (184 runs sampled)
+  nativeurl - legacy x   507,180 ops/sec ±0.82% (191 runs sampled)
+  nativeurl - whatwg x   290,044 ops/sec ±1.96% (189 runs sampled)
+  parseurl           x   488,907 ops/sec ±2.13% (192 runs sampled)
 
-req.setEncoding('utf8')
-req.on('data', function (str) {
-  data += str
-})
+> node benchmark/pathquery.js
 
-onFinished(req, function (err, req) {
-  // data is read unless there is err
-})
-```
+  Parsing URL "/foo/bar?user=tj&pet=fluffy"
 
-### onFinished.isFinished(res)
+  4 tests completed.
 
-Determine if `res` is already finished. This would be useful to check and
-not even start certain operations if the response has already finished.
+  fasturl            x 3,812,564 ops/sec ±3.15% (188 runs sampled)
+  nativeurl - legacy x 2,651,631 ops/sec ±1.68% (189 runs sampled)
+  nativeurl - whatwg x   161,837 ops/sec ±2.26% (189 runs sampled)
+  parseurl           x 4,166,338 ops/sec ±2.23% (184 runs sampled)
 
-### onFinished.isFinished(req)
+> node benchmark/samerequest.js
 
-Determine if `req` is already finished. This would be useful to check and
-not even start certain operations if the request has already finished.
+  Parsing URL "/foo/bar?user=tj&pet=fluffy" on same request object
 
-## Special Node.js requests
+  4 tests completed.
 
-### HTTP CONNECT method
+  fasturl            x  3,821,651 ops/sec ±2.42% (185 runs sampled)
+  nativeurl - legacy x  2,651,162 ops/sec ±1.90% (187 runs sampled)
+  nativeurl - whatwg x    175,166 ops/sec ±1.44% (188 runs sampled)
+  parseurl           x 14,912,606 ops/sec ±3.59% (183 runs sampled)
 
-The meaning of the `CONNECT` method from RFC 7231, section 4.3.6:
+> node benchmark/simplepath.js
 
-> The CONNECT method requests that the recipient establish a tunnel to
-> the destination origin server identified by the request-target and,
-> if successful, thereafter restrict its behavior to blind forwarding
-> of packets, in both directions, until the tunnel is closed.  Tunnels
-> are commonly used to create an end-to-end virtual connection, through
-> one or more proxies, which can then be secured using TLS (Transport
-> Layer Security, [RFC5246]).
+  Parsing URL "/foo/bar"
 
-In Node.js, these request objects come from the `'connect'` event on
-the HTTP server.
+  4 tests completed.
 
-When this module is used on a HTTP `CONNECT` request, the request is
-considered "finished" immediately, **due to limitations in the Node.js
-interface**. This means if the `CONNECT` request contains a request entity,
-the request will be considered "finished" even before it has been read.
+  fasturl            x 12,421,765 ops/sec ±2.04% (191 runs sampled)
+  nativeurl - legacy x  7,546,036 ops/sec ±1.41% (188 runs sampled)
+  nativeurl - whatwg x    198,843 ops/sec ±1.83% (189 runs sampled)
+  parseurl           x 24,244,006 ops/sec ±0.51% (194 runs sampled)
 
-There is no such thing as a response object to a `CONNECT` request in
-Node.js, so there is no support for one.
+> node benchmark/slash.js
 
-### HTTP Upgrade request
+  Parsing URL "/"
 
-The meaning of the `Upgrade` header from RFC 7230, section 6.1:
+  4 tests completed.
 
-> The "Upgrade" header field is intended to provide a simple mechanism
-> for transitioning from HTTP/1.1 to some other protocol on the same
-> connection.
-
-In Node.js, these request objects come from the `'upgrade'` event on
-the HTTP server.
-
-When this module is used on a HTTP request with an `Upgrade` header, the
-request is considered "finished" immediately, **due to limitations in the
-Node.js interface**. This means if the `Upgrade` request contains a request
-entity, the request will be considered "finished" even before it has been
-read.
-
-There is no such thing as a response object to a `Upgrade` request in
-Node.js, so there is no support for one.
-
-## Example
-
-The following code ensures that file descriptors are always closed
-once the response finishes.
-
-```js
-var destroy = require('destroy')
-var fs = require('fs')
-var http = require('http')
-var onFinished = require('on-finished')
-
-http.createServer(function onRequest (req, res) {
-  var stream = fs.createReadStream('package.json')
-  stream.pipe(res)
-  onFinished(res, function () {
-    destroy(stream)
-  })
-})
+  fasturl            x 17,159,456 ops/sec ±3.25% (188 runs sampled)
+  nativeurl - legacy x 11,635,097 ops/sec ±3.79% (184 runs sampled)
+  nativeurl - whatwg x    240,693 ops/sec ±0.83% (189 runs sampled)
+  parseurl           x 42,279,067 ops/sec ±0.55% (190 runs sampled)
 ```
 
 ## License
 
-[MIT](LICENSE)
+  [MIT](LICENSE)
 
-[ci-image]: https://badgen.net/github/checks/jshttp/on-finished/master?label=ci
-[ci-url]: https://github.com/jshttp/on-finished/actions/workflows/ci.yml
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/on-finished/master
-[coveralls-url]: https://coveralls.io/r/jshttp/on-finished?branch=master
-[node-image]: https://badgen.net/npm/node/on-finished
+[coveralls-image]: https://badgen.net/coveralls/c/github/pillarjs/parseurl/master
+[coveralls-url]: https://coveralls.io/r/pillarjs/parseurl?branch=master
+[node-image]: https://badgen.net/npm/node/parseurl
 [node-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/on-finished
-[npm-url]: https://npmjs.org/package/on-finished
-[npm-version-image]: https://badgen.net/npm/v/on-finished
+[npm-downloads-image]: https://badgen.net/npm/dm/parseurl
+[npm-url]: https://npmjs.org/package/parseurl
+[npm-version-image]: https://badgen.net/npm/v/parseurl
+[travis-image]: https://badgen.net/travis/pillarjs/parseurl/master
+[travis-url]: https://travis-ci.org/pillarjs/parseurl
