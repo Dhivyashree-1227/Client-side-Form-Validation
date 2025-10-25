@@ -1,114 +1,146 @@
-'use strict';
+/*!
+ * statuses
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2016 Douglas Christopher Wilson
+ * MIT Licensed
+ */
 
-var test = require('tape');
+'use strict'
 
-var getSideChannelWeakMap = require('../');
+/**
+ * Module dependencies.
+ * @private
+ */
 
-test('getSideChannelMap', { skip: typeof WeakMap !== 'function' && typeof Map !== 'function' }, function (t) {
-	var getSideChannel = getSideChannelWeakMap || function () {
-		throw new EvalError('should never happen');
-	};
+var codes = require('./codes.json')
 
-	t.test('export', function (st) {
-		st.equal(typeof getSideChannel, 'function', 'is a function');
+/**
+ * Module exports.
+ * @public
+ */
 
-		st.equal(getSideChannel.length, 0, 'takes no arguments');
+module.exports = status
 
-		var channel = getSideChannel();
-		st.ok(channel, 'is truthy');
-		st.equal(typeof channel, 'object', 'is an object');
-		st.end();
-	});
+// status code to message map
+status.message = codes
 
-	t.test('assert', function (st) {
-		var channel = getSideChannel();
-		st['throws'](
-			function () { channel.assert({}); },
-			TypeError,
-			'nonexistent value throws'
-		);
+// status message (lower-case) to code map
+status.code = createMessageToStatusCodeMap(codes)
 
-		var o = {};
-		channel.set(o, 'data');
-		st.doesNotThrow(function () { channel.assert(o); }, 'existent value noops');
+// array of status codes
+status.codes = createStatusCodeList(codes)
 
-		st.end();
-	});
+// status codes for redirects
+status.redirect = {
+  300: true,
+  301: true,
+  302: true,
+  303: true,
+  305: true,
+  307: true,
+  308: true
+}
 
-	t.test('has', function (st) {
-		var channel = getSideChannel();
-		/** @type {unknown[]} */ var o = [];
+// status codes for empty bodies
+status.empty = {
+  204: true,
+  205: true,
+  304: true
+}
 
-		st.equal(channel.has(o), false, 'nonexistent value yields false');
+// status codes for when you should retry the request
+status.retry = {
+  502: true,
+  503: true,
+  504: true
+}
 
-		channel.set(o, 'foo');
-		st.equal(channel.has(o), true, 'existent value yields true');
+/**
+ * Create a map of message to status code.
+ * @private
+ */
 
-		st.equal(channel.has('abc'), false, 'non object value non existent yields false');
+function createMessageToStatusCodeMap (codes) {
+  var map = {}
 
-		channel.set('abc', 'foo');
-		st.equal(channel.has('abc'), true, 'non object value that exists yields true');
+  Object.keys(codes).forEach(function forEachCode (code) {
+    var message = codes[code]
+    var status = Number(code)
 
-		st.end();
-	});
+    // populate map
+    map[message.toLowerCase()] = status
+  })
 
-	t.test('get', function (st) {
-		var channel = getSideChannel();
-		var o = {};
-		st.equal(channel.get(o), undefined, 'nonexistent value yields undefined');
+  return map
+}
 
-		var data = {};
-		channel.set(o, data);
-		st.equal(channel.get(o), data, '"get" yields data set by "set"');
+/**
+ * Create a list of all status codes.
+ * @private
+ */
 
-		st.end();
-	});
+function createStatusCodeList (codes) {
+  return Object.keys(codes).map(function mapCode (code) {
+    return Number(code)
+  })
+}
 
-	t.test('set', function (st) {
-		var channel = getSideChannel();
-		var o = function () {};
-		st.equal(channel.get(o), undefined, 'value not set');
+/**
+ * Get the status code for given message.
+ * @private
+ */
 
-		channel.set(o, 42);
-		st.equal(channel.get(o), 42, 'value was set');
+function getStatusCode (message) {
+  var msg = message.toLowerCase()
 
-		channel.set(o, Infinity);
-		st.equal(channel.get(o), Infinity, 'value was set again');
+  if (!Object.prototype.hasOwnProperty.call(status.code, msg)) {
+    throw new Error('invalid status message: "' + message + '"')
+  }
 
-		var o2 = {};
-		channel.set(o2, 17);
-		st.equal(channel.get(o), Infinity, 'o is not modified');
-		st.equal(channel.get(o2), 17, 'o2 is set');
+  return status.code[msg]
+}
 
-		channel.set(o, 14);
-		st.equal(channel.get(o), 14, 'o is modified');
-		st.equal(channel.get(o2), 17, 'o2 is not modified');
+/**
+ * Get the status message for given code.
+ * @private
+ */
 
-		st.end();
-	});
+function getStatusMessage (code) {
+  if (!Object.prototype.hasOwnProperty.call(status.message, code)) {
+    throw new Error('invalid status code: ' + code)
+  }
 
-	t.test('delete', function (st) {
-		var channel = getSideChannel();
-		var o = {};
-		st.equal(channel['delete']({}), false, 'nonexistent value yields false');
+  return status.message[code]
+}
 
-		channel.set(o, 42);
-		st.equal(channel.has(o), true, 'value is set');
+/**
+ * Get the status code.
+ *
+ * Given a number, this will throw if it is not a known status
+ * code, otherwise the code will be returned. Given a string,
+ * the string will be parsed for a number and return the code
+ * if valid, otherwise will lookup the code assuming this is
+ * the status message.
+ *
+ * @param {string|number} code
+ * @returns {number}
+ * @public
+ */
 
-		st.equal(channel['delete']({}), false, 'nonexistent value still yields false');
+function status (code) {
+  if (typeof code === 'number') {
+    return getStatusMessage(code)
+  }
 
-		st.equal(channel['delete'](o), true, 'deleted value yields true');
+  if (typeof code !== 'string') {
+    throw new TypeError('code must be a number or string')
+  }
 
-		st.equal(channel.has(o), false, 'value is no longer set');
+  // '403'
+  var n = parseInt(code, 10)
+  if (!isNaN(n)) {
+    return getStatusMessage(n)
+  }
 
-		st.end();
-	});
-
-	t.end();
-});
-
-test('getSideChannelMap, no WeakMaps and/or Maps', { skip: typeof WeakMap === 'function' || typeof Map === 'function' }, function (t) {
-	t.equal(getSideChannelWeakMap, false, 'is false');
-
-	t.end();
-});
+  return getStatusCode(code)
+}
