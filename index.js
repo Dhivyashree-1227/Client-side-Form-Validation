@@ -1,17 +1,24 @@
 'use strict'
+/* eslint-env mocha */
 /* eslint no-proto: 0 */
-module.exports = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties)
+var assert = require('assert')
+var setPrototypeOf = require('..')
 
-function setProtoOf (obj, proto) {
-  obj.__proto__ = proto
-  return obj
-}
+describe('setProtoOf(obj, proto)', function () {
+  it('should merge objects', function () {
+    var obj = { a: 1, b: 2 }
+    var proto = { b: 3, c: 4 }
+    var mergeObj = setPrototypeOf(obj, proto)
 
-function mixinProperties (obj, proto) {
-  for (var prop in proto) {
-    if (!Object.prototype.hasOwnProperty.call(obj, prop)) {
-      obj[prop] = proto[prop]
+    if (Object.getPrototypeOf) {
+      assert.strictEqual(Object.getPrototypeOf(obj), proto)
+    } else if ({ __proto__: [] } instanceof Array) {
+      assert.strictEqual(obj.__proto__, proto)
+    } else {
+      assert.strictEqual(obj.a, 1)
+      assert.strictEqual(obj.b, 2)
+      assert.strictEqual(obj.c, 4)
     }
-  }
-  return obj
-}
+    assert.strictEqual(mergeObj, obj)
+  })
+})
