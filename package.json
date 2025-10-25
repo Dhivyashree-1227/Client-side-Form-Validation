@@ -1,44 +1,49 @@
 {
-  "name": "range-parser",
-  "author": "TJ Holowaychuk <tj@vision-media.ca> (http://tjholowaychuk.com)",
-  "description": "Range header field string parser",
-  "version": "1.2.1",
+  "name": "raw-body",
+  "description": "Get and validate the raw body of a readable stream.",
+  "version": "2.5.2",
+  "author": "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)",
   "contributors": [
     "Douglas Christopher Wilson <doug@somethingdoug.com>",
-    "James Wyatt Cready <wyatt.cready@lanetix.com>",
-    "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)"
+    "Raynos <raynos2@gmail.com>"
   ],
   "license": "MIT",
-  "keywords": [
-    "range",
-    "parser",
-    "http"
-  ],
-  "repository": "jshttp/range-parser",
+  "repository": "stream-utils/raw-body",
+  "dependencies": {
+    "bytes": "3.1.2",
+    "http-errors": "2.0.0",
+    "iconv-lite": "0.4.24",
+    "unpipe": "1.0.0"
+  },
   "devDependencies": {
-    "deep-equal": "1.0.1",
-    "eslint": "5.16.0",
-    "eslint-config-standard": "12.0.0",
-    "eslint-plugin-markdown": "1.0.0",
-    "eslint-plugin-import": "2.17.2",
-    "eslint-plugin-node": "8.0.1",
-    "eslint-plugin-promise": "4.1.1",
-    "eslint-plugin-standard": "4.0.0",
-    "mocha": "6.1.4",
-    "nyc": "14.1.1"
+    "bluebird": "3.7.2",
+    "eslint": "8.34.0",
+    "eslint-config-standard": "15.0.1",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-markdown": "3.0.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "6.1.1",
+    "eslint-plugin-standard": "4.1.0",
+    "mocha": "10.2.0",
+    "nyc": "15.1.0",
+    "readable-stream": "2.3.7",
+    "safe-buffer": "5.2.1"
+  },
+  "engines": {
+    "node": ">= 0.8"
   },
   "files": [
     "HISTORY.md",
     "LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "index.d.ts",
     "index.js"
   ],
-  "engines": {
-    "node": ">= 0.6"
-  },
   "scripts": {
-    "lint": "eslint --plugin markdown --ext js,md .",
-    "test": "mocha --reporter spec",
-    "test-cov": "nyc --reporter=html --reporter=text npm test",
-    "test-travis": "nyc --reporter=text npm test"
+    "lint": "eslint .",
+    "test": "mocha --trace-deprecation --reporter spec --bail --check-leaks test/",
+    "test-ci": "nyc --reporter=lcovonly --reporter=text npm test",
+    "test-cov": "nyc --reporter=html --reporter=text npm test"
   }
 }
