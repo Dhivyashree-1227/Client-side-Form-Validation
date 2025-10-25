@@ -1,5 +1,3 @@
-declare function gOPD<O extends object, K extends keyof O>(obj: O, prop: K): PropertyDescriptor | undefined;
+declare function hasOwn<O, K extends PropertyKey, V = unknown>(o: O, p: K): o is O & Record<K, V>;
 
-declare const fn: typeof gOPD | undefined | null;
-
-export = fn;
+export = hasOwn;
